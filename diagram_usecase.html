@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Gambar Diagram Use Case</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f9f9f9; }
+        .container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Diagram Use Case (Aplikasi Kesehatan Gigi)</h2>
+        <div class="mermaid">
+            usecaseDiagram
+                actor Pengguna as "Pengguna (User)"
+                
+                rectangle "Sistem Aplikasi Kesehatan Gigi" {
+                    usecase UC1 as "Melihat Halaman Utama"
+                    usecase UC2 as "Membaca Artikel"
+                    usecase UC3 as "Menonton Video"
+                    usecase UC4 as "Mengerjakan Kuis"
+                    usecase UC5 as "Melihat Skor Kuis"
+                    
+                    Pengguna --> UC1
+                    Pengguna --> UC2
+                    Pengguna --> UC3
+                    Pengguna --> UC4
+                    UC4 ..> UC5 : <<include>>
+                }
+        </div>
+        <p style="text-align: center; color: gray; margin-top: 20px;">
+            (Silakan Screenshot gambar di atas dan tempel di Word / Laporan Anda)
+        </p>
+    </div>
+</body>
+</html>

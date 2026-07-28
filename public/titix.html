@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ti.tix.com — Temukan Eventmu Sekarang</title>
+  <meta name="description" content="ti.tix.com — Platform tiket event terlengkap, mudah, dan terpercaya di Indonesia. Temukan dan beli tiket event favoritmu sekarang!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #0a0425;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+    button { cursor: pointer; border: none; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --navy-deep: #0a0425;
+      --navy-dark: #0d0630;
+      --navy-mid: #1a0a5e;
+      --navy-light: #2a1a7e;
+      --purple-accent: #3d2a9e;
+      --gold: #F5A623;
+      --gold-light: #ffc857;
+      --gold-dark: #d48f1a;
+      --white: #ffffff;
+      --white-dim: #e0dced;
+      --gray-light: #b0a8c8;
+      --card-bg: #ffffff;
+      --card-text: #1a1a2e;
+      --card-sub: #555;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.18);
+      --shadow-hover: 0 8px 32px rgba(245,166,35,0.15);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 4, 37, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(245, 166, 35, 0.12);
+      padding: 0 40px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+    .navbar.scrolled {
+      background: rgba(10, 4, 37, 0.98);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .nav-logo img {
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+    }
+    .nav-logo span {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: -0.5px;
+    }
+    .nav-menu {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      list-style: none;
+    }
+    .nav-menu li a,
+    .nav-menu li button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--white-dim);
+      background: none;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-menu li a:hover,
+    .nav-menu li button:hover,
+    .nav-menu li a.active {
+      color: var(--gold);
+      background: rgba(245, 166, 35, 0.08);
+    }
+    .nav-menu .btn-helpdesk {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--navy-deep) !important;
+      font-weight: 600;
+      padding: 10px 22px;
+      border-radius: 50px;
+    }
+    .nav-menu .btn-helpdesk:hover {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(245, 166, 35, 0.3);
+    }
+
+    /* Mobile menu */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      padding: 8px;
+    }
+    .nav-toggle span {
+      width: 26px;
+      height: 2.5px;
+      background: var(--white);
+      border-radius: 3px;
+      transition: var(--transition);
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 20px; }
+      .nav-toggle { display: flex; }
+      .nav-menu {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background: rgba(10, 4, 37, 0.98);
+        backdrop-filter: blur(16px);
+        flex-direction: column;
+        padding: 20px;
+        gap: 4px;
+        transform: translateY(-120%);
+        transition: var(--transition);
+        border-bottom: 1px solid rgba(245, 166, 35, 0.12);
+      }
+      .nav-menu.open { transform: translateY(0); }
+      .nav-menu li { width: 100%; }
+      .nav-menu li a,
+      .nav-menu li button { width: 100%; justify-content: center; }
+    }
+
+    /* ===== PAGES ===== */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ===== HERO SECTION ===== */
+    .hero {
+      margin-top: 70px;
+      min-height: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 40px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(160deg, #0d0630 0%, #1a0a5e 40%, #2a1a7e 70%, #0d0630 100%);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -20%;
+      width: 80%;
+      height: 200%;
+      background: radial-gradient(ellipse, rgba(245,166,35,0.06) 0%, transparent 70%);
+      animation: heroGlow 8s ease-in-out infinite alternate;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      right: -10%;
+      width: 60%;
+      height: 160%;
+      background: radial-gradient(ellipse, rgba(61,42,158,0.15) 0%, transparent 70%);
+      animation: heroGlow 10s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes heroGlow {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, -20px) scale(1.1); }
+    }
+    /* Floating particles */
+    .hero-particles {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--gold);
+      border-radius: 50%;
+      opacity: 0;
+      animation: particleFloat 6s ease-in-out infinite;
+    }
+    .particle:nth-child(1) { left: 10%; top: 20%; animation-delay: 0s; animation-duration: 7s; }
+    .particle:nth-child(2) { left: 25%; top: 60%; animation-delay: 1s; animation-duration: 5s; }
+    .particle:nth-child(3) { left: 50%; top: 30%; animation-delay: 2s; animation-duration: 8s; }
+    .particle:nth-child(4) { left: 70%; top: 70%; animation-delay: 0.5s; animation-duration: 6s; }
+    .particle:nth-child(5) { left: 85%; top: 40%; animation-delay: 3s; animation-duration: 7s; }
+    .particle:nth-child(6) { left: 40%; top: 80%; animation-delay: 1.5s; animation-duration: 9s; }
+    .particle:nth-child(7) { left: 60%; top: 15%; animation-delay: 2.5s; animation-duration: 6s; }
+    .particle:nth-child(8) { left: 15%; top: 50%; animation-delay: 4s; animation-duration: 8s; }
+    @keyframes particleFloat {
+      0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+      20% { opacity: 0.6; }
+      50% { opacity: 0.8; transform: translateY(-60px) scale(1); }
+      80% { opacity: 0.4; }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245, 166, 35, 0.12);
+      border: 1px solid rgba(245, 166, 35, 0.25);
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--gold);
+      margin-bottom: 28px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .hero-badge svg { width: 16px; height: 16px; }
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, var(--white) 0%, var(--gold-light) 50%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--gray-light);
+      max-width: 560px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--navy-deep);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 15px 36px;
+      border-radius: 50px;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(245, 166, 35, 0.3);
+    }
+    .hero-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(245, 166, 35, 0.4);
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 50px;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--gold);
+    }
+    .hero-stat .stat-label {
+      font-size: 0.8rem;
+      color: var(--gray-light);
+      margin-top: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .hero { padding: 60px 20px; min-height: 420px; }
+      .hero h1 { font-size: 2rem; }
+      .hero p { font-size: 0.95rem; }
+      .hero-stats { gap: 24px; }
+      .hero-stat .stat-num { font-size: 1.4rem; }
+    }
+
+    /* ===== SECTION COMMONS ===== */
+    .section {
+      padding: 70px 40px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--white);
+      position: relative;
+      padding-bottom: 10px;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+      border-radius: 2px;
+    }
+    .section-link {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gold);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+    .section-link:hover { gap: 10px; }
+
+    @media (max-width: 768px) {
+      .section { padding: 50px 16px; }
+      .section-title { font-size: 1.4rem; }
+    }
+
+    /* ===== EVENT GRID ===== */
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 1100px) { .event-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 780px) { .event-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .event-grid { grid-template-columns: 1fr; } }
+
+    /* ===== EVENT CARD ===== */
+    .event-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+    .event-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-hover);
+    }
+    .event-card-img {
+      width: 100%;
+      height: 175px;
+      object-fit: cover;
+      background: linear-gradient(135deg, var(--navy-mid), var(--purple-accent));
+    }
+    .event-card-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .event-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--card-text);
+      margin-bottom: 10px;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .event-card-info {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--card-sub);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .event-card-info svg {
+      width: 14px;
+      height: 14px;
+      min-width: 14px;
+      margin-top: 1px;
+      color: var(--navy-mid);
+    }
+    .event-card-info span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .event-card-price {
+      margin-top: auto;
+      padding-top: 12px;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .event-card-price .label {
+      font-size: 0.72rem;
+      color: var(--card-sub);
+    }
+    .event-card-price .amount {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+    }
+    .event-card-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--navy-mid), var(--navy-dark));
+      color: var(--white);
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-align: center;
+      transition: var(--transition);
+      border-bottom-left-radius: var(--radius);
+      border-bottom-right-radius: var(--radius);
+    }
+    .event-card-btn:hover {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--navy-deep);
+    }
+
+    /* ===== ALL EVENTS PAGE ===== */
+    .page-header {
+      margin-top: 70px;
+      padding: 50px 40px 30px;
+      background: linear-gradient(160deg, #0d0630, #1a0a5e);
+    }
+    .page-header h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .filter-btn {
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: rgba(255,255,255,0.06);
+      color: var(--gray-light);
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: var(--transition);
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--gold);
+      color: var(--navy-deep);
+      border-color: var(--gold);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: #060218;
+      border-top: 1px solid rgba(245, 166, 35, 0.1);
+      padding: 60px 40px 30px;
+      margin-top: 40px;
+    }
+    .footer-grid {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 40px;
+    }
+    .footer-brand img {
+      height: 42px;
+      margin-bottom: 14px;
+    }
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--gray-light);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .footer-socials {
+      display: flex;
+      gap: 12px;
+    }
+    .footer-socials a {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .footer-socials a:hover {
+      background: var(--gold);
+      color: var(--navy-deep);
+    }
+    .footer-socials a svg { width: 18px; height: 18px; }
+    .footer-col h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: var(--gold);
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a {
+      font-size: 0.85rem;
+      color: var(--gray-light);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-col ul li a:hover { color: var(--gold); }
+    .footer-col ul li a svg { width: 14px; height: 14px; min-width: 14px; }
+    .footer-bottom {
+      max-width: 1320px;
+      margin: 40px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--gray-light);
+    }
+
+    @media (max-width: 768px) {
+      .footer { padding: 40px 20px 20px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+    }
+
+    /* ===== ADMIN PANEL ===== */
+    .admin-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: var(--navy-deep);
+      overflow-y: auto;
+    }
+    .admin-overlay.active { display: block; }
+
+    .admin-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: linear-gradient(160deg, #0d0630, #1a0a5e, #0d0630);
+    }
+    .admin-login-box {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 50px 40px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    .admin-login-box h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .admin-login-box .sub {
+      font-size: 0.85rem;
+      color: var(--gray-light);
+      margin-bottom: 32px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--gray-light);
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-sm);
+      color: var(--white);
+      font-size: 0.92rem;
+      transition: var(--transition);
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.12);
+    }
+    .form-group input::placeholder { color: rgba(255,255,255,0.3); }
+    .form-group select option { background: var(--navy-dark); color: var(--white); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--navy-deep);
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(245, 166, 35, 0.3);
+    }
+    .btn-secondary {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--white);
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+    .btn-danger {
+      padding: 8px 16px;
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: var(--danger);
+      font-size: 0.8rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .btn-danger:hover { background: var(--danger); color: var(--white); }
+    .btn-edit {
+      padding: 8px 16px;
+      background: rgba(245, 166, 35, 0.15);
+      border: 1px solid rgba(245, 166, 35, 0.3);
+      color: var(--gold);
+      font-size: 0.8rem;
+      font-weight: 500;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .btn-edit:hover { background: var(--gold); color: var(--navy-deep); }
+
+    .login-error {
+      background: rgba(231, 76, 60, 0.12);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      color: var(--danger);
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* Admin Dashboard */
+    .admin-dashboard {
+      display: none;
+      min-height: 100vh;
+      background: var(--navy-deep);
+    }
+    .admin-dashboard.active { display: block; }
+    .admin-topbar {
+      background: rgba(10, 4, 37, 0.95);
+      backdrop-filter: blur(16px);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(245, 166, 35, 0.1);
+    }
+    .admin-topbar h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .admin-body {
+      padding: 30px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .admin-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .admin-actions h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .btn-add {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--navy-deep);
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .btn-add:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(245, 166, 35, 0.3);
+    }
+
+    /* Admin Table */
+    .admin-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .admin-table th {
+      background: rgba(255,255,255,0.04);
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--gray-light);
+      white-space: nowrap;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .admin-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--white-dim);
+      vertical-align: middle;
+    }
+    .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .admin-table .badge {
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-upcoming { background: rgba(39, 174, 96, 0.15); color: var(--success); }
+    .badge-highlight { background: rgba(245, 166, 35, 0.15); color: var(--gold); }
+    .admin-table .actions { display: flex; gap: 8px; }
+
+    /* Admin Modal/Form */
+    .admin-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 3000;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .admin-modal.active { display: flex; }
+    .admin-modal-box {
+      background: #12083a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 36px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .admin-modal-box h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--gold);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .modal-actions .btn-primary { flex: 1; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+    .event-card {
+      opacity: 0;
+      animation: fadeInUp 0.5s ease forwards;
+    }
+    .event-card:nth-child(1) { animation-delay: 0.05s; }
+    .event-card:nth-child(2) { animation-delay: 0.1s; }
+    .event-card:nth-child(3) { animation-delay: 0.15s; }
+    .event-card:nth-child(4) { animation-delay: 0.2s; }
+    .event-card:nth-child(5) { animation-delay: 0.25s; }
+    .event-card:nth-child(6) { animation-delay: 0.3s; }
+    .event-card:nth-child(7) { animation-delay: 0.35s; }
+    .event-card:nth-child(8) { animation-delay: 0.4s; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--gray-light);
+    }
+    .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.4; }
+    .empty-state p { font-size: 0.95rem; }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--navy-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+    /* Confirm dialog */
+    .confirm-dialog {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 4000;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-dialog.active { display: flex; }
+    .confirm-box {
+      background: #12083a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    .confirm-box h4 { font-size: 1.1rem; margin-bottom: 10px; }
+    .confirm-box p { font-size: 0.85rem; color: var(--gray-light); margin-bottom: 24px; }
+    .confirm-box .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+    .confirm-box .confirm-actions button { min-width: 110px; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo" id="navLogo">
+      <img src="tik-tik.webp" alt="ti.tix.com">
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-menu" id="navMenu">
+      <li><a href="#" class="active" data-page="home" onclick="navigateTo('home')">Home</a></li>
+      <li><a href="#" data-page="event" onclick="navigateTo('event')">Event</a></li>
+      <li>
+        <a href="https://wa.me/6281393564042" target="_blank" class="btn-helpdesk">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Helpdesk
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ===== HOME PAGE ===== -->
+  <div class="page active" id="page-home">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-particles">
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div>
+      </div>
+      <div class="hero-content fade-in-up">
+        <div class="hero-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Platform Tiket Event #1 Indonesia
+        </div>
+        <h1>TEMUKAN EVENTMU<br>SEKARANG</h1>
+        <p>Tiket event terlengkap, mudah, dan terpercaya. Dari konser musik hingga fun run, semua ada di sini.</p>
+        <a href="#" class="hero-cta" onclick="navigateTo('event')">
+          Jelajahi Event
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="stat-num">500+</div>
+            <div class="stat-label">Event Terlaksana</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-num">100K+</div>
+            <div class="stat-label">Tiket Terjual</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-num">50+</div>
+            <div class="stat-label">Kota di Indonesia</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upcoming Events -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Upcoming Events</h2>
+        <a href="#" class="section-link" onclick="navigateTo('event')">
+          Lihat Semua
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+      <div class="event-grid" id="upcomingGrid"></div>
+    </section>
+
+    <!-- Highlight Events -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Highlight Events</h2>
+        <a href="#" class="section-link" onclick="navigateTo('event')">
+          Lihat Semua
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+      <div class="event-grid" id="highlightGrid"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="tik-tik.webp" alt="ti.tix.com">
+          <p>Platform tiket event terlengkap, mudah, dan terpercaya di Indonesia. Temukan event favoritmu sekarang!</p>
+          <div class="footer-socials">
+            <a href="#" aria-label="Instagram">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="#" aria-label="TikTok">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.18 8.18 0 0 0 4.76 1.52V6.84a4.84 4.84 0 0 1-1-.15z"/></svg>
+            </a>
+            <a href="#" aria-label="Facebook">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <ul>
+            <li><a href="https://wa.me/6281393564042">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              081393564042
+            </a></li>
+            <li><a href="mailto:info@titix.com">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              info@titix.com
+            </a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Information</h4>
+          <ul>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Syarat dan Ketentuan</a></li>
+            <li><a href="#">Kebijakan Privasi</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2025 ti.tix.com. All rights reserved.
+      </div>
+    </footer>
+  </div>
+
+  <!-- ===== EVENT PAGE ===== -->
+  <div class="page" id="page-event">
+    <div class="page-header">
+      <h1>All Events</h1>
+    </div>
+    <section class="section">
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-btn active" data-filter="all" onclick="filterEvents('all')">Semua</button>
+        <button class="filter-btn" data-filter="upcoming" onclick="filterEvents('upcoming')">Upcoming</button>
+        <button class="filter-btn" data-filter="highlight" onclick="filterEvents('highlight')">Highlight</button>
+      </div>
+      <div class="event-grid" id="allEventsGrid"></div>
+    </section>
+
+    <!-- Footer clone -->
+    <footer class="footer">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="tik-tik.webp" alt="ti.tix.com">
+          <p>Platform tiket event terlengkap, mudah, dan terpercaya di Indonesia.</p>
+          <div class="footer-socials">
+            <a href="#" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+            <a href="#" aria-label="TikTok"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.75a8.18 8.18 0 0 0 4.76 1.52V6.84a4.84 4.84 0 0 1-1-.15z"/></svg></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <ul>
+            <li><a href="https://wa.me/6281393564042"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 081393564042</a></li>
+            <li><a href="mailto:info@titix.com"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> info@titix.com</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Information</h4>
+          <ul>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Syarat dan Ketentuan</a></li>
+            <li><a href="#">Kebijakan Privasi</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">&copy; 2025 ti.tix.com. All rights reserved.</div>
+    </footer>
+  </div>
+
+  <!-- ===== ADMIN PANEL ===== -->
+  <div class="admin-overlay" id="adminOverlay">
+    <!-- Login -->
+    <div class="admin-login" id="adminLogin">
+      <div class="admin-login-box">
+        <img src="tik-tik.webp" alt="ti.tix.com" style="height:48px;margin:0 auto 20px;">
+        <h2>Admin Panel</h2>
+        <p class="sub">Masuk untuk mengelola event</p>
+        <div class="login-error" id="loginError">Username atau password salah!</div>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="adminUser">Username</label>
+            <input type="text" id="adminUser" placeholder="Masukkan username" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="adminPass">Password</label>
+            <input type="password" id="adminPass" placeholder="Masukkan password">
+          </div>
+          <button type="submit" class="btn-primary">Masuk</button>
+        </form>
+        <div style="margin-top:20px;">
+          <button class="btn-secondary" onclick="closeAdmin()" style="width:100%;">← Kembali ke Website</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="admin-dashboard" id="adminDashboard">
+      <div class="admin-topbar">
+        <h3>🎛️ Dashboard Admin — ti.tix.com</h3>
+        <div style="display:flex;gap:12px;">
+          <button class="btn-secondary" onclick="closeAdmin()">← Website</button>
+          <button class="btn-danger" onclick="handleLogout()">Logout</button>
+        </div>
+      </div>
+      <div class="admin-body">
+        <div class="admin-actions">
+          <h2>Manajemen Event</h2>
+          <button class="btn-add" onclick="openEventForm()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Event
+          </button>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nama Event</th>
+                <th>Lokasi</th>
+                <th>Tanggal</th>
+                <th>Harga</th>
+                <th>Kategori</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EVENT FORM MODAL ===== -->
+  <div class="admin-modal" id="eventModal">
+    <div class="admin-modal-box">
+      <h3 id="modalTitle">Tambah Event Baru</h3>
+      <form id="eventForm" onsubmit="saveEvent(event)">
+        <input type="hidden" id="eventId">
+        <div class="form-group">
+          <label for="eventNama">Nama Event *</label>
+          <input type="text" id="eventNama" placeholder="Nama event" required>
+        </div>
+        <div class="form-group">
+          <label for="eventThumbnail">URL Thumbnail</label>
+          <input type="text" id="eventThumbnail" placeholder="https://... (kosongkan untuk placeholder)">
+        </div>
+        <div class="form-group">
+          <label for="eventLokasi">Lokasi *</label>
+          <input type="text" id="eventLokasi" placeholder="Lokasi event" required>
+        </div>
+        <div class="form-group">
+          <label for="eventTanggal">Tanggal Event *</label>
+          <input type="text" id="eventTanggal" placeholder="contoh: 25 Juli 2026" required>
+        </div>
+        <div class="form-group">
+          <label for="eventHarga">Harga Tiket (Rp) *</label>
+          <input type="number" id="eventHarga" placeholder="0 untuk gratis" min="0" required>
+        </div>
+        <div class="form-group">
+          <label for="eventKategori">Kategori *</label>
+          <select id="eventKategori" required>
+            <option value="upcoming">Upcoming Events</option>
+            <option value="highlight">Highlight Events</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="eventUrl">URL Beli Tiket</label>
+          <input type="text" id="eventUrl" placeholder="https://wa.me/6281393564042" value="https://wa.me/6281393564042">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeEventForm()" style="flex:1;">Batal</button>
+          <button type="submit" class="btn-primary" id="btnSaveEvent">Simpan Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== CONFIRM DIALOG ===== -->
+  <div class="confirm-dialog" id="confirmDialog">
+    <div class="confirm-box">
+      <h4>Hapus Event?</h4>
+      <p id="confirmText">Apakah Anda yakin ingin menghapus event ini?</p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" onclick="closeConfirm()">Batal</button>
+        <button class="btn-danger" id="confirmDelete" onclick="confirmDeleteEvent()">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== DEFAULT EVENT DATA =====
+    const defaultEvents = [
+      {
+        id: 1,
+        nama: "VOLT RHYTHM 2026",
+        lokasi: "Lapangan Yonif Mekanis, Jakarta",
+        tanggal: "25 Juli 2026",
+        harga: 100000,
+        thumbnail: "",
+        kategori: "upcoming",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 2,
+        nama: "STEP UP FEST 2026",
+        lokasi: "Gambir Expo – Kemayoran",
+        tanggal: "25-26 Juli 2026",
+        harga: 145000,
+        thumbnail: "",
+        kategori: "upcoming",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 3,
+        nama: "KELUYURUN",
+        lokasi: "SMAN 2 Jember",
+        tanggal: "26 Juli 2026",
+        harga: 105000,
+        thumbnail: "",
+        kategori: "upcoming",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 4,
+        nama: "SOERATS 2026",
+        lokasi: "Kampus Bendan SCU",
+        tanggal: "26-28 September 2026",
+        harga: 55000,
+        thumbnail: "",
+        kategori: "upcoming",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 5,
+        nama: "THE PARADE PROJECT",
+        lokasi: "Kabupaten Kendal",
+        tanggal: "3 Oktober 2026",
+        harga: 85000,
+        thumbnail: "",
+        kategori: "upcoming",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 6,
+        nama: "DIANA RIA FESTIVAL",
+        lokasi: "Pekalongan, Jawa Tengah",
+        tanggal: "15 Agustus 2026",
+        harga: 90000,
+        thumbnail: "",
+        kategori: "upcoming",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 7,
+        nama: "INVESTOSIR RUN 2026",
+        lokasi: "Tandon Ilam Isiang Plong, Semarang",
+        tanggal: "13-15 Agustus 2026",
+        harga: 0,
+        thumbnail: "",
+        kategori: "upcoming",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 8,
+        nama: "ENERGY COLOR RUN",
+        lokasi: "Lapangan Pemuda Jalan Kota",
+        tanggal: "2 Juli 2026",
+        harga: 80000,
+        thumbnail: "",
+        kategori: "upcoming",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 9,
+        nama: "JAMNAS 7 TLCI",
+        lokasi: "Spekta Merbabu, Kab. Semarang",
+        tanggal: "9 Juli 2027",
+        harga: 150000,
+        thumbnail: "",
+        kategori: "highlight",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 10,
+        nama: "JEMBER 10K",
+        lokasi: "Jember, Jawa Timur",
+        tanggal: "19 Juli 2026",
+        harga: 250000,
+        thumbnail: "",
+        kategori: "highlight",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 11,
+        nama: "KAIJERUN 2026",
+        lokasi: "Universitas Jember",
+        tanggal: "5 Juli 2026",
+        harga: 150000,
+        thumbnail: "",
+        kategori: "highlight",
+        urlBeli: "https://wa.me/6281393564042"
+      },
+      {
+        id: 12,
+        nama: "RUPIAH BOROBUDUR RUN",
+        lokasi: "Plaza Borogh, Kawasan Candi",
+        tanggal: "5 Juli 2026",
+        harga: 175000,
+        thumbnail: "",
+        kategori: "highlight",
+        urlBeli: "https://wa.me/6281393564042"
+      }
+    ];
+
+    // ===== STATE =====
+    let events = [];
+    let isAdminLoggedIn = false;
+    let deleteTargetId = null;
+    let currentFilter = 'all';
+    let logoClickCount = 0;
+    let logoClickTimer = null;
+
+    // ===== INIT =====
+    function init() {
+      loadEvents();
+      renderAll();
+      setupNavScroll();
+      setupLogoSecret();
+
+      // Check URL hash for admin
+      if (window.location.hash === '#admin') {
+        openAdmin();
+      }
+    }
+
+    // ===== DATA =====
+    function loadEvents() {
+      const stored = localStorage.getItem('titix_events');
+      if (stored) {
+        try { events = JSON.parse(stored); } catch(e) { events = [...defaultEvents]; }
+      } else {
+        events = [...defaultEvents];
+      }
+    }
+    function saveEvents() {
+      localStorage.setItem('titix_events', JSON.stringify(events));
+    }
+    function getNextId() {
+      return events.length > 0 ? Math.max(...events.map(e => e.id)) + 1 : 1;
+    }
+
+    // ===== NAVIGATION =====
+    function navigateTo(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      document.querySelectorAll('.nav-menu a[data-page]').forEach(a => {
+        a.classList.toggle('active', a.dataset.page === page);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Close mobile menu
+      document.getElementById('navMenu').classList.remove('open');
+      document.getElementById('navToggle').classList.remove('open');
+
+      if (page === 'event') renderAllEvents();
+    }
+
+    // ===== RENDER =====
+    function renderAll() {
+      renderUpcoming();
+      renderHighlight();
+      renderAllEvents();
+      if (isAdminLoggedIn) renderAdminTable();
+    }
+
+    function createEventCard(ev) {
+      const thumb = ev.thumbnail || `https://placehold.co/300x180/1a0a5e/ffffff?text=${encodeURIComponent(ev.nama.substring(0,12))}`;
+      const price = ev.harga === 0 ? 'Rp0' : 'Rp' + ev.harga.toLocaleString('id-ID');
+      return `
+        <div class="event-card">
+          <img class="event-card-img" src="${thumb}" alt="${ev.nama}" onerror="this.src='https://placehold.co/300x180/1a0a5e/ffffff?text=Event'">
+          <div class="event-card-body">
+            <div class="event-card-title">${ev.nama}</div>
+            <div class="event-card-info">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>${ev.lokasi}</span>
+            </div>
+            <div class="event-card-info">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>${ev.tanggal}</span>
+            </div>
+            <div class="event-card-price">
+              <span class="label">Mulai Dari</span>
+              <span class="amount">${price}</span>
+            </div>
+          </div>
+          <a href="${ev.urlBeli || 'https://wa.me/6281393564042'}" target="_blank" class="event-card-btn">Beli Tiket</a>
+        </div>
+      `;
+    }
+
+    function renderUpcoming() {
+      const grid = document.getElementById('upcomingGrid');
+      const upcoming = events.filter(e => e.kategori === 'upcoming').slice(0, 8);
+      if (upcoming.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><p>Belum ada upcoming event.</p></div>';
+        return;
+      }
+      grid.innerHTML = upcoming.map(createEventCard).join('');
+    }
+
+    function renderHighlight() {
+      const grid = document.getElementById('highlightGrid');
+      const highlight = events.filter(e => e.kategori === 'highlight').slice(0, 4);
+      if (highlight.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><p>Belum ada highlight event.</p></div>';
+        return;
+      }
+      grid.innerHTML = highlight.map(createEventCard).join('');
+    }
+
+    function renderAllEvents() {
+      const grid = document.getElementById('allEventsGrid');
+      let filtered = events;
+      if (currentFilter !== 'all') {
+        filtered = events.filter(e => e.kategori === currentFilter);
+      }
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><p>Tidak ada event ditemukan.</p></div>';
+        return;
+      }
+      grid.innerHTML = filtered.map(createEventCard).join('');
+    }
+
+    function filterEvents(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === filter);
+      });
+      renderAllEvents();
+    }
+
+    // ===== NAVBAR =====
+    function setupNavScroll() {
+      window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+      });
+      document.getElementById('navToggle').addEventListener('click', () => {
+        document.getElementById('navToggle').classList.toggle('open');
+        document.getElementById('navMenu').classList.toggle('open');
+      });
+    }
+
+    // ===== SECRET ADMIN ACCESS =====
+    function setupLogoSecret() {
+      document.getElementById('navLogo').addEventListener('click', (e) => {
+        e.preventDefault();
+        logoClickCount++;
+        clearTimeout(logoClickTimer);
+        logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 2000);
+        if (logoClickCount >= 5) {
+          logoClickCount = 0;
+          openAdmin();
+        }
+      });
+    }
+
+    // ===== ADMIN =====
+    function openAdmin() {
+      document.getElementById('adminOverlay').classList.add('active');
+      if (isAdminLoggedIn) {
+        showDashboard();
+      } else {
+        showLogin();
+      }
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeAdmin() {
+      document.getElementById('adminOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+      renderAll();
+    }
+
+    function showLogin() {
+      document.getElementById('adminLogin').style.display = 'flex';
+      document.getElementById('adminDashboard').classList.remove('active');
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('adminUser').value = '';
+      document.getElementById('adminPass').value = '';
+    }
+
+    function showDashboard() {
+      document.getElementById('adminLogin').style.display = 'none';
+      document.getElementById('adminDashboard').classList.add('active');
+      renderAdminTable();
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('adminUser').value.trim();
+      const pass = document.getElementById('adminPass').value;
+      if (user === 'admin' && pass === 'titix2025') {
+        isAdminLoggedIn = true;
+        showDashboard();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('adminPass').value = '';
+      }
+    }
+
+    function handleLogout() {
+      isAdminLoggedIn = false;
+      closeAdmin();
+    }
+
+    // ===== ADMIN TABLE =====
+    function renderAdminTable() {
+      const tbody = document.getElementById('adminTableBody');
+      if (events.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-light);">Belum ada event. Klik "Tambah Event" untuk memulai.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = events.map((ev, idx) => {
+        const price = ev.harga === 0 ? 'Gratis' : 'Rp' + ev.harga.toLocaleString('id-ID');
+        const badgeClass = ev.kategori === 'upcoming' ? 'badge-upcoming' : 'badge-highlight';
+        const badgeText = ev.kategori === 'upcoming' ? 'Upcoming' : 'Highlight';
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ev.nama}</td>
+            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ev.lokasi}</td>
+            <td style="white-space:nowrap;">${ev.tanggal}</td>
+            <td style="white-space:nowrap;font-weight:600;color:var(--gold);">${price}</td>
+            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+            <td>
+              <div class="actions">
+                <button class="btn-edit" onclick="editEvent(${ev.id})">Edit</button>
+                <button class="btn-danger" onclick="promptDelete(${ev.id})">Hapus</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ===== EVENT FORM =====
+    function openEventForm(editId = null) {
+      document.getElementById('eventModal').classList.add('active');
+      if (editId) {
+        const ev = events.find(e => e.id === editId);
+        if (!ev) return;
+        document.getElementById('modalTitle').textContent = 'Edit Event';
+        document.getElementById('btnSaveEvent').textContent = 'Update Event';
+        document.getElementById('eventId').value = ev.id;
+        document.getElementById('eventNama').value = ev.nama;
+        document.getElementById('eventThumbnail').value = ev.thumbnail || '';
+        document.getElementById('eventLokasi').value = ev.lokasi;
+        document.getElementById('eventTanggal').value = ev.tanggal;
+        document.getElementById('eventHarga').value = ev.harga;
+        document.getElementById('eventKategori').value = ev.kategori;
+        document.getElementById('eventUrl').value = ev.urlBeli || 'https://wa.me/6281393564042';
+      } else {
+        document.getElementById('modalTitle').textContent = 'Tambah Event Baru';
+        document.getElementById('btnSaveEvent').textContent = 'Simpan Event';
+        document.getElementById('eventForm').reset();
+        document.getElementById('eventId').value = '';
+        document.getElementById('eventUrl').value = 'https://wa.me/6281393564042';
+      }
+    }
+
+    function closeEventForm() {
+      document.getElementById('eventModal').classList.remove('active');
+    }
+
+    function editEvent(id) {
+      openEventForm(id);
+    }
+
+    function saveEvent(e) {
+      e.preventDefault();
+      const id = document.getElementById('eventId').value;
+      const data = {
+        nama: document.getElementById('eventNama').value.trim(),
+        thumbnail: document.getElementById('eventThumbnail').value.trim(),
+        lokasi: document.getElementById('eventLokasi').value.trim(),
+        tanggal: document.getElementById('eventTanggal').value.trim(),
+        harga: parseInt(document.getElementById('eventHarga').value) || 0,
+        kategori: document.getElementById('eventKategori').value,
+        urlBeli: document.getElementById('eventUrl').value.trim() || 'https://wa.me/6281393564042'
+      };
+
+      if (id) {
+        // Update
+        const idx = events.findIndex(ev => ev.id === parseInt(id));
+        if (idx !== -1) {
+          events[idx] = { ...events[idx], ...data };
+        }
+      } else {
+        // Create
+        data.id = getNextId();
+        events.push(data);
+      }
+
+      saveEvents();
+      renderAdminTable();
+      closeEventForm();
+    }
+
+    // ===== DELETE =====
+    function promptDelete(id) {
+      deleteTargetId = id;
+      const ev = events.find(e => e.id === id);
+      document.getElementById('confirmText').textContent = `Apakah Anda yakin ingin menghapus "${ev ? ev.nama : 'event'}"?`;
+      document.getElementById('confirmDialog').classList.add('active');
+    }
+
+    function closeConfirm() {
+      document.getElementById('confirmDialog').classList.remove('active');
+      deleteTargetId = null;
+    }
+
+    function confirmDeleteEvent() {
+      if (deleteTargetId !== null) {
+        events = events.filter(e => e.id !== deleteTargetId);
+        saveEvents();
+        renderAdminTable();
+      }
+      closeConfirm();
+    }
+
+    // ===== HASH ROUTING =====
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash === '#admin') {
+        openAdmin();
+      } else if (window.location.hash === '#event') {
+        navigateTo('event');
+      } else {
+        navigateTo('home');
+      }
+    });
+
+    // ===== START =====
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+
+</body>
+</html>
