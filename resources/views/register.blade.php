@@ -14,20 +14,20 @@
     {{-- Tanpa rekening tujuan, pesanan tidak bisa diproses — formulir tidak
          ditampilkan sama sekali daripada peserta terlanjur mengisi lalu ditolak. --}}
     @if($paymentAccounts->isEmpty())
-        <div class="max-w-2xl mx-auto glass-panel rounded-3xl p-8 md:p-10 text-center">
-            <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-6">
+        <div class="max-w-2xl mx-auto card p-8 md:p-12 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-accent-50 text-accent-600 flex items-center justify-center mx-auto mb-6">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.33 16a2 2 0 001.74 3z" />
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold text-white mb-3">Pendaftaran belum dibuka</h1>
-            <p class="text-slate-400 text-sm leading-relaxed mb-8">
-                Penyelenggara <span class="text-slate-200 font-medium">{{ $event['nama'] }}</span> belum menetapkan
+            <h1 class="text-2xl font-bold text-ink-900 mb-3">Pendaftaran belum dibuka</h1>
+            <p class="text-ink-500 text-sm leading-relaxed mb-8">
+                Penyelenggara <span class="text-ink-900 font-semibold">{{ $event['nama'] }}</span> belum menetapkan
                 rekening tujuan pembayaran, jadi pemesanan tiket belum bisa diproses. Silakan cek kembali nanti.
             </p>
             <a href="{{ route('home') }}"
-                class="inline-block bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-semibold px-6 py-3 rounded-xl transition-all">
+                class="btn btn-primary px-6 py-3">
                 Kembali ke Beranda
             </a>
         </div>
@@ -43,12 +43,12 @@
             {{-- COLUMN 1 & 2: Form Fields --}}
             <div class="lg:col-span-2 space-y-8">
 
-                <div class="glass-panel rounded-3xl p-6 md:p-10 shadow-2xl relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-amber-500"></div>
+                <div class="card p-6 md:p-9 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-brand-600"></div>
 
                     <div class="mb-8">
-                        <h2 class="text-3xl font-extrabold tracking-tight text-white mb-2">{{ $event['nama'] }}</h2>
-                        <p class="text-gray-400 text-sm">
+                        <h2 class="text-2xl sm:text-3xl font-bold text-ink-900 mb-2">{{ $event['nama'] }}</h2>
+                        <p class="text-ink-500 text-sm">
                             Lengkapi data peserta di bawah ini. Anda bisa memesan sampai {{ $maxTickets }} tiket
                             sekaligus dalam satu kali pembayaran.
                         </p>
@@ -56,7 +56,7 @@
 
                     {{-- Validation Errors --}}
                     @if($errors->any())
-                        <div class="mb-6 bg-red-500/10 border border-red-500/30 text-red-400 px-5 py-3 rounded-xl">
+                        <div class="mb-6 rounded-btn bg-red-50 border border-red-200 text-red-800 px-5 py-4">
                             <ul class="list-disc list-inside text-sm space-y-1">
                                 @foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach
                             </ul>
@@ -66,63 +66,63 @@
                     {{-- Step 1: Data Peserta --}}
                     <div class="space-y-6">
                         <div class="flex items-center justify-between gap-4 flex-wrap">
-                            <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-sm flex items-center justify-center font-bold">1</span>
+                            <h3 class="text-lg font-bold text-ink-900 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-brand-600 text-white text-xs flex items-center justify-center font-bold">1</span>
                                 Data Peserta
                             </h3>
-                            <div class="text-sm text-gray-400">
-                                Akun: <span class="text-gray-200">{{ auth()->user()->email }}</span>
+                            <div class="text-sm text-ink-500">
+                                Akun: <span class="text-ink-900 font-medium">{{ auth()->user()->email }}</span>
                             </div>
                         </div>
 
                         <div id="participantList" class="space-y-6">
                             @foreach($rows as $i => $row)
-                                <div class="participant-card bg-slate-900/30 border border-white/10 rounded-2xl p-5 md:p-6 space-y-6">
+                                <div class="participant-card border border-line rounded-card p-5 md:p-6 space-y-6 bg-white">
                                     <div class="flex items-center justify-between">
-                                        <h4 class="font-bold text-white flex items-center gap-2">
-                                            <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 text-sm flex items-center justify-center font-bold participant-number">{{ $i + 1 }}</span>
+                                        <h4 class="font-bold text-ink-900 flex items-center gap-2">
+                                            <span class="w-7 h-7 rounded-lg bg-brand-50 text-brand-700 text-sm flex items-center justify-center font-bold participant-number">{{ $i + 1 }}</span>
                                             Peserta <span class="participant-number-text">{{ $i + 1 }}</span>
                                         </h4>
                                         <button type="button"
-                                            class="btn-remove-participant text-xs font-semibold text-red-400 hover:text-red-300 transition-colors {{ count($rows) <= 1 ? 'hidden' : '' }}">
+                                            class="btn-remove-participant text-xs font-semibold text-red-600 hover:text-red-700 transition-colors {{ count($rows) <= 1 ? 'hidden' : '' }}">
                                             Hapus peserta
                                         </button>
                                     </div>
 
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-300 mb-2">Nama Lengkap (sesuai KTP) *</label>
+                                            <label class="label">Nama Lengkap (sesuai KTP) *</label>
                                             <input type="text" name="participants[{{ $i }}][fullname]" required
                                                 value="{{ $row['fullname'] ?? ($i === 0 ? auth()->user()->name : '') }}"
-                                                class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
+                                                class="field">
                                         </div>
 
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-300 mb-2">NIK (16 Digit) *</label>
+                                            <label class="label">NIK (16 Digit) *</label>
                                             <input type="text" name="participants[{{ $i }}][nik]" required minlength="16" maxlength="16"
                                                 pattern="[0-9]{16}" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                                 value="{{ $row['nik'] ?? '' }}" placeholder="contoh: 3578123456789012"
-                                                class="nik-input w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
-                                            <p class="text-xs text-gray-500 mt-1">NIK tiap peserta harus berbeda.</p>
+                                                class="nik-input field">
+                                            <p class="text-xs text-ink-500 mt-1">NIK tiap peserta harus berbeda.</p>
                                         </div>
 
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-300 mb-2">Nomor WhatsApp *</label>
+                                            <label class="label">Nomor WhatsApp *</label>
                                             <input type="text" name="participants[{{ $i }}][phone]" required value="{{ $row['phone'] ?? '' }}"
-                                                class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
+                                                class="field">
                                         </div>
 
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-300 mb-2">Kategori Run <span class="text-amber-400">*</span></label>
+                                            <label class="label">Kategori Run <span class="text-red-500">*</span></label>
                                             <select name="participants[{{ $i }}][category]" required
-                                                class="category-select w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
+                                                class="category-select field">
                                                 @foreach($categories as $cat)
                                                     <option value="{{ $cat->code }}" {{ ($row['category'] ?? '') === $cat->code ? 'selected' : '' }}>
                                                         {{ $cat->name }} (Rp {{ number_format($cat->price, 0, ',', '.') }})
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            <p class="text-xs text-gray-500 mt-1">Boleh berbeda antar peserta.</p>
+                                            <p class="text-xs text-ink-500 mt-1">Boleh berbeda antar peserta.</p>
                                         </div>
 
                                         {{-- Field selebihnya mengikuti konfigurasi formulir milik event ini,
@@ -137,18 +137,18 @@
 
                         <div class="flex items-center justify-between gap-4 flex-wrap">
                             <button type="button" id="btnAddParticipant"
-                                class="px-5 py-3 rounded-xl font-semibold text-sm border border-dashed border-white/20 text-gray-300 hover:text-white hover:border-amber-500/50 hover:bg-amber-500/5 transition-all">
+                                class="btn px-5 py-3 text-sm border border-dashed border-line text-ink-900 hover:border-brand-500 hover:bg-brand-50">
                                 + Tambah Peserta
                             </button>
-                            <p class="text-xs text-gray-500" id="participantLimitNote">
+                            <p class="text-xs text-ink-500" id="participantLimitNote">
                                 Maksimal {{ $maxTickets }} tiket per pesanan.
                             </p>
                         </div>
 
                         <div class="pt-4 flex justify-end" id="btnNextContainer">
                             <button type="button" id="btnNext"
-                                class="w-full md:w-auto px-10 py-4 rounded-2xl font-bold text-lg transition-all transform hover:-translate-y-1 hover:shadow-2xl"
-                                style="background: linear-gradient(135deg, #F5A623, #d48f1a); color: #0a0425; box-shadow: 0 4px 20px rgba(245,166,35,0.25);">
+                                class="btn btn-primary w-full md:w-auto px-10 py-3.5 text-base"
+                                >
                                 Lanjutkan ke Pembayaran
                             </button>
                         </div>
@@ -156,14 +156,14 @@
 
                     {{-- Step 2: Payment Details --}}
                     <div id="paymentSection" class="hidden pt-8 border-t border-white/10 mt-8 space-y-6">
-                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                            <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 text-sm flex items-center justify-center font-bold">2</span>
+                        <h3 class="text-lg font-bold text-ink-900 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-brand-600 text-white text-xs flex items-center justify-center font-bold">2</span>
                             Konfirmasi Pembayaran
                         </h3>
 
-                        <div class="bg-slate-900/30 p-5 rounded-2xl border border-white/5 space-y-4">
-                            <div class="text-sm text-gray-400">
-                                Transfer <span class="font-bold text-amber-400" id="paymentTotalText">Rp 0</span>
+                        <div class="rounded-card border border-line bg-gray-50 p-5 space-y-4">
+                            <div class="text-sm text-ink-500">
+                                Transfer <span class="font-semibold text-accent-600" id="paymentTotalText">Rp 0</span>
                                 (total seluruh tiket) ke salah satu rekening resmi event ini, lalu unggah satu bukti transfer.
                             </div>
 
@@ -174,30 +174,30 @@
                                         <input type="radio" name="payment_account_id" value="{{ $account->id }}" class="peer sr-only"
                                             required
                                             {{ (int) old('payment_account_id', $paymentAccounts->first()->id) === $account->id ? 'checked' : '' }}>
-                                        <div class="p-4 rounded-xl border border-white/10 bg-slate-950/40 hover:bg-slate-900/30 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 transition-all">
-                                            <div class="font-bold text-white mb-1">{{ $account->bank_name }}</div>
-                                            <div class="text-xs text-amber-400 font-mono tracking-wider font-bold">
+                                        <div class="p-4 rounded-btn border border-line bg-white hover:border-gray-300 peer-checked:border-brand-600 peer-checked:bg-brand-50 transition-all">
+                                            <div class="font-semibold text-ink-900 mb-1">{{ $account->bank_name }}</div>
+                                            <div class="text-xs text-ink-900 font-mono tracking-wider font-semibold">
                                                 {{ $account->numberLabel() }}: {{ $account->account_number }}
                                             </div>
-                                            <div class="text-xs text-gray-400 mt-1">a.n. {{ $account->account_holder }}</div>
+                                            <div class="text-xs text-ink-500 mt-1">a.n. {{ $account->account_holder }}</div>
                                         </div>
                                     </label>
                                 @endforeach
                             </div>
 
-                            <p class="text-xs text-gray-500">
-                                Rekening di atas adalah rekening resmi <span class="text-gray-300">{{ $event['nama'] }}</span>.
+                            <p class="text-xs text-ink-500">
+                                Rekening di atas adalah rekening resmi <span class="text-ink-900">{{ $event['nama'] }}</span>.
                                 Jangan mentransfer ke nomor lain.
                             </p>
                         </div>
 
                         {{-- Upload Receipt File --}}
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-300">Upload Bukti Transfer *</label>
-                            <div class="relative rounded-xl border border-white/10 bg-slate-900/50 p-4 transition-all">
+                            <label class="label">Upload Bukti Transfer *</label>
+                            <div class="rounded-btn border border-line bg-gray-50 p-4">
                                 <input type="file" name="proof" id="proofInput" accept="image/*" required
-                                    class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer">
-                                <div class="text-xs text-gray-400 mt-2">
+                                    class="block w-full text-sm text-ink-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-600 file:text-white hover:file:bg-brand-700 cursor-pointer">
+                                <div class="text-xs text-ink-500 mt-2">
                                     Cukup satu bukti untuk seluruh tiket dalam pesanan ini. Format JPG/PNG/GIF, maksimal 2MB.
                                 </div>
                             </div>
@@ -205,7 +205,7 @@
 
                         <div class="pt-4">
                             <button type="submit" id="btnSubmit" disabled
-                                class="w-full py-4 rounded-2xl font-bold text-lg flex justify-center items-center gap-2.5 transition-all opacity-50 cursor-not-allowed text-slate-800 bg-slate-600">
+                                class="btn w-full py-4 text-base opacity-50 cursor-not-allowed bg-gray-300 text-gray-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -218,56 +218,60 @@
 
             {{-- COLUMN 3: Sticky Summary --}}
             <div class="lg:col-span-1">
-                <div class="glass-panel rounded-3xl p-6 shadow-2xl space-y-6 md:sticky md:top-28 border border-white/10">
+                <div class="card p-6 space-y-6 lg:sticky lg:top-24">
 
                     <div>
-                        <h3 class="text-lg font-bold text-white">Ringkasan Pembelian</h3>
-                        <div class="mt-1 h-0.5 w-12 bg-amber-500 rounded-full"></div>
+                        <h3 class="text-lg font-bold text-ink-900">Ringkasan Pembelian</h3>
+                        <div class="mt-1 h-0.5 w-12 bg-accent-500 rounded-full"></div>
                     </div>
 
-                    <div class="flex items-center gap-4 bg-slate-950/40 p-3 rounded-2xl border border-white/5">
-                        <img src="{{ $event['thumbnail'] ?: 'https://placehold.co/150x150/1a0a5e/ffffff?text=Event' }}"
-                            alt="{{ $event['nama'] }}" class="w-16 h-16 object-cover rounded-xl shrink-0"
-                            onerror="this.src='https://placehold.co/150x150/1a0a5e/ffffff?text=Event'">
+                    <div class="flex items-center gap-4 rounded-btn border border-line p-3 bg-gray-50">
+                        <div class="w-16 h-16 shrink-0 rounded-xl overflow-hidden">
+                            @include('partials.event-image', [
+                                'nama' => $event['nama'],
+                                'thumbnail' => $event['thumbnail'] ?? null,
+                                'class' => 'w-16 h-16 object-cover',
+                            ])
+                        </div>
                         <div class="min-w-0">
-                            <div class="text-sm font-bold text-white truncate">{{ $event['nama'] }}</div>
-                            <div class="text-xs text-gray-400 mt-0.5 truncate">{{ $event['lokasi'] }}</div>
+                            <div class="text-sm font-bold text-ink-900 truncate">{{ $event['nama'] }}</div>
+                            <div class="text-xs text-ink-500 mt-0.5 truncate">{{ $event['lokasi'] }}</div>
                         </div>
                     </div>
 
-                    <div class="space-y-3.5 text-sm border-b border-white/5 pb-5">
+                    <div class="space-y-3.5 text-sm border-b border-line pb-5">
                         <div class="flex justify-between">
-                            <span class="text-gray-400">Tanggal</span>
-                            <span class="font-semibold text-white text-right">{{ $event['tanggal'] }}</span>
+                            <span class="text-ink-500">Tanggal</span>
+                            <span class="font-semibold text-ink-900 text-right">{{ $event['tanggal'] }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-400">Waktu</span>
-                            <span class="font-semibold text-white text-right">{{ $event['waktu'] }}</span>
+                            <span class="text-ink-500">Waktu</span>
+                            <span class="font-semibold text-ink-900 text-right">{{ $event['waktu'] }}</span>
                         </div>
                     </div>
 
                     {{-- Rincian tiket, diisi ulang oleh JS --}}
                     <div class="space-y-4">
                         <div>
-                            <div class="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-2">
+                            <div class="text-xs text-ink-500 uppercase tracking-widest font-semibold mb-2">
                                 Tiket (<span id="summaryCount">1</span>)
                             </div>
-                            <div id="summaryLines" class="bg-slate-900/50 p-4 rounded-xl border border-white/5 space-y-3"></div>
+                            <div id="summaryLines" class="rounded-btn border border-line bg-gray-50 p-4 space-y-3"></div>
                         </div>
 
-                        <div class="flex justify-between items-center pt-3 border-t border-white/10">
-                            <span class="text-gray-300 font-bold">Total Pembayaran</span>
-                            <span class="text-2xl font-black text-white" id="summaryTotal">Rp 0</span>
+                        <div class="flex justify-between items-center pt-4 border-t border-line">
+                            <span class="text-ink-900 font-bold">Total Pembayaran</span>
+                            <span class="font-display text-2xl font-bold text-accent-600" id="summaryTotal">Rp 0</span>
                         </div>
                     </div>
 
-                    <div class="pt-4 border-t border-white/5 space-y-2 text-xs text-gray-500">
+                    <div class="pt-4 border-t border-line space-y-2 text-xs text-ink-500">
                         <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded-full bg-blue-500 text-slate-900 flex items-center justify-center font-bold text-[10px]">✓</div>
-                            <span class="text-gray-300 font-medium">Langkah 1: Isi Data Peserta</span>
+                            <div class="w-4 h-4 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-[10px]">✓</div>
+                            <span class="text-ink-900 font-medium">Langkah 1: Isi Data Peserta</span>
                         </div>
                         <div class="flex items-center gap-2" id="stepIndicator2">
-                            <div class="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center font-bold text-[10px]" id="stepIcon2">2</div>
+                            <div class="w-4 h-4 rounded-full bg-gray-200 text-ink-500 flex items-center justify-center font-bold text-[10px]" id="stepIcon2">2</div>
                             <span>Langkah 2: Konfirmasi Pembayaran</span>
                         </div>
                     </div>
@@ -349,13 +353,13 @@ document.addEventListener('DOMContentLoaded', function () {
             line.className = 'flex justify-between items-start gap-3 text-sm';
             line.innerHTML =
                 '<div class="min-w-0">' +
-                    '<div class="font-semibold text-white truncate"></div>' +
-                    '<div class="text-xs text-gray-400"></div>' +
+                    '<div class="font-semibold text-ink-900 truncate"></div>' +
+                    '<div class="text-xs text-ink-500"></div>' +
                 '</div>' +
-                '<div class="font-bold text-amber-400 whitespace-nowrap"></div>';
+                '<div class="font-semibold text-accent-600 whitespace-nowrap"></div>';
             line.querySelector('.font-semibold').textContent = label;
             line.querySelector('.text-xs').textContent = info.name;
-            line.querySelector('.font-bold').textContent = rupiah(info.price);
+            line.querySelector('.font-semibold').textContent = rupiah(info.price);
             summaryLines.appendChild(line);
         });
 
@@ -421,8 +425,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         paymentSection.classList.remove('hidden');
         btnNextContainer.classList.add('hidden');
-        stepIcon2.classList.remove('bg-slate-800');
-        stepIcon2.classList.add('bg-blue-500', 'text-slate-900');
+        stepIcon2.classList.remove('bg-gray-200', 'text-ink-500');
+        stepIcon2.classList.add('bg-brand-600', 'text-white');
         paymentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
@@ -431,11 +435,11 @@ document.addEventListener('DOMContentLoaded', function () {
         btnSubmit.disabled = !ready;
         btnSubmit.classList.toggle('opacity-50', !ready);
         btnSubmit.classList.toggle('cursor-not-allowed', !ready);
-        btnSubmit.classList.toggle('bg-slate-600', !ready);
-        btnSubmit.classList.toggle('text-slate-800', !ready);
-        btnSubmit.classList.toggle('bg-emerald-500', ready);
-        btnSubmit.classList.toggle('hover:bg-emerald-400', ready);
-        btnSubmit.classList.toggle('text-white', ready);
+        btnSubmit.classList.toggle('bg-gray-300', !ready);
+        btnSubmit.classList.toggle('text-gray-600', !ready);
+        btnSubmit.classList.toggle('btn-primary', ready);
+        
+        
     });
 
     reindex();

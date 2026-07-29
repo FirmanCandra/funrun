@@ -19,33 +19,33 @@
         ? ($row[$field->key] ?? '')
         : ($row['custom'][$field->key] ?? '');
 
-    $inputClass = 'w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all';
-    $selectClass = 'w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all';
+    $inputClass = 'field';
+    $selectClass = 'field';
 @endphp
 
 <div class="{{ $field->isFullWidth() ? 'md:col-span-2' : '' }}">
     @if ($field->type === EventFormField::TYPE_CONSENT)
 
-        <label class="flex items-start gap-3 cursor-pointer bg-slate-900/30 border border-white/10 rounded-xl p-4">
+        <label class="flex items-start gap-3 cursor-pointer bg-gray-50 border border-line rounded-btn p-4">
             {{-- Hidden 0 supaya checkbox yang tidak dicentang tetap terkirim. --}}
             <input type="hidden" name="{{ $name }}" value="0">
             <input type="checkbox" name="{{ $name }}" value="1" {{ $value ? 'checked' : '' }}
                 {{ $field->required ? 'required' : '' }}
-                class="mt-0.5 rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-500/50">
-            <span class="text-sm text-gray-300">
+                class="mt-0.5 rounded border-line text-brand-600 focus:ring-brand-500">
+            <span class="text-sm text-ink-900">
                 {{ $field->label }}
-                @if ($field->required)<span class="text-amber-400">*</span>@endif
+                @if ($field->required)<span class="text-red-500">*</span>@endif
                 @if ($field->help_text)
-                    <span class="block text-xs text-gray-500 mt-1">{{ $field->help_text }}</span>
+                    <span class="block text-xs text-ink-500 mt-1">{{ $field->help_text }}</span>
                 @endif
             </span>
         </label>
 
     @else
 
-        <label class="block text-sm font-medium text-gray-300 mb-2">
+        <label class="label">
             {{ $field->label }}
-            @if ($field->required)<span class="text-amber-400">*</span>@endif
+            @if ($field->required)<span class="text-red-500">*</span>@endif
         </label>
 
         @if ($field->is_core && isset(EventFormField::SELECT_OPTIONS[$field->key]))
@@ -79,7 +79,7 @@
         @endif
 
         @if ($field->help_text)
-            <p class="text-xs text-gray-500 mt-1">{{ $field->help_text }}</p>
+            <p class="text-xs text-ink-500 mt-1">{{ $field->help_text }}</p>
         @endif
 
     @endif

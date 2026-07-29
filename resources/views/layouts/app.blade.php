@@ -4,192 +4,263 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'SeTiket')</title>
+    <title>@yield('title', 'SeTiket — Temukan & Pesan Tiket Event')</title>
     <link rel="icon" type="image/webp" href="{{ asset('images/setiket.webp') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-        }
-
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .gradient-text {
-            background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-    </style>
 </head>
 
-<body class="antialiased min-h-screen flex flex-col relative overflow-x-hidden">
-    <!-- Background Elements -->
-    <div class="fixed inset-0 z-[-1] pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-600/20 blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-purple-600/20 blur-[120px]">
-        </div>
-    </div>
+<body class="min-h-screen flex flex-col bg-canvas text-ink-900">
 
-    <!-- Navbar -->
-    <nav class="fixed w-full z-50 glass-panel border-b-0 border-white/5 transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer"
-                    onclick="window.location.href='{{ route('home') }}'">
-                    <img src="{{ asset('images/setiket.webp') }}" alt="SeTiket Logo"
-                        style="height: 125px; width: auto; display: block;" class="transition-all duration-300">
-                </div>
+    {{-- ===== NAVBAR ===== --}}
+    <header class="sticky top-0 z-50 bg-white border-b border-line" style="box-shadow: var(--shadow-nav);">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-4 lg:gap-8 h-[72px]">
 
-                <!-- Search Panel -->
-                <div class="flex-1 max-w-[140px] sm:max-w-xs mx-2 sm:mx-8 relative">
-                    <input type="text" id="navbarSearch" placeholder="Cari event..."
-                        class="w-full bg-slate-800/60 text-slate-200 placeholder-slate-400 text-xs sm:text-sm rounded-full pl-8 sm:pl-10 pr-3 py-1.5 sm:py-2 border border-white/10 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all">
-                    <div class="absolute left-2.5 sm:left-3.5 top-[9px] sm:top-[11px] text-slate-500 leading-none">
-                        <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                {{-- Logo --}}
+                <a href="{{ route('home') }}" class="flex items-center gap-2 shrink-0">
+                    <img src="{{ asset('images/setiketbg.webp') }}" alt="SeTiket" class="h-9 w-auto"
+                        onerror="this.style.display='none'">
+                    <span class="font-display font-bold text-lg tracking-tight text-ink-900 hidden sm:inline">SeTiket</span>
+                </a>
+
+                {{-- Pencarian di tengah --}}
+                <div class="flex-1 max-w-xl mx-auto hidden md:block">
+                    <div class="search-pill flex items-center gap-2 px-4 py-2">
+                        <svg class="w-4 h-4 text-ink-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
                         </svg>
+                        <input type="text" id="navbarSearch" placeholder="Cari event, lokasi, atau kategori…"
+                            class="w-full bg-transparent text-sm text-ink-900 placeholder-gray-400 focus:outline-none"
+                            autocomplete="off">
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-4 sm:space-x-8">
+                {{-- Navigasi --}}
+                <div class="flex items-center gap-1 lg:gap-2 ml-auto">
                     <a href="{{ route('home') }}"
-                        class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Home</a>
-                    <a href="{{ route('home') }}#upcoming-events"
-                        class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Event</a>
-                    <a href="https://wa.me/6289681201941" target="_blank"
-                        class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Helpdesk</a>
+                        class="hidden lg:inline-flex px-3 py-2 rounded-btn text-sm font-medium text-ink-500 hover:text-ink-900 hover:bg-gray-50 transition-colors">Beranda</a>
+                    <a href="{{ route('home') }}#events"
+                        class="hidden lg:inline-flex px-3 py-2 rounded-btn text-sm font-medium text-ink-500 hover:text-ink-900 hover:bg-gray-50 transition-colors">Event</a>
+                    <a href="https://wa.me/6289681201941" target="_blank" rel="noopener"
+                        class="hidden lg:inline-flex px-3 py-2 rounded-btn text-sm font-medium text-ink-500 hover:text-ink-900 hover:bg-gray-50 transition-colors">Pusat Bantuan</a>
 
                     @auth
                         @if(auth()->user()->isUser())
-                            <a href="{{ route('dashboard') }}"
-                                class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base whitespace-nowrap">Pesanan</a>
                             <a href="{{ route('tickets') }}"
-                                class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base whitespace-nowrap">Tiket Saya</a>
+                                class="px-3 py-2 rounded-btn text-sm font-semibold text-brand-600 hover:bg-brand-50 transition-colors whitespace-nowrap">Tiket Saya</a>
                         @else
                             <a href="{{ route('admin.dashboard') }}"
-                                class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base whitespace-nowrap">Panel Admin</a>
+                                class="px-3 py-2 rounded-btn text-sm font-semibold text-brand-600 hover:bg-brand-50 transition-colors whitespace-nowrap">Panel Admin</a>
                         @endif
 
-                        {{-- Identitas pemakai: pembeda paling cepat terlihat antara
-                             pengunjung dan orang yang sudah login. --}}
-                        <div class="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-white/10">
-                            <span
-                                class="w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-white flex items-center justify-center text-xs font-black"
-                                title="{{ auth()->user()->name }}">
-                                {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
-                            </span>
-                            <span class="hidden md:inline text-gray-300 text-sm font-medium max-w-[8rem] truncate">
-                                {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}
-                            </span>
-                            <form action="{{ route('logout') }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit"
-                                    class="text-gray-400 hover:text-white transition-colors font-medium text-xs sm:text-sm cursor-pointer">
-                                    Keluar
-                                </button>
-                            </form>
+                        {{-- Menu profil --}}
+                        <div class="relative ml-1" id="profileMenu">
+                            <button type="button" id="profileTrigger"
+                                class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full border border-line hover:bg-gray-50 transition-colors"
+                                aria-haspopup="true" aria-expanded="false">
+                                <span class="w-8 h-8 shrink-0 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold">
+                                    {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+                                </span>
+                                <svg class="w-4 h-4 text-ink-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+                                </svg>
+                            </button>
+
+                            <div id="profileDropdown"
+                                class="hidden absolute right-0 mt-2 w-60 card p-2 origin-top-right animate-fade-in">
+                                <div class="px-3 py-2.5 border-b border-line mb-1">
+                                    <p class="text-sm font-semibold text-ink-900 truncate">{{ auth()->user()->name }}</p>
+                                    <p class="text-xs text-ink-500 truncate">{{ auth()->user()->email }}</p>
+                                </div>
+
+                                @if(auth()->user()->isUser())
+                                    <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded-btn text-sm text-ink-900 hover:bg-gray-50 transition-colors">Pesanan Saya</a>
+                                    <a href="{{ route('tickets') }}" class="block px-3 py-2 rounded-btn text-sm text-ink-900 hover:bg-gray-50 transition-colors">Tiket Saya</a>
+                                @endif
+                                <a href="{{ route('profile.edit') }}" class="block px-3 py-2 rounded-btn text-sm text-ink-900 hover:bg-gray-50 transition-colors">Profil</a>
+
+                                <form action="{{ route('logout') }}" method="POST" class="border-t border-line mt-1 pt-1">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full text-left px-3 py-2 rounded-btn text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer">
+                                        Keluar
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     @else
                         <a href="{{ route('login') }}"
-                            class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Login</a>
+                            class="btn btn-ghost px-3 py-2 text-sm">Masuk</a>
                         <a href="{{ route('register') }}"
-                            class="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-full font-semibold text-xs sm:text-sm transition-all whitespace-nowrap">
-                            Daftar
-                        </a>
+                            class="btn btn-primary px-4 py-2 text-sm">Daftar</a>
                     @endauth
                 </div>
             </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <main class="flex-grow pt-20">
+            {{-- Pencarian versi mobile --}}
+            <div class="md:hidden pb-3">
+                <div class="search-pill flex items-center gap-2 px-4 py-2">
+                    <svg class="w-4 h-4 text-ink-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
+                    </svg>
+                    <input type="text" id="navbarSearchMobile" placeholder="Cari event…"
+                        class="w-full bg-transparent text-sm text-ink-900 placeholder-gray-400 focus:outline-none" autocomplete="off">
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    {{-- ===== KONTEN ===== --}}
+    <main class="flex-grow">
         @yield('content')
     </main>
 
-    <!-- Footer -->
-    <footer class="glass-panel border-t border-white/10 mt-20 py-12 relative z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center gap-2 mb-4 md:mb-0">
-                    <img src="{{ asset('images/setiket.webp') }}" alt="SeTiket Logo"
-                        style="height: 125px; width: auto; display: block;">
+    {{-- ===== FOOTER ===== --}}
+    <footer class="bg-ink-900 text-gray-400 mt-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-10">
+
+                <div class="col-span-2 lg:col-span-2">
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="{{ asset('images/setiket.webp') }}" alt="SeTiket" class="h-10 w-auto"
+                            onerror="this.style.display='none'">
+                        <span class="font-display font-bold text-lg text-white">SeTiket</span>
+                    </div>
+                    <p class="text-sm leading-relaxed max-w-xs">
+                        Temukan dan pesan tiket event favorit Anda — fun run, festival, seminar, dan pertunjukan —
+                        dalam beberapa langkah saja.
+                    </p>
                 </div>
-                <div class="text-gray-400 text-sm">
-                    &copy; 2026 SeTiket. All rights reserved.
+
+                <div>
+                    <h4 class="text-white font-semibold text-sm mb-4">Jelajahi</h4>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="{{ route('home') }}" class="hover:text-white transition-colors">Beranda</a></li>
+                        <li><a href="{{ route('home') }}#events" class="hover:text-white transition-colors">Semua Event</a></li>
+                        <li><a href="{{ route('home') }}#featured" class="hover:text-white transition-colors">Event Pilihan</a></li>
+                    </ul>
                 </div>
-                <div class="flex space-x-4 mt-4 md:mt-0">
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Instagram</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Twitter</a>
+
+                <div>
+                    <h4 class="text-white font-semibold text-sm mb-4">Akun</h4>
+                    <ul class="space-y-2.5 text-sm">
+                        @auth
+                            @if(auth()->user()->isUser())
+                                <li><a href="{{ route('dashboard') }}" class="hover:text-white transition-colors">Pesanan Saya</a></li>
+                                <li><a href="{{ route('tickets') }}" class="hover:text-white transition-colors">Tiket Saya</a></li>
+                            @endif
+                            <li><a href="{{ route('profile.edit') }}" class="hover:text-white transition-colors">Profil</a></li>
+                        @else
+                            <li><a href="{{ route('login') }}" class="hover:text-white transition-colors">Masuk</a></li>
+                            <li><a href="{{ route('register') }}" class="hover:text-white transition-colors">Daftar</a></li>
+                        @endauth
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-semibold text-sm mb-4">Bantuan</h4>
+                    <ul class="space-y-2.5 text-sm">
+                        <li><a href="https://wa.me/6289681201941" target="_blank" rel="noopener" class="hover:text-white transition-colors">Hubungi Kami</a></li>
+                        <li><a href="https://wa.me/6289681201941" target="_blank" rel="noopener" class="hover:text-white transition-colors">Pusat Bantuan</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-5">
+                <p class="text-sm">&copy; {{ date('Y') }} SeTiket. Seluruh hak cipta dilindungi.</p>
+
+                <div class="flex items-center gap-3">
+                    @foreach([
+                        ['label' => 'Instagram', 'path' => 'M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2Zm0 5.6a4.2 4.2 0 1 0 0 8.4 4.2 4.2 0 0 0 0-8.4Zm0 6.9a2.7 2.7 0 1 1 0-5.4 2.7 2.7 0 0 1 0 5.4Zm5.4-7.1a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z'],
+                        ['label' => 'Twitter', 'path' => 'M18.9 3H22l-6.9 7.9L23 21h-6.4l-5-6.5L5.8 21H2.7l7.4-8.5L1.5 3H8l4.5 6 6.4-6Zm-1.1 16.1h1.7L7.3 4.8H5.5l12.3 14.3Z'],
+                        ['label' => 'Facebook', 'path' => 'M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z'],
+                    ] as $social)
+                        <a href="#" aria-label="{{ $social['label'] }}"
+                            class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="{{ $social['path'] }}" /></svg>
+                        </a>
+                    @endforeach
                 </div>
             </div>
         </div>
     </footer>
 
     <script>
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('navbar');
-            if (window.scrollY > 20) {
-                nav.classList.add('shadow-lg', 'bg-slate-900/80');
-            } else {
-                nav.classList.remove('shadow-lg', 'bg-slate-900/80');
-            }
-        });
+        // Menu profil
+        (function () {
+            const trigger = document.getElementById('profileTrigger');
+            const dropdown = document.getElementById('profileDropdown');
+            if (!trigger || !dropdown) return;
 
-        // Dynamic Event Search & Filtering
-        document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('navbarSearch');
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const open = !dropdown.classList.contains('hidden');
+                dropdown.classList.toggle('hidden', open);
+                trigger.setAttribute('aria-expanded', String(!open));
+            });
 
-            if (searchInput) {
-                searchInput.addEventListener('input', function (e) {
-                    const query = e.target.value.toLowerCase().trim();
-                    const cards = document.querySelectorAll('.event-card');
+            document.addEventListener('click', function () {
+                dropdown.classList.add('hidden');
+                trigger.setAttribute('aria-expanded', 'false');
+            });
 
-                    cards.forEach(card => {
-                        const title = card.getAttribute('data-nama') || '';
-                        if (title.includes(query)) {
-                            card.style.display = '';
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') dropdown.classList.add('hidden');
+            });
+        })();
+
+        // Pencarian event — menyaring kartu di beranda, atau melompat ke beranda
+        // dengan kata kunci kalau sedang di halaman lain.
+        (function () {
+            const inputs = [document.getElementById('navbarSearch'), document.getElementById('navbarSearchMobile')].filter(Boolean);
+            if (!inputs.length) return;
+
+            function filter(query) {
+                const q = query.toLowerCase().trim();
+                let visible = 0;
+
+                document.querySelectorAll('.event-card').forEach(card => {
+                    const haystack = (card.getAttribute('data-search') || '').toLowerCase();
+                    const match = haystack.includes(q);
+                    card.style.display = match ? '' : 'none';
+                    if (match) visible++;
                 });
 
-                // If user is on a different page, pressing Enter redirects to homepage with search query
-                searchInput.addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') {
-                        if (window.location.pathname !== '/') {
-                            window.location.href = '/?q=' + encodeURIComponent(this.value);
-                        }
+                const empty = document.getElementById('searchEmpty');
+                if (empty) empty.classList.toggle('hidden', visible > 0 || q === '');
+            }
+
+            inputs.forEach(input => {
+                input.addEventListener('input', function (e) {
+                    if (document.querySelector('.event-card')) {
+                        filter(e.target.value);
+                        inputs.forEach(other => { if (other !== e.target) other.value = e.target.value; });
                     }
                 });
 
-                // Read query param on homepage load
-                if (window.location.pathname === '/') {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const q = urlParams.get('q');
-                    if (q) {
-                        searchInput.value = q;
-                        // Trigger input event
-                        setTimeout(() => {
-                            searchInput.dispatchEvent(new Event('input'));
-                        }, 150);
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter' && !document.querySelector('.event-card')) {
+                        window.location.href = '{{ route('home') }}?q=' + encodeURIComponent(this.value);
                     }
-                }
+                });
+            });
+
+            // Terapkan kata kunci dari URL saat beranda dimuat.
+            const q = new URLSearchParams(window.location.search).get('q');
+            if (q && document.querySelector('.event-card')) {
+                inputs.forEach(i => { i.value = q; });
+                filter(q);
+                document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' });
             }
-        });
+        })();
     </script>
+
+    @stack('scripts')
 </body>
 
 </html>
