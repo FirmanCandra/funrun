@@ -70,17 +70,35 @@
                         class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Helpdesk</a>
 
                     @auth
-                        <a href="{{ auth()->user()->homeRoute() }}"
-                            class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">
-                            {{ auth()->user()->isAdmin() ? 'Panel Admin' : 'Tiket Saya' }}
-                        </a>
-                        <form action="{{ route('logout') }}" method="POST" class="inline">
-                            @csrf
-                            <button type="submit"
-                                class="text-gray-400 hover:text-white transition-colors font-medium text-xs sm:text-base cursor-pointer">
-                                Logout
-                            </button>
-                        </form>
+                        @if(auth()->user()->isUser())
+                            <a href="{{ route('dashboard') }}"
+                                class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base whitespace-nowrap">Pesanan</a>
+                            <a href="{{ route('tickets') }}"
+                                class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base whitespace-nowrap">Tiket Saya</a>
+                        @else
+                            <a href="{{ route('admin.dashboard') }}"
+                                class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base whitespace-nowrap">Panel Admin</a>
+                        @endif
+
+                        {{-- Identitas pemakai: pembeda paling cepat terlihat antara
+                             pengunjung dan orang yang sudah login. --}}
+                        <div class="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-4 border-l border-white/10">
+                            <span
+                                class="w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-full bg-gradient-to-br from-sky-500 to-indigo-500 text-white flex items-center justify-center text-xs font-black"
+                                title="{{ auth()->user()->name }}">
+                                {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+                            </span>
+                            <span class="hidden md:inline text-gray-300 text-sm font-medium max-w-[8rem] truncate">
+                                {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}
+                            </span>
+                            <form action="{{ route('logout') }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="text-gray-400 hover:text-white transition-colors font-medium text-xs sm:text-sm cursor-pointer">
+                                    Keluar
+                                </button>
+                            </form>
+                        </div>
                     @else
                         <a href="{{ route('login') }}"
                             class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Login</a>

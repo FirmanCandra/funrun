@@ -16,7 +16,7 @@ Panduan teknis untuk developer yang mengerjakan project ini. Dokumen ini menjela
 | **Landing publik** | Tanpa login | Daftar event, detail event, lihat/unduh e-ticket |
 | **Area peserta** | Login `user` | `/dashboard` untuk riwayat pesanan, `/tickets` untuk e-ticket aktif saja |
 | **Panel admin** | Login `admin` | Kelola peserta, verifikasi pesanan, atur formulir pendaftaran event-nya, scan QR check-in, export CSV |
-| **Panel super admin** | Login `super_admin` | Semua fitur admin + kelola event, kategori event, dan akun admin |
+| **Panel super admin** | Login `super_admin` | Semua fitur admin + kelola event, kategori, rekening pembayaran, dan akun admin |
 
 Nama internal repo adalah `funrun`, tetapi branding produknya **SeTiket**.
 
@@ -179,12 +179,11 @@ Skema satu entri `events.json` (perhatikan: field berbahasa Indonesia):
   "urlBeli": "https://wa.me/6289681201941",
   "waktu": "16.00 - 23.00",
   "deskripsi": "...",
-  "syarat_ketentuan": "...",
-  "payment_methods": [
-    { "name": "Transfer Bank BCA", "account_number": "...", "account_holder": "..." }
-  ]
+  "syarat_ketentuan": "..."
 }
 ```
+
+Entri lama mungkin masih menyimpan kunci `payment_methods`. Kunci itu **diabaikan** sekarang — rekening pindah ke tabel `event_payment_accounts` (§7.2).
 
 `kategori` hanya menerima `upcoming` atau `highlight` — ini menentukan di baris mana event muncul di landing page, bukan kategori lari.
 
@@ -197,7 +196,7 @@ Sinkronisasi terjadi di `AdminController::syncEventsToDatabase()`, yang dipanggi
 Konsekuensi praktis:
 
 - Menambah/mengubah event **harus** lewat `/admin/events` (super admin) agar JSON dan DB ikut ter-update. Mengedit tabel `events` langsung akan tertimpa pada request admin berikutnya.
-- Field yang ikut tersinkron hanya `title`, `date`, `location`, `quota`, `payment_methods`. `quota` **selalu di-hardcode 5000** dan tidak pernah divalidasi terhadap jumlah peserta — belum ada pembatasan kuota.
+- Field yang ikut tersinkron hanya `title`, `date`, `location`, `quota`. Rekening **tidak** ikut — sejak ada tabel `event_payment_accounts`, rekening tidak lagi menumpang di JSON. `quota` **selalu di-hardcode 5000** dan tidak pernah divalidasi terhadap jumlah peserta — belum ada pembatasan kuota.
 - `tanggal` di JSON adalah teks bebas berbahasa Indonesia ("25-26 Juli 2026"). `AdminController::parseDateString()` menerjemahkannya ke `Y-m-d`; untuk rentang tanggal, yang dipakai adalah tanggal **akhir**. Kalau gagal parse, fallback-nya `2026-09-15`.
 
 ### 5.3 Formulir pendaftaran hidup di database, per event
@@ -298,7 +297,25 @@ Menghapus field tambahan tidak menghapus jawaban yang sudah masuk — datanya te
 
 Jawaban field tambahan muncul di halaman edit peserta dan di export CSV (satu kolom per field; peserta dari event lain dibiarkan kosong).
 
-### 7.2 Alur pembelian
+### 7.2 Rekening tujuan transfer per event
+
+Tiap event punya daftar rekeningnya sendiri di tabel `event_payment_accounts`, dikelola di **`/admin/payment-accounts`**.
+
+| Peran | Boleh |
+|---|---|
+| **Super admin** | Menambah, mengubah, menonaktifkan, menghapus rekening event mana pun |
+| **Admin event** | **Hanya melihat** rekening event yang dia tangani |
+| **Peserta** | Memilih salah satu rekening aktif saat memesan |
+
+Pembatasannya ada di controller (`checkSuperAdmin()` pada `storePaymentAccount`, `updatePaymentAccount`, `destroyPaymentAccount`), bukan sekadar menyembunyikan tombol — POST langsung dari admin event tetap ditolak 403. Alasannya: admin event yang memverifikasi transfer masuk, jadi dia perlu tahu nomornya, tapi tidak boleh mengalihkan aliran dana event ke rekening lain.
+
+**Pesanan menyimpan salinan, bukan hanya referensi.** Saat memesan, `orders` mengisi `payment_method`, `payment_account_number`, dan `payment_account_holder` dari rekening yang dipilih, selain `payment_account_id`. Kalau super admin nanti mengganti nomor rekening — atau menghapusnya — pesanan lama tetap menunjukkan ke mana pembeli sebenarnya diminta transfer. Tanpa ini, admin tidak bisa mencocokkan bukti transfer lama dengan rekening yang sudah berubah.
+
+**Event tanpa rekening aktif tidak bisa menjual tiket.** `RegistrationController` menolak pesanannya, dan halaman `/register-event` menampilkan "Pendaftaran belum dibuka" alih-alih formulir. Ini disengaja: sebelumnya ada fallback rekening yang di-hardcode di controller (`80771234567890` a.n. "SeTiket Organizer"), sehingga **seluruh event mengumpulkan uang ke satu rekening contoh** — fallback itu sudah dihapus.
+
+Validasi `payment_account_id` memakai `Rule::in()` atas rekening aktif milik event tersebut, jadi pembeli tidak bisa mengarahkan pesanannya ke rekening event lain atau ke rekening yang sudah dinonaktifkan.
+
+### 7.3 Alur pembelian
 
 **0. Pembeli login** — seluruh alur pembelian berada di balik middleware `['auth', 'role:user']`.
 Guest yang menekan "Beli Tiket Sekarang" diarahkan ke `/login`, lalu dikembalikan ke form pembelian oleh mekanisme *intended URL* Laravel. Admin dan super admin **tidak bisa** membeli tiket (403) — akun mereka untuk mengelola, bukan memesan.
@@ -307,7 +324,7 @@ Guest yang menekan "Beli Tiket Sekarang" diarahkan ke `/login`, lalu dikembalika
 Menampilkan form beserta kategori dan metode pembayaran milik event tersebut. Nama diisi otomatis dari akun, dan email dikunci (`readonly`) ke email akun agar jelas pesanan tercatat ke akun mana. Kalau event belum ada di DB, dibuat di sini.
 
 **2. Submit pesanan** — `POST /register-event` → `submitRegistration()`
-Form mengirim array `participants[]`, satu entri per tiket. Yang dipakai bersama untuk seluruh pesanan hanya `event_id`, `payment_method`, dan satu file `proof`.
+Form mengirim array `participants[]`, satu entri per tiket. Yang dipakai bersama untuk seluruh pesanan hanya `event_id`, `payment_account_id`, dan satu file `proof`.
 
 1. Validasi. Selain aturan per peserta (NIK 16 digit angka, jersey, kategori), ada tiga yang menjaga integritas pesanan:
    - `event_id` wajib `exists:events,id` — datang dari input tersembunyi, bisa diubah pembeli
@@ -317,7 +334,7 @@ Form mengirim array `participants[]`, satu entri per tiket. Yang dipakai bersama
 3. `resolveEvent()` memastikan event ada di DB beserta kategori bawaannya
 4. Dalam satu `DB::transaction()`: buat `Order`, lalu untuk tiap peserta buat `Participant` + `Ticket` berstatus `pending`
 5. `total_amount` dijumlah dari `event_categories.price` tiap peserta — jadi kategori boleh berbeda-beda dalam satu pesanan
-6. Bukti bayar disimpan sekali ke `storage/app/public/proofs` dan menempel di `Order`, bukan di tiap tiket
+6. Bukti bayar disimpan sekali ke `storage/app/public/proofs` dan menempel di `Order`, bukan di tiap tiket. Rekening tujuan ikut disalin ke pesanan (§7.2)
 
 Nama boleh sama (kembar atau nama umum memang bisa sama); **NIK** yang wajib berbeda, karena itu identitas resmi yang mencegah satu orang mendapat dua tiket di event yang sama. NIK yang sama tetap boleh mendaftar di event berbeda.
 
@@ -356,6 +373,20 @@ Tidak ada autentikasi di sini: siapa pun yang tahu kode tiket bisa membukanya.
 
 **5. Check-in di lokasi** — `/admin/scanner` → `POST /admin/scan`
 Scan kamera memakai `html5-qrcode`, hasilnya dikirim via `fetch()` sebagai JSON. Endpoint menerima `qr_code` **maupun** `ticket_code` sehingga input manual tetap bisa. Tiket harus berstatus `valid`; sekali di-scan statusnya jadi `checked-in` dan scan kedua ditolak.
+
+### Tampilan berbeda untuk guest, peserta, dan pengelola
+
+Beranda dan halaman detail event menyesuaikan diri dengan siapa yang membukanya. Datanya disiapkan `HomeController::participantContext()` — mengembalikan nilai kosong untuk guest dan admin, jadi view-nya aman dipakai ketiga kondisi.
+
+| Bagian | Guest | Peserta (`user`) | Admin / Super admin |
+|---|---|---|---|
+| Hero beranda | Headline promosi + "Buat Akun Gratis" + tautan masuk | Sapaan nama, kartu **Tiket Aktif** & **Menunggu Verifikasi**, tombol ke `/tickets` | "Mode Pengelola" + tombol ke panel admin |
+| Angka promosi (500+ event, dst.) | Tampil | Disembunyikan | Disembunyikan |
+| Kartu event | Tombol "Beli Tiket" | Event yang sudah didaftari diberi badge **Sudah Terdaftar** dan tombolnya jadi "Lihat Pesanan Saya" | Sama seperti guest |
+| Detail event | Tombol beli + ajakan masuk/daftar | Kalau sudah terdaftar: status hijau + tombol "Lihat Pesanan" / "Pesan Lagi" | Tombol beli (tetap 403 saat diklik) |
+| Navbar | Login + Daftar | Inisial nama, "Pesanan", "Tiket Saya", "Keluar" | Inisial nama, "Panel Admin", "Keluar" |
+
+Kalimat di bawah sapaan ikut menyesuaikan keadaan: ada tiket aktif, ada pesanan menunggu verifikasi, atau belum punya keduanya.
 
 ### Halaman peserta
 
@@ -527,6 +558,7 @@ Route `/storage/{path}` di akhir `web.php` adalah fallback kalau symlink tidak t
 
 Peserta: `dashboard`, `participants`, `participants/{id}/edit|update|delete`, `participants/bulk-delete`, `export-csv`
 Pesanan: `orders`, `orders/{id}/approve`, `orders/{id}/reject`, `orders/bulk-delete`
+Rekening *(lihat: admin; ubah: super admin)*: `payment-accounts` + `store|update|destroy`
 Formulir: `form-fields` + `store|update|destroy` — admin mengatur event yang dia tangani, super admin pilih event lewat `?event_id=`
 Check-in: `scanner`, `scan`, `eticket/{ticket_code}/pdf`
 Event *(super admin)*: `events` + `store|update|destroy|bulk-delete`
@@ -558,6 +590,7 @@ Tidak ada lagi `/admin/login` — login admin memakai `/login` yang sama dengan 
 - `tests/Feature/RoleAccessTest.php` — matriks akses tiga role: redirect setelah login per role, `user` ditolak di `/admin/*`, `admin` ditolak di `/dashboard` dan di halaman khusus super admin, guest diarahkan ke `/login`, registrasi publik selalu menghasilkan role `user`, dan dashboard peserta hanya menampilkan pendaftaran miliknya sendiri.
 - `tests/Feature/TicketPurchaseFlowTest.php` (22 test) — alur beli tiket, multi-tiket, dan isolasi antar-event: pembelian wajib login, admin tidak bisa membeli, pesanan terikat akun pembeli, `event_id` palsu ditolak, satu pesanan berisi tiga tiket dengan kategori berbeda dan total yang benar, NIK kembar dalam satu pesanan ditolak, NIK yang sudah terdaftar di event itu ditolak, NIK sama boleh mendaftar di event lain, batas 10 tiket ditegakkan, admin event hanya melihat & hanya bisa menyetujui pesanan event-nya, satu approve menerbitkan seluruh tiket, penolakan wajib beralasan, `/tickets` hanya menampilkan tiket terbit milik sendiri, dan pesanan orang lain tidak bisa diakses.
 - `tests/Feature/EventFormFieldTest.php` (21 test) — formulir per event: admin hanya bisa mengatur event sendiri, super admin bisa pilih event, field bawaan ter-seed otomatis, key custom tidak menabrak nama kolom bawaan, field bawaan tidak bisa dihapus, mematikan field bawaan menghilangkannya dari form dan validasi, field opsional boleh kosong, field wajib tetap memblokir, jawaban tersimpan di `custom_data`, persetujuan wajib harus dicentang, tipe angka menolak teks, konfigurasi terisolasi antar-event, dan jawaban ikut ke CSV.
+- `tests/Feature/EventPaymentAccountTest.php` (17 test) — rekening per event: hanya super admin yang bisa menambah/mengubah/menghapus, admin event ditolak 403 dan hanya melihat rekening event-nya, form pembelian hanya menampilkan rekening event tersebut, event tanpa rekening tidak bisa menjual tiket, rekening event lain dan rekening nonaktif ditolak, pesanan menyimpan salinan yang bertahan walau rekening diubah atau dihapus, serta bukti transfer dan rekening tujuan terlihat admin di antrian verifikasi.
 - `tests/Unit/ExampleTest.php`, `tests/Feature/ExampleTest.php` — bawaan Laravel.
 
 Belum ada test untuk penerbitan PDF e-ticket dan notifikasi WhatsApp.
