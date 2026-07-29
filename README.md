@@ -1,58 +1,197 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SeTiket
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Platform penjualan tiket event lari (fun run) dengan pembayaran transfer manual dan verifikasi oleh panitia.
 
-## About Laravel
+- **Peserta** membeli satu atau beberapa tiket sekaligus, mengunggah bukti transfer, lalu memantau statusnya sampai e-ticket terbit.
+- **Admin event** memverifikasi pesanan yang masuk untuk event yang ditugaskan kepadanya, mengatur data apa saja yang diminta di formulir pendaftaran, dan memindai QR saat check-in.
+- **Super admin** mengelola event, kategori lomba, dan akun admin.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Dibangun dengan Laravel 13, Blade, Tailwind CSS 4, dan Laravel Breeze untuk autentikasi.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Kebutuhan
 
-## Learning Laravel
+| Kebutuhan | Versi minimum | Dipakai saat dikembangkan |
+|---|---|---|
+| PHP | 8.3 | 8.3.6 |
+| Composer | 2.x | 2.8.9 |
+| Node.js | 20.x | 20.17.0 |
+| npm | 10.x | 10.8.2 |
+| MySQL | 5.7 / 8.x | bawaan Laragon |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Ekstensi PHP yang dibutuhkan sudah tersedia di paket standar Laragon/XAMPP: `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `gd`.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Cara menjalankan
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 1. Ambil kode dan pasang dependensi
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/FirmanCandra/funrun.git
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+```bash
+cd funrun
+```
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+npm install
+```
 
-## Code of Conduct
+### 2. Siapkan file konfigurasi
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+cp .env.example .env
+```
 
-## Security Vulnerabilities
+Buka `.env`. Bawaannya masih menunjuk ke SQLite dan baris MySQL-nya dikomentari:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```env
+DB_CONNECTION=sqlite
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=laravel
+# DB_USERNAME=root
+# DB_PASSWORD=
+```
 
-## License
+Ganti seluruh bagian itu menjadi — perhatikan tanda `#` **harus dihapus**, dan sesuaikan `DB_USERNAME`/`DB_PASSWORD` dengan MySQL Anda:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=funrun
+DB_USERNAME=root
+DB_PASSWORD=root
+```
+
+Project ini memakai MySQL. Kalau `DB_CONNECTION` dibiarkan `sqlite`, migrasi akan gagal karena file databasenya tidak ada.
+
+### 3. Buat kunci aplikasi
+
+```bash
+php artisan key:generate
+```
+
+### 4. Buat database kosong
+
+Buat database bernama **`funrun`** lewat phpMyAdmin, HeidiSQL, atau menu Database di Laragon. Nama harus sama dengan `DB_DATABASE` di `.env`.
+
+### 5. Jalankan migrasi dan data awal
+
+```bash
+php artisan migrate --seed
+```
+
+Perintah ini membuat seluruh tabel sekaligus akun super admin, admin, dan peserta contoh.
+
+### 6. Sambungkan folder penyimpanan
+
+```bash
+php artisan storage:link
+```
+
+**Langkah ini wajib.** Bukti transfer dan thumbnail event tersimpan di `storage/app/public` dan diakses lewat `/storage/...`. Tanpa symlink ini, gambar tidak akan muncul di panel admin.
+
+### 7. Jalankan aplikasi
+
+```bash
+composer run dev
+```
+
+Satu perintah itu menjalankan tiga proses sekaligus: web server, antrean, dan Vite. Buka **http://127.0.0.1:8000**.
+
+Kalau Anda memakai virtual host Laragon (misalnya `http://funrun.test`), server-nya sudah disediakan Laragon — cukup jalankan Vite saja:
+
+```bash
+npm run dev
+```
+
+---
+
+## Akun bawaan
+
+Semua peran masuk lewat halaman yang sama: **`/login`**.
+
+| Peran | Email | Password | Sesudah login |
+|---|---|---|---|
+| Super Admin | `superadmin@setiket.com` | `admin123` | `/admin/dashboard` |
+| Admin Event | `admin@setiket.com` | `admin123` | `/admin/dashboard` |
+| Peserta | `test@example.com` | `password` | `/dashboard` |
+
+Ganti password akun-akun ini sebelum dipakai di lingkungan sungguhan.
+
+---
+
+## Perintah yang sering dipakai
+
+Menjalankan server, antrean, dan Vite sekaligus:
+
+```bash
+composer run dev
+```
+
+Build aset untuk produksi:
+
+```bash
+npm run build
+```
+
+Menjalankan seluruh test:
+
+```bash
+composer run test
+```
+
+Merapikan gaya penulisan kode:
+
+```bash
+./vendor/bin/pint
+```
+
+Mengulang database dari nol beserta data awal:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+---
+
+## Kalau ada yang tidak beres
+
+| Gejala | Penyebab | Cara mengatasi |
+|---|---|---|
+| Halaman tampil polos tanpa CSS | Vite mati tapi file penanda `public/hot` tertinggal | Hapus `public/hot`, atau jalankan `npm run dev` lagi |
+| Gambar bukti transfer tidak muncul | Symlink storage belum dibuat | Jalankan `php artisan storage:link` |
+| `SQLSTATE[HY000] [1049] Unknown database` | Database `funrun` belum dibuat | Ulangi langkah 4 |
+| `SQLSTATE[HY000] [1045] Access denied` | `DB_USERNAME` / `DB_PASSWORD` di `.env` salah | Sesuaikan dengan kredensial MySQL Anda |
+| Perubahan `.env` tidak terbaca | Konfigurasi masih ter-cache | Jalankan `php artisan config:clear` |
+| QR code tidak muncul di tiket atau PDF | Gambar QR diambil dari layanan online `api.qrserver.com` | Pastikan ada koneksi internet |
+| Notifikasi WhatsApp tidak terkirim | `FONNTE_TOKEN` belum diisi di `.env` | Wajar. Tanpa token, isi pesannya dicatat ke `storage/logs/laravel.log` |
+
+Menghapus semua cache sekaligus kalau aplikasi berperilaku aneh:
+
+```bash
+php artisan optimize:clear
+```
+
+---
+
+## Dokumentasi lain
+
+| Berkas | Isi |
+|---|---|
+| [DEVELOPMENT.md](DEVELOPMENT.md) | Cara kerja internal: arsitektur data, skema database, alur bisnis, peran & hak akses, peta rute, konvensi kode |
+| [DEMO.md](DEMO.md) | 13 skenario peragaan langkah demi langkah, lengkap dengan hasil yang diharapkan |
+
+Sebelum menyentuh kode, **baca DEVELOPMENT.md §5 dan §7 lebih dulu**. Ada dua hal yang tidak biasa di project ini dan mudah menjebak kalau belum tahu:
+
+1. Data event disimpan di file JSON (`storage/app/events.json`), bukan di tabel `events`. Tabel database hanya cerminannya.
+2. Formulir pendaftaran berbeda-beda tiap event, dan aturan validasinya dibaca dari database — bukan daftar tetap di controller.

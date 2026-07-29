@@ -2,8 +2,7 @@
 
 Panduan teknis untuk developer yang mengerjakan project ini. Dokumen ini menjelaskan cara kerja internal aplikasi, bukan cara memakainya sebagai user.
 
-> `README.md` masih berisi boilerplate bawaan Laravel dan tidak menggambarkan project ini. Pakai dokumen ini sebagai acuan.
->
+> Untuk memasang dan menjalankan project, lihat [README.md](README.md).
 > Untuk peragaan fitur dari sisi pengguna (skenario langkah demi langkah), lihat [DEMO.md](DEMO.md).
 
 ---
