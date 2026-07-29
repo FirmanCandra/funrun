@@ -13,11 +13,20 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         \App\Models\User::firstOrCreate(
+            ['email' => 'superadmin@setiket.com'],
+            [
+                'name' => 'Super Administrator',
+                'password' => bcrypt('admin123'),
+                'role' => \App\Models\User::ROLE_SUPER_ADMIN
+            ]
+        );
+
+        \App\Models\User::firstOrCreate(
             ['email' => 'admin@setiket.com'],
             [
                 'name' => 'Administrator',
                 'password' => bcrypt('admin123'),
-                'role' => 'admin'
+                'role' => \App\Models\User::ROLE_ADMIN
             ]
         );
     }

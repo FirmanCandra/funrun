@@ -2,17 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
+use App\Models\EventCategory;
+use App\Models\EventFormField;
+use App\Models\Order;
+use App\Models\Participant;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class RegistrationController extends Controller
 {
+    /**
+     * Batas jumlah tiket dalam satu pesanan.
+     */
+    public const MAX_TICKETS_PER_ORDER = 10;
+
     public function showRegistrationForm(Request $request)
     {
         $eventId = $request->query('event_id', 1);
-        $events = \App\Http\Controllers\HomeController::loadEvents();
-        $event = collect($events)->firstWhere('id', (int)$eventId);
- 
-        if (!$event) {
+        $events = HomeController::loadEvents();
+        $event = collect($events)->firstWhere('id', (int) $eventId);
+
+        if (! $event) {
             // Fallback to first event or default
             $event = count($events) > 0 ? $events[0] : [
                 'id' => 1,
@@ -21,215 +35,334 @@ class RegistrationController extends Controller
                 'tanggal' => '25-26 Juli 2026',
                 'harga' => 100000,
                 'kategori' => 'upcoming',
-                'waktu' => '16.00 - 23.00'
+                'waktu' => '16.00 - 23.00',
             ];
         }
- 
+
         // Apply fallbacks
         if (empty($event['waktu'])) {
             $event['waktu'] = '16.00 - 23.00';
         }
 
-        // Ensure the event exists in the database
-        $dbEvent = \App\Models\Event::firstOrCreate(
-            ['id' => $event['id']],
-            [
-                'title' => $event['nama'] ?? 'SeTiket',
-                'date' => \App\Http\Controllers\AdminController::parseDateString($event['tanggal'] ?? ''),
-                'location' => $event['lokasi'] ?? 'City Square',
-                'quota' => 5000
-            ]
-        );
-
-        // Seed default categories if none exist yet in DB
-        if ($dbEvent->categories()->count() === 0) {
-            $dbEvent->categories()->createMany([
-                ['name' => '3K Fun Walk', 'code' => '3K', 'bib_code' => 'FW', 'price' => 100000],
-                ['name' => '5K Night Run', 'code' => '5K', 'bib_code' => 'NR', 'price' => 150000],
-                ['name' => '10K Challenger', 'code' => '10K', 'bib_code' => 'CH', 'price' => 250000],
-            ]);
-        }
-
+        $dbEvent = $this->resolveEvent($event);
         $categories = $dbEvent->categories;
+        $paymentMethods = $this->paymentMethodsFor($event);
 
-        $paymentMethods = $event['payment_methods'] ?? [];
-        if (empty($paymentMethods)) {
-            $paymentMethods = [
-                [
-                    'name' => 'Transfer Bank BCA',
-                    'account_number' => '80771234567890',
-                    'account_holder' => 'SeTiket Organizer'
-                ],
-                [
-                    'name' => 'E-Wallet DANA',
-                    'account_number' => '081234567890',
-                    'account_holder' => 'SeTiket Organizer'
-                ]
-            ];
-        }
- 
-        return view('register', compact('event', 'categories', 'paymentMethods'));
+        // Susunan field mengikuti konfigurasi formulir milik event ini.
+        $formFields = EventFormField::activeFor($dbEvent->id);
+
+        return view('register', compact('event', 'categories', 'paymentMethods', 'formFields'));
     }
- 
+
+    /**
+     * Simpan pesanan berisi satu atau banyak tiket.
+     *
+     * Data diri diisi per peserta; yang dipakai bersama untuk seluruh pesanan
+     * hanya metode pembayaran dan satu bukti transfer.
+     */
     public function submitRegistration(Request $request)
     {
-        $eventId = $request->input('event_id', 1);
-        $validCategories = \App\Models\EventCategory::where('event_id', $eventId)->pluck('code')->toArray();
+        // Event divalidasi lebih dulu dan terpisah: aturan validasi selanjutnya
+        // disusun dari konfigurasi formulir milik event ini, jadi event-nya
+        // harus dipastikan ada sebelum apa pun menyentuhnya.
+        $request->validate([
+            'event_id' => 'required|integer|exists:events,id',
+        ], [
+            'event_id.exists' => 'Event yang dipilih tidak ditemukan.',
+        ]);
+
+        $eventId = (int) $request->input('event_id');
+
+        $categories = EventCategory::where('event_id', $eventId)->get();
+        $validCategories = $categories->pluck('code')->all();
         if (empty($validCategories)) {
             $validCategories = ['3K', '5K', '10K'];
         }
 
-        $events = \App\Http\Controllers\HomeController::loadEvents();
-        $jsonEvent = collect($events)->firstWhere('id', (int)$eventId);
-        $paymentMethods = $jsonEvent['payment_methods'] ?? [];
-        if (empty($paymentMethods)) {
-            $paymentMethods = [
-                ['name' => 'Transfer Bank BCA'],
-                ['name' => 'E-Wallet DANA']
-            ];
-        }
-        $validPaymentMethods = collect($paymentMethods)->pluck('name')->toArray();
+        $jsonEvent = collect(HomeController::loadEvents())->firstWhere('id', $eventId);
+        $validPaymentMethods = collect($this->paymentMethodsFor($jsonEvent ?? []))->pluck('name')->all();
 
-        $validated = $request->validate([
-            'fullname'          => 'required|string|max:255',
-            'email'             => 'required|email|max:255',
-            'phone'             => 'required|string|max:20',
-            'dob'               => 'required|date',
-            'gender'            => 'required|in:male,female',
-            'address'           => 'required|string',
-            'nik'               => 'required|string|size:16|regex:/^[0-9]+$/',
-            'city'              => 'required|string|max:255',
-            'medical_history'   => 'nullable|string|max:1000',
-            'jersey_size'       => 'required|in:S,M,L,XL,XXL',
-            'emergency_contact' => 'required|string|max:255',
-            'category'          => 'required|in:' . implode(',', $validCategories),
-            'event_id'          => 'required|integer',
-            'payment_method'    => 'required|in:' . implode(',', $validPaymentMethods),
-            'proof'             => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ], [
-            'nik.required' => 'NIK wajib diisi.',
-            'nik.size'     => 'NIK harus terdiri dari 16 digit.',
-            'nik.regex'    => 'NIK hanya boleh berisi angka.',
-            'city.required' => 'Asal Kota/Kabupaten wajib diisi.',
+        // Field bawaan yang aktif dan field tambahan diambil dari konfigurasi
+        // formulir milik event ini, bukan dari daftar tetap.
+        $formFields = EventFormField::activeFor($eventId);
+
+        $rules = [
+            // event_id berasal dari input tersembunyi, jadi wajib diikat ke event nyata.
+            'event_id' => 'required|integer|exists:events,id',
+            'payment_method' => 'required|in:'.implode(',', $validPaymentMethods),
+            'proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+
+            'participants' => 'required|array|min:1|max:'.self::MAX_TICKETS_PER_ORDER,
+
+            // Field terkunci — selalu wajib, tidak bisa dimatikan admin.
+            'participants.*.fullname' => 'required|string|max:255',
+            // distinct: NIK tidak boleh diulang di dalam satu pesanan.
+            'participants.*.nik' => 'required|string|size:16|regex:/^[0-9]+$/|distinct',
+            'participants.*.phone' => 'required|string|max:20',
+            'participants.*.category' => ['required', Rule::in($validCategories)],
+        ];
+
+        $messages = [
+            'participants.required' => 'Minimal satu peserta harus diisi.',
+            'participants.max' => 'Maksimal '.self::MAX_TICKETS_PER_ORDER.' tiket dalam satu pesanan.',
+            'participants.*.fullname.required' => 'Nama lengkap peserta wajib diisi.',
+            'participants.*.nik.required' => 'NIK wajib diisi.',
+            'participants.*.nik.size' => 'NIK harus terdiri dari 16 digit.',
+            'participants.*.nik.regex' => 'NIK hanya boleh berisi angka.',
+            'participants.*.nik.distinct' => 'NIK tiap peserta harus berbeda.',
+            'participants.*.category.required' => 'Kategori lomba wajib dipilih.',
+            'event_id.exists' => 'Event yang dipilih tidak ditemukan.',
             'payment_method.in' => 'Metode pembayaran tidak valid.',
-        ]);
- 
-        // 1. Create or Find User
-        $user = \App\Models\User::firstOrCreate(
-            ['email' => $validated['email']],
-            ['name' => $validated['fullname'], 'password' => bcrypt('password'), 'role' => 'participant']
-        );
- 
-        // 2. Find or Create Event in Database
-        $events = \App\Http\Controllers\HomeController::loadEvents();
-        $jsonEvent = collect($events)->firstWhere('id', (int)$eventId);
- 
-        $title = $jsonEvent['nama'] ?? 'SeTiket';
-        
-        $event = \App\Models\Event::firstOrCreate(
-            ['id' => $eventId],
+        ];
+
+        $attributes = [];
+
+        foreach ($formFields as $field) {
+            $path = $field->is_core
+                ? 'participants.*.'.$field->key
+                : 'participants.*.custom.'.$field->key;
+
+            $rules[$path] = $this->rulesForField($field);
+            $attributes[$path] = strtolower($field->label);
+
+            if ($field->required && $field->type === EventFormField::TYPE_CONSENT) {
+                $messages[$path.'.accepted'] = $field->label.' harus disetujui.';
+            }
+        }
+
+        $validated = $request->validate($rules, $messages, $attributes);
+
+        // Satu NIK hanya boleh punya satu tiket per event, termasuk terhadap
+        // pesanan yang sudah dibuat sebelumnya.
+        $this->rejectNiksAlreadyRegistered($validated['participants'], $eventId);
+
+        $event = $this->resolveEvent($jsonEvent ?? ['id' => $eventId]);
+        $categoryByCode = $categories->keyBy('code');
+
+        $proofPath = $request->file('proof')->store('proofs', 'public');
+
+        $order = DB::transaction(function () use ($validated, $event, $categoryByCode, $proofPath, $request, $formFields) {
+            $order = Order::create([
+                'order_code' => Order::generateCode(),
+                'user_id' => $request->user()->id,
+                'event_id' => $event->id,
+                'total_amount' => 0,
+                'payment_method' => $validated['payment_method'],
+                'payment_status' => Order::STATUS_WAITING,
+                'proof_of_payment' => $proofPath,
+            ]);
+
+            $total = 0;
+
+            foreach ($validated['participants'] as $row) {
+                $category = $categoryByCode->get($row['category']);
+                $price = $category->price ?? 100000;
+                $bibCode = $category->bib_code ?? 'FW';
+
+                $attributes = [
+                    'user_id' => $request->user()->id,
+                    'event_id' => $event->id,
+                    'fullname' => $row['fullname'],
+                    'nik' => $row['nik'],
+                    'phone' => $row['phone'],
+                    'category' => $row['category'],
+                    'custom_data' => [],
+                ];
+
+                // Hanya field yang diaktifkan admin event yang ikut disimpan.
+                foreach ($formFields as $field) {
+                    if ($field->is_core) {
+                        $attributes[$field->key] = $this->normalizeValue($field, $row[$field->key] ?? null);
+                    } else {
+                        $attributes['custom_data'][$field->key] = $this->normalizeValue(
+                            $field,
+                            $row['custom'][$field->key] ?? null
+                        );
+                    }
+                }
+
+                $participant = Participant::create($attributes);
+
+                Ticket::create([
+                    'participant_id' => $participant->id,
+                    'order_id' => $order->id,
+                    'ticket_code' => $this->nextTicketCode($event->id, $row['category'], $bibCode),
+                    'status' => 'pending',
+                ]);
+
+                $total += $price;
+            }
+
+            $order->update(['total_amount' => $total]);
+
+            return $order;
+        });
+
+        return redirect()->route('registration.success', ['order' => $order->order_code])
+            ->with('success', 'Pesanan berhasil dibuat! Silakan tunggu verifikasi admin.');
+    }
+
+    public function success(Request $request)
+    {
+        $order = Order::with(['event', 'tickets.participant'])
+            ->where('order_code', $request->query('order'))
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        return view('registration-success', compact('order'));
+    }
+
+    // ===== Helper =====
+
+    /**
+     * Aturan validasi untuk satu field, disusun dari tipe dan status wajibnya.
+     */
+    private function rulesForField(EventFormField $field): array
+    {
+        // Persetujuan: kalau wajib harus dicentang, kalau tidak boleh dilewati.
+        if ($field->type === EventFormField::TYPE_CONSENT) {
+            return $field->required ? ['accepted'] : ['nullable', 'boolean'];
+        }
+
+        $rules = [$field->required ? 'required' : 'nullable'];
+
+        // Field core bertipe select punya daftar pilihan tetap.
+        if ($field->is_core && isset(EventFormField::SELECT_OPTIONS[$field->key])) {
+            $rules[] = Rule::in(array_keys(EventFormField::SELECT_OPTIONS[$field->key]));
+
+            return $rules;
+        }
+
+        $rules[] = match ($field->type) {
+            EventFormField::TYPE_DATE => 'date',
+            EventFormField::TYPE_NUMBER => 'numeric',
+            EventFormField::TYPE_TEXTAREA => 'string',
+            default => 'string',
+        };
+
+        if ($field->type === EventFormField::TYPE_TEXTAREA) {
+            $rules[] = 'max:1000';
+        } elseif ($field->type === EventFormField::TYPE_TEXT) {
+            $rules[] = 'max:255';
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Samakan bentuk nilai sebelum disimpan.
+     */
+    private function normalizeValue(EventFormField $field, $value)
+    {
+        if ($field->type === EventFormField::TYPE_CONSENT) {
+            return (bool) $value;
+        }
+
+        return $value === '' ? null : $value;
+    }
+
+    /**
+     * Pastikan event ada di database (sumber utamanya file JSON) beserta
+     * kategori bawaannya.
+     */
+    private function resolveEvent(array $jsonEvent): Event
+    {
+        $event = Event::firstOrCreate(
+            ['id' => $jsonEvent['id']],
             [
-                'title' => $title,
-                'date' => \App\Http\Controllers\AdminController::parseDateString($jsonEvent['tanggal'] ?? ''),
+                'title' => $jsonEvent['nama'] ?? 'SeTiket',
+                'date' => AdminController::parseDateString($jsonEvent['tanggal'] ?? ''),
                 'location' => $jsonEvent['lokasi'] ?? 'City Square',
-                'quota' => 5000
+                'quota' => 5000,
             ]
         );
- 
-        // 3. Create Participant
-        $participant = \App\Models\Participant::create([
-            'user_id'           => $user->id,
-            'event_id'          => $event->id,
-            'fullname'          => $validated['fullname'],
-            'phone'             => $validated['phone'],
-            'dob'               => $validated['dob'],
-            'gender'            => $validated['gender'],
-            'address'           => $validated['address'],
-            'nik'               => $validated['nik'],
-            'city'              => $validated['city'],
-            'medical_history'   => $validated['medical_history'] ?? null,
-            'jersey_size'       => $validated['jersey_size'],
-            'emergency_contact' => $validated['emergency_contact'],
-            'category'          => $validated['category'],
-        ]);
- 
-        // 4. Determine price and BIB code based on category in DB
-        $categoryModel = \App\Models\EventCategory::where('event_id', $event->id)
-            ->where('code', $validated['category'])
-            ->first();
-        
-        $price = $categoryModel ? $categoryModel->price : 100000;
-        $bibCode = $categoryModel ? $categoryModel->bib_code : 'FW';
- 
-        // 5. Generate Ticket
-        $categoryCount = \App\Models\Participant::where('event_id', $event->id)
-                                                ->where('category', $validated['category'])
-                                                ->whereHas('ticket')
-                                                ->count();
-        $newNumber = $categoryCount + 1;
-        $ticketCode = 'ST-' . $validated['category'] . '-' . $bibCode . '-' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
- 
-        $ticket = \App\Models\Ticket::create([
-            'participant_id' => $participant->id,
-            'ticket_code'    => $ticketCode,
-            'status'         => 'pending'
-        ]);
- 
-        // 6. Save Proof of Payment file
-        $path = $request->file('proof')->store('proofs', 'public');
- 
-        // 7. Create Payment record
-        $payment = \App\Models\Payment::create([
-            'ticket_id'        => $ticket->id,
-            'amount'           => $price,
-            'payment_method'   => $validated['payment_method'],
-            'payment_status'   => 'waiting_verification',
-            'proof_of_payment' => $path
-        ]);
- 
-        return redirect()->route('registration.success')
-            ->with('success', 'Pendaftaran berhasil! Bukti pembayaran telah diunggah. Silakan tunggu verifikasi admin.');
-    }
- 
-    public function success()
-    {
-        return view('registration-success');
-    }
- 
-    public function checkout($participant_id)
-    {
-        $participant = \App\Models\Participant::findOrFail($participant_id);
-        
-        $categoryModel = \App\Models\EventCategory::where('event_id', $participant->event_id)
-            ->where('code', $participant->category)
-            ->first();
-        
-        $price = $categoryModel ? $categoryModel->price : 100000;
-        $bibCode = $categoryModel ? $categoryModel->bib_code : 'FW';
- 
-        $ticket = \App\Models\Ticket::where('participant_id', $participant->id)->first();
-        
-        if (!$ticket) {
-            $categoryCount = \App\Models\Participant::where('event_id', $participant->event_id)
-                                                    ->where('category', $participant->category)
-                                                    ->whereHas('ticket')
-                                                    ->count();
-            $newNumber = $categoryCount + 1;
-            $ticketCode = 'ST-' . $participant->category . '-' . $bibCode . '-' . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
- 
-            $ticket = \App\Models\Ticket::create([
-                'participant_id' => $participant->id,
-                'ticket_code' => $ticketCode,
-                'status' => 'pending'
+
+        if ($event->categories()->count() === 0) {
+            $event->categories()->createMany([
+                ['name' => '3K Fun Walk', 'code' => '3K', 'bib_code' => 'FW', 'price' => 100000],
+                ['name' => '5K Night Run', 'code' => '5K', 'bib_code' => 'NR', 'price' => 150000],
+                ['name' => '10K Challenger', 'code' => '10K', 'bib_code' => 'CH', 'price' => 250000],
             ]);
+            $event->load('categories');
         }
- 
-        // Create Payment record
-        $payment = \App\Models\Payment::firstOrCreate(
-            ['ticket_id' => $ticket->id],
-            ['amount' => $price, 'payment_status' => 'pending']
-        );
- 
-        return view('checkout', compact('participant', 'ticket', 'payment', 'price'));
+
+        return $event;
+    }
+
+    /**
+     * Metode pembayaran milik event, dengan fallback bawaan.
+     */
+    private function paymentMethodsFor(array $jsonEvent): array
+    {
+        $methods = $jsonEvent['payment_methods'] ?? [];
+
+        if (! empty($methods)) {
+            return $methods;
+        }
+
+        return [
+            [
+                'name' => 'Transfer Bank BCA',
+                'account_number' => '80771234567890',
+                'account_holder' => 'SeTiket Organizer',
+            ],
+            [
+                'name' => 'E-Wallet DANA',
+                'account_number' => '081234567890',
+                'account_holder' => 'SeTiket Organizer',
+            ],
+        ];
+    }
+
+    /**
+     * Tolak NIK yang sudah terdaftar di event ini pada pesanan sebelumnya.
+     */
+    private function rejectNiksAlreadyRegistered(array $participants, int $eventId): void
+    {
+        $niks = array_column($participants, 'nik');
+
+        $taken = Participant::where('event_id', $eventId)
+            ->whereIn('nik', $niks)
+            ->pluck('nik')
+            ->all();
+
+        if (empty($taken)) {
+            return;
+        }
+
+        $errors = [];
+        foreach ($participants as $index => $row) {
+            if (in_array($row['nik'], $taken, true)) {
+                $errors["participants.{$index}.nik"] = 'NIK ini sudah terdaftar pada event tersebut.';
+            }
+        }
+
+        throw ValidationException::withMessages($errors);
+    }
+
+    /**
+     * Nomor urut tiket per event + kategori.
+     *
+     * ID event ikut masuk ke dalam kode karena `tickets.ticket_code` unik secara
+     * global, sementara penomoran BIB dihitung ulang dari 1 di tiap event —
+     * tanpa itu, peserta 5K pertama di event A dan event B menghasilkan kode
+     * yang sama persis dan penyimpanan gagal.
+     *
+     * Nomor dihitung dari jumlah tiket yang sudah ada, jadi pemanggilan
+     * berturut-turut dalam satu transaksi tetap menghasilkan nomor berbeda.
+     * Loop menjaga dari tabrakan kalau ada pesanan lain yang masuk bersamaan.
+     */
+    private function nextTicketCode(int $eventId, string $categoryCode, string $bibCode): string
+    {
+        $sequence = Ticket::whereHas('participant', function ($q) use ($eventId, $categoryCode) {
+            $q->where('event_id', $eventId)->where('category', $categoryCode);
+        })->count() + 1;
+
+        do {
+            $code = 'ST-'.$eventId.'-'.$categoryCode.'-'.$bibCode.'-'.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
+            $sequence++;
+        } while (Ticket::where('ticket_code', $code)->exists());
+
+        return $code;
     }
 }

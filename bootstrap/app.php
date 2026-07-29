@@ -12,7 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+        ]);
+
+        // User yang sudah login dan membuka /login atau /register dilempar
+        // ke beranda sesuai role-nya, bukan selalu ke /dashboard.
+        $middleware->redirectUsersTo(
+            fn (Request $request) => $request->user()->homeRoute()
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

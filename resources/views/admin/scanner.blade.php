@@ -26,7 +26,7 @@
         <div class="mt-8 text-left">
             <h4 class="font-bold text-sm text-slate-500 uppercase tracking-wider mb-2 border-b pb-2">Manual Entry (Fallback)</h4>
             <div class="flex gap-2">
-                <input type="text" id="manual-qr" placeholder="Enter Ticket Code (e.g. ST-3K-FR-0001)..." class="flex-1 border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase">
+                <input type="text" id="manual-qr" placeholder="Masukkan Kode Tiket (contoh: ST-1-5K-NR-0001)..." class="flex-1 border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase">
                 <button id="manual-submit" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-lg font-medium transition-colors">Verify</button>
             </div>
         </div>

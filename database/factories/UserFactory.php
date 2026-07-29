@@ -30,7 +30,30 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => User::ROLE_USER,
         ];
+    }
+
+    /**
+     * Admin sebuah event.
+     */
+    public function admin(?int $eventId = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_ADMIN,
+            'event_id' => $eventId,
+        ]);
+    }
+
+    /**
+     * Super admin — akses penuh, tidak terikat event.
+     */
+    public function superAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_SUPER_ADMIN,
+            'event_id' => null,
+        ]);
     }
 
     /**

@@ -35,7 +35,7 @@
 
         {{-- CTAs --}}
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="{{ route('register') }}"
+            <a href="{{ route('event.register') }}"
                class="w-full sm:w-auto px-10 py-4 rounded-full font-bold text-lg transition-all transform hover:-translate-y-1"
                style="background:linear-gradient(135deg,#F5A623,#d48f1a);color:#0a0425;box-shadow:0 4px 24px rgba(245,166,35,0.3);">
                 Daftar Sekarang

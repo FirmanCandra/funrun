@@ -20,10 +20,41 @@
             </div>
 
             {{-- Heading --}}
-            <h1 class="text-3xl font-extrabold text-white tracking-tight mb-3">Registrasi Berhasil!</h1>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight mb-3">Pesanan Berhasil Dibuat!</h1>
             <p class="text-gray-400 text-sm leading-relaxed mb-8">
-                Terima kasih telah mendaftar. Data Anda telah kami terima dan akan segera diproses.
+                @if($order)
+                    {{ $order->tickets->count() }} tiket untuk {{ $order->event->title ?? 'event ini' }} telah kami terima
+                    dan akan segera diverifikasi panitia.
+                @else
+                    Terima kasih telah mendaftar. Data Anda telah kami terima dan akan segera diproses.
+                @endif
             </p>
+
+            {{-- Ringkasan pesanan --}}
+            @if($order)
+                <div class="bg-slate-800/60 border border-white/10 rounded-2xl p-5 mb-8 text-left">
+                    <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-widest">Kode Pesanan</div>
+                            <div class="font-mono font-bold text-white">{{ $order->order_code }}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 uppercase tracking-widest">Total</div>
+                            <div class="font-bold text-amber-400">
+                                Rp {{ number_format((float) $order->total_amount, 0, ',', '.') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        @foreach($order->tickets as $ticket)
+                            <div class="flex items-center justify-between text-sm gap-3">
+                                <span class="text-gray-300 truncate">{{ $ticket->participant->fullname ?? '—' }}</span>
+                                <span class="font-mono text-xs text-gray-500 whitespace-nowrap">{{ $ticket->ticket_code }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             {{-- Info Cards --}}
             <div class="space-y-4 mb-8">
@@ -55,10 +86,14 @@
             </div>
 
             {{-- CTA Button --}}
-            <a href="{{ route('home') }}"
+            <a href="{{ route('dashboard') }}"
                class="block w-full py-4 rounded-2xl font-bold text-lg text-center transition-all transform hover:-translate-y-1 hover:shadow-2xl"
-               style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #f8fafc; border: 1px solid rgba(255,255,255,0.1);">
-                OK, Saya Mengerti
+               style="background: linear-gradient(135deg, #0ea5e9, #6366f1); color: #ffffff; box-shadow: 0 4px 20px rgba(14,165,233,0.25);">
+                Lihat Status Pesanan Saya
+            </a>
+            <a href="{{ route('home') }}"
+               class="block w-full mt-3 py-3 rounded-2xl font-medium text-center text-gray-400 hover:text-white transition-colors">
+                Kembali ke Beranda
             </a>
         </div>
     </div>

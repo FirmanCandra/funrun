@@ -16,8 +16,30 @@ class Ticket extends Model
         return $this->belongsTo(Participant::class);
     }
 
-    public function payments()
+    public function order()
     {
-        return $this->hasMany(Payment::class);
+        return $this->belongsTo(Order::class);
+    }
+
+    public function isCheckedIn(): bool
+    {
+        return $this->status === 'checked-in';
+    }
+
+    /**
+     * Tiket sudah terbit dan bisa ditunjukkan saat check-in.
+     */
+    public function isIssued(): bool
+    {
+        return in_array($this->status, ['valid', 'checked-in'], true);
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            'valid' => 'Tiket Aktif',
+            'checked-in' => 'Sudah Check-in',
+            default => 'Menunggu Verifikasi',
+        };
     }
 }

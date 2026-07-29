@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div class="shrink-0">
-                <a href="{{ route('register', ['event_id' => $event['id']]) }}"
+                <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
                    class="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl font-bold text-lg transition-all transform hover:-translate-y-1 hover:shadow-2xl"
                    style="background: linear-gradient(135deg, #F5A623, #d48f1a); color: #0a0425; box-shadow: 0 4px 20px rgba(245,166,35,0.25);">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,6 +44,9 @@
                     </svg>
                     Beli Tiket Sekarang
                 </a>
+                @guest
+                    <p class="text-xs text-gray-400 mt-3 text-center">Perlu login untuk membeli tiket.</p>
+                @endguest
             </div>
         </div>
 

@@ -3,6 +3,36 @@
 @section('header_title', 'Dashboard Overview')
 
 @section('content')
+
+{{-- Antrian pesanan masuk untuk event yang ditangani admin ini --}}
+@if($pendingOrders > 0)
+<div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        <div>
+            <p class="font-bold text-amber-900">{{ $pendingOrders }} pesanan menunggu verifikasi</p>
+            <p class="text-sm text-amber-700">
+                @if(auth()->user()->role === 'admin' && auth()->user()->event)
+                    Pesanan masuk untuk event {{ auth()->user()->event->title }}.
+                @else
+                    Pesanan masuk dari seluruh event.
+                @endif
+                Periksa bukti pembayarannya lalu setujui untuk menerbitkan tiket.
+            </p>
+        </div>
+    </div>
+    <a href="{{ route('admin.orders', ['status' => 'waiting_verification']) }}"
+        class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl font-medium transition-colors whitespace-nowrap text-center">
+        Verifikasi Sekarang
+    </a>
+</div>
+@endif
+
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
     <!-- KPI 1 -->
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center">

@@ -68,6 +68,27 @@
                         class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Event</a>
                     <a href="https://wa.me/6289681201941" target="_blank"
                         class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Helpdesk</a>
+
+                    @auth
+                        <a href="{{ auth()->user()->homeRoute() }}"
+                            class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">
+                            {{ auth()->user()->isAdmin() ? 'Panel Admin' : 'Tiket Saya' }}
+                        </a>
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit"
+                                class="text-gray-400 hover:text-white transition-colors font-medium text-xs sm:text-base cursor-pointer">
+                                Logout
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}"
+                            class="text-gray-300 hover:text-white transition-colors font-medium text-xs sm:text-base">Login</a>
+                        <a href="{{ route('register') }}"
+                            class="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-full font-semibold text-xs sm:text-sm transition-all whitespace-nowrap">
+                            Daftar
+                        </a>
+                    @endauth
                 </div>
             </div>
         </div>

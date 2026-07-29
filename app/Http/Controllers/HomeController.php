@@ -8,6 +8,12 @@ class HomeController extends Controller
 {
     public static function getEventsPath(): string
     {
+        // Saat menjalankan test, pakai file terpisah supaya suite tidak membaca
+        // — apalagi menimpa — data event asli di storage/app/events.json.
+        if (app()->runningUnitTests()) {
+            return storage_path('app/events.testing.json');
+        }
+
         return storage_path('app/events.json');
     }
 

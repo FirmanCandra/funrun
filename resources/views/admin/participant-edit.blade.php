@@ -56,4 +56,26 @@
         </form>
     </div>
 </div>
+
+{{-- Jawaban pertanyaan tambahan milik event ini (hanya baca) --}}
+@if($customFields->isNotEmpty())
+    <div class="max-w-2xl bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mt-6">
+        <div class="p-6 border-b border-slate-100">
+            <h3 class="font-bold text-lg">Jawaban Pertanyaan Tambahan</h3>
+            <p class="text-sm text-slate-500">
+                Pertanyaan khusus event ini, diatur di
+                <a href="{{ route('admin.form-fields', ['event_id' => $participant->event_id]) }}"
+                    class="text-blue-600 hover:underline">Formulir Pendaftaran</a>.
+            </p>
+        </div>
+        <dl class="divide-y divide-slate-100">
+            @foreach($customFields as $field)
+                <div class="px-6 py-4 flex flex-wrap justify-between gap-3">
+                    <dt class="text-sm text-slate-500">{{ $field->label }}</dt>
+                    <dd class="text-sm font-medium text-slate-800 text-right">{{ $participant->customAnswer($field) }}</dd>
+                </div>
+            @endforeach
+        </dl>
+    </div>
+@endif
 @endsection

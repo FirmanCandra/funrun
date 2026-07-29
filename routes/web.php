@@ -5,35 +5,49 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 
 // Landing Page
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/event/{id}', [HomeController::class, 'showEvent'])->name('event.show');
 
-// Registration Flow
-Route::get('/register-event', [RegistrationController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register-event', [RegistrationController::class, 'submitRegistration']);
-Route::get('/registration-success', [RegistrationController::class, 'success'])->name('registration.success');
-Route::get('/checkout/{participant_id}', [RegistrationController::class, 'checkout'])->name('checkout');
+// Alur Pembelian Tiket — wajib login sebagai peserta, supaya setiap pesanan
+// terikat ke akun pembeli dan bisa dilacak lewat /dashboard.
+// Route pembelian dinamai 'event.register' agar tidak bentrok dengan route
+// 'register' milik Breeze (pendaftaran akun) yang di-load dari routes/auth.php.
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/register-event', [RegistrationController::class, 'showRegistrationForm'])->name('event.register');
+    Route::post('/register-event', [RegistrationController::class, 'submitRegistration']);
+    Route::get('/registration-success', [RegistrationController::class, 'success'])->name('registration.success');
 
-// Payment Mock
-Route::post('/pay/{ticket_id}', [PaymentController::class, 'processPayment'])->name('payment.process');
+    // Detail pesanan + unggah ulang bukti kalau ditolak admin
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/proof', [OrderController::class, 'updateProof'])->name('orders.proof');
+});
 
 // E-Ticket
 Route::get('/ticket/{ticket_code}', [TicketController::class, 'showTicket'])->name('ticket.show');
 Route::get('/ticket/{ticket_code}/pdf', [TicketController::class, 'downloadPdf'])->name('ticket.pdf');
 
-// Admin Panel
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Auth Routes
-    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
-    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+// Area Peserta (role: user)
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Halaman tiket saja — hanya tiket yang sudah terbit
+    Route::get('/tickets', [DashboardController::class, 'tickets'])->name('tickets');
+});
 
-    // Protected Routes
-    Route::middleware([\App\Http\Middleware\IsAdmin::class])->group(function () {
+// Profil — semua role yang sudah login
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Admin Panel — hanya role admin & super_admin
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth', 'role:admin,super_admin'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         Route::get('/participants', [AdminController::class, 'participants'])->name('participants');
         Route::post('/participants/bulk-delete', [AdminController::class, 'bulkDestroyParticipant'])->name('participants.bulk-delete');
@@ -41,9 +55,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/participants/{id}', [AdminController::class, 'updateParticipant'])->name('participants.update');
         Route::delete('/participants/{id}', [AdminController::class, 'deleteParticipant'])->name('participants.delete');
         Route::get('/export-csv', [AdminController::class, 'exportCSV'])->name('export');
-        Route::get('/payments', [AdminController::class, 'payments'])->name('payments');
-        Route::post('/payments/bulk-delete', [AdminController::class, 'bulkDestroyPayment'])->name('payments.bulk-delete');
-        Route::post('/payments/{id}/approve', [AdminController::class, 'approvePayment'])->name('payments.approve');
+        // Antrian verifikasi pesanan (satu baris per pesanan, bukan per tiket)
+        Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
+        Route::post('/orders/bulk-delete', [AdminController::class, 'bulkDestroyOrder'])->name('orders.bulk-delete');
+        Route::post('/orders/{id}/approve', [AdminController::class, 'approveOrder'])->name('orders.approve');
+        Route::post('/orders/{id}/reject', [AdminController::class, 'rejectOrder'])->name('orders.reject');
+        // Formulir pendaftaran per event — admin mengatur event yang dia tangani
+        Route::get('/form-fields', [AdminController::class, 'formFields'])->name('form-fields');
+        Route::post('/form-fields', [AdminController::class, 'storeFormField'])->name('form-fields.store');
+        Route::put('/form-fields/{id}', [AdminController::class, 'updateFormField'])->name('form-fields.update');
+        Route::delete('/form-fields/{id}', [AdminController::class, 'destroyFormField'])->name('form-fields.destroy');
+
         Route::get('/scanner', [AdminController::class, 'scanner'])->name('scanner');
         Route::post('/scan', [AdminController::class, 'scanTicket'])->name('scan');
         Route::get('/eticket/{ticket_code}/pdf', [AdminController::class, 'downloadEticket'])->name('eticket.pdf');
@@ -77,3 +99,5 @@ Route::get('/storage/{path}', function ($path) {
     }
     return response()->file(\Illuminate\Support\Facades\Storage::path($filePath));
 })->where('path', '.*');
+
+require __DIR__ . '/auth.php';

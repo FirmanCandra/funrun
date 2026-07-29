@@ -51,13 +51,28 @@
                 </svg>
                 Participants
             </a>
-            <a href="{{ route('admin.payments') }}"
-                class="sidebar-item px-6 py-3 flex items-center gap-3 text-slate-600 hover:bg-slate-50 transition-colors {{ request()->routeIs('admin.payments') ? 'active' : '' }}">
+            <a href="{{ route('admin.orders') }}"
+                class="sidebar-item px-6 py-3 flex items-center gap-3 text-slate-600 hover:bg-slate-50 transition-colors {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                Payments
+                Pesanan
+                @php($pendingBadge = \App\Http\Controllers\AdminController::pendingOrdersCount(auth()->user()))
+                @if($pendingBadge > 0)
+                    <span
+                        class="ml-auto bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full min-w-[1.5rem] text-center"
+                        title="Pesanan menunggu verifikasi">{{ $pendingBadge }}</span>
+                @endif
+            </a>
+            <a href="{{ route('admin.form-fields') }}"
+                class="sidebar-item px-6 py-3 flex items-center gap-3 text-slate-600 hover:bg-slate-50 transition-colors {{ request()->routeIs('admin.form-fields') ? 'active' : '' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
+                Formulir Pendaftaran
             </a>
             <a href="{{ route('admin.scanner') }}"
                 class="sidebar-item px-6 py-3 flex items-center gap-3 text-slate-600 hover:bg-slate-50 transition-colors {{ request()->routeIs('admin.scanner') ? 'active' : '' }}">
@@ -101,7 +116,17 @@
             </a>
         </div>
         <div class="p-6 border-t border-slate-200">
-            <form action="{{ route('admin.logout') }}" method="POST">
+            <a href="{{ route('profile.edit') }}"
+                class="flex items-center gap-3 text-slate-500 hover:text-slate-800 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Profil Saya
+            </a>
+        </div>
+        <div class="p-6 border-t border-slate-200">
+            <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit"
                     class="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg font-medium transition-colors">
