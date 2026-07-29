@@ -71,7 +71,7 @@
                         @endphp
                         <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
                             <div class="min-w-0">
-                                <p class="font-medium text-ink-900 text-sm truncate">{{ $participant->fullname ?? '—' }}</p>
+                                <p class="font-medium text-ink-900 text-sm truncate">{{ $participant?->displayName() ?? '—' }}</p>
                                 <p class="text-xs text-ink-500">
                                     {{ $category->name ?? $participant?->category }} · Jersey {{ $participant->jersey_size ?? '—' }}
                                 </p>

@@ -74,6 +74,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/form-fields/{id}', [AdminController::class, 'updateFormField'])->name('form-fields.update');
         Route::delete('/form-fields/{id}', [AdminController::class, 'destroyFormField'])->name('form-fields.destroy');
 
+        // Gambar event — admin event boleh mengurus gambar event yang dia tangani,
+        // pembatasan per-event ditangani resolveFormEvent() di dalam controller.
+        Route::get('/event-image', [AdminController::class, 'eventImage'])->name('event-image');
+        Route::post('/event-image', [AdminController::class, 'updateEventImage'])->name('event-image.update');
+        Route::delete('/event-image', [AdminController::class, 'destroyEventImage'])->name('event-image.destroy');
+
         Route::get('/scanner', [AdminController::class, 'scanner'])->name('scanner');
         Route::post('/scan', [AdminController::class, 'scanTicket'])->name('scan');
         Route::get('/eticket/{ticket_code}/pdf', [AdminController::class, 'downloadEticket'])->name('eticket.pdf');

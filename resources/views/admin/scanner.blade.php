@@ -4,9 +4,9 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto">
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
-        <h2 class="text-2xl font-bold mb-2">Check-in Scanner</h2>
-        <p class="text-slate-500 mb-8">Scan participant's E-Ticket QR Code to verify and check-in.</p>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-8 text-center">
+        <h2 class="text-xl sm:text-2xl font-bold mb-2">Check-in Scanner</h2>
+        <p class="text-slate-500 text-sm sm:text-base mb-6 sm:mb-8">Scan participant's E-Ticket QR Code to verify and check-in.</p>
         
         <div id="reader-container" class="mx-auto w-full max-w-md overflow-hidden rounded-2xl border-4 border-slate-100 shadow-inner bg-slate-50 relative aspect-square flex items-center justify-center">
             <div id="reader" class="w-full"></div>
@@ -25,9 +25,9 @@
 
         <div class="mt-8 text-left">
             <h4 class="font-bold text-sm text-slate-500 uppercase tracking-wider mb-2 border-b pb-2">Manual Entry (Fallback)</h4>
-            <div class="flex gap-2">
-                <input type="text" id="manual-qr" placeholder="Masukkan Kode Tiket (contoh: ST-1-5K-NR-0001)..." class="flex-1 border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase">
-                <button id="manual-submit" class="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-lg font-medium transition-colors">Verify</button>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="manual-qr" placeholder="Masukkan Kode Tiket (contoh: ST-1-5K-NR-0001)..." class="flex-1 min-w-0 border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase">
+                <button id="manual-submit" class="shrink-0 bg-slate-800 hover:bg-slate-900 text-white px-6 py-2 rounded-lg font-medium transition-colors">Verify</button>
             </div>
         </div>
     </div>

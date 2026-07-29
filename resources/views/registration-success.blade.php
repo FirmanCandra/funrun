@@ -48,7 +48,7 @@
                     <div class="space-y-2">
                         @foreach($order->tickets as $ticket)
                             <div class="flex items-center justify-between text-sm gap-3">
-                                <span class="text-ink-900 truncate">{{ $ticket->participant->fullname ?? '—' }}</span>
+                                <span class="text-ink-900 truncate">{{ $ticket->participant?->displayName() ?? '—' }}</span>
                                 <span class="font-mono text-xs text-ink-500 whitespace-nowrap">{{ $ticket->ticket_code }}</span>
                             </div>
                         @endforeach

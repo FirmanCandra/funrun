@@ -272,13 +272,25 @@ Ini alur utama yang harus dipahami sebelum menyentuh controller manapun.
 
 Data yang diminta dari peserta ditentukan per event lewat tabel `event_form_fields`, diatur di **`/admin/form-fields`**. Admin hanya bisa mengatur event yang ditugaskan kepadanya; super admin bisa memilih event mana pun lewat dropdown.
 
-Ada tiga lapis:
+**Tidak ada field yang wajib ada.** Admin boleh mematikan semuanya, termasuk nama, NIK, WhatsApp, dan kategori. Ada dua lapis:
 
 | Lapis | Contoh | Bisa diatur admin? |
 |---|---|---|
-| **Terkunci** | `fullname`, `nik`, `phone`, `category` | Tidak. Sistem bergantung padanya: NIK mencegah tiket ganda, WhatsApp untuk kirim e-ticket, kategori menentukan harga & kode BIB |
-| **Bawaan** (`is_core = true`) | `dob`, `gender`, `jersey_size`, `emergency_contact`, `address`, `city`, `medical_history` | Label, wajib/opsional, aktif/nonaktif, urutan. **Tipe tidak bisa diubah** karena kolomnya sudah tetap di tabel `participants` |
+| **Bawaan** (`is_core = true`) | `fullname`, `nik`, `phone`, `category`, `dob`, `gender`, `jersey_size`, `emergency_contact`, `address`, `city`, `medical_history` | Label, wajib/opsional, aktif/nonaktif, urutan. **Tipe tidak bisa diubah** karena kolomnya sudah tetap di tabel `participants` |
 | **Tambahan** (`is_core = false`) | "Nama Komunitas Lari", "Saya menyatakan sehat" | Semuanya, termasuk tipe dan penghapusan |
+
+Empat field bawaan memengaruhi cara kerja sistem kalau dimatikan. Semuanya tetap boleh dimatikan — sistem punya jalan keluarnya, dan panel admin menampilkan peringatan yang sama (`EventFormField::CORE_FIELD_NOTES`):
+
+| Dimatikan | Yang terjadi |
+|---|---|
+| `category` | Semua peserta memakai **kategori pertama** event ini, sehingga harga dan kode BIB tetap punya sumber |
+| `nik` | Pengecekan NIK ganda **dilewati** — tanpa NIK memang tidak ada yang bisa dibandingkan |
+| `fullname` | Tiket memakai nama pemilik akun pemesan lewat `Participant::displayName()` |
+| `phone` | Notifikasi WhatsApp tidak terkirim (Fonnte butuh nomor tujuan) |
+
+`Participant::displayName()` dipakai **di semua tempat** yang menampilkan nama peserta — e-ticket, PDF, daftar admin, CSV, pesan WhatsApp, hasil scan. Jangan membaca `fullname` mentah untuk tampilan; kolomnya boleh null.
+
+Kolom `fullname`, `nik`, `phone`, dan `category` di tabel `participants` **nullable** sejak migration `2026_07_29_040000`.
 
 Tipe untuk field tambahan: `text`, `textarea`, `number`, `date`, `consent`. Jawabannya masuk ke `participants.custom_data` (JSON).
 
@@ -288,7 +300,7 @@ Tipe untuk field tambahan: `text`, `textarea`, `number`, `date`, `consent`. Jawa
 
 1. `EventFormField::activeFor($eventId)` mengembalikan field aktif terurut
 2. `register.blade.php` merender tiap field lewat `partials/form-field.blade.php`. Field bawaan memakai nama `participants[i][key]`, field tambahan `participants[i][custom][key]` supaya tidak bertabrakan
-3. `RegistrationController::submitRegistration()` **menyusun aturan validasi dari konfigurasi itu**, bukan dari daftar tetap. `rulesForField()` menerjemahkan tipe + wajib jadi aturan Laravel
+3. `RegistrationController::submitRegistration()` **menyusun seluruh aturan validasi dari konfigurasi itu** — tidak ada satu pun aturan field peserta yang ditulis tetap di controller. `rulesForField()` menerjemahkan tipe + wajib jadi aturan Laravel, dengan penanganan khusus untuk `nik` (16 digit, `distinct`), `category` (pilihan milik event), dan `phone`
 4. Saat menyimpan, hanya field yang aktif yang ikut ditulis; field bawaan ke kolomnya masing-masing, field tambahan ke `custom_data`
 
 Karena aturan validasi disusun dari database, `event_id` **harus divalidasi lebih dulu secara terpisah** di awal `submitRegistration()`. Tanpa itu, `event_id` palsu membuat `ensureCoreFields()` menulis baris dengan foreign key yang tidak ada dan request gagal dengan integrity violation, bukan pesan validasi yang wajar.
@@ -326,10 +338,10 @@ Menampilkan form beserta kategori dan metode pembayaran milik event tersebut. Na
 **2. Submit pesanan** — `POST /register-event` → `submitRegistration()`
 Form mengirim array `participants[]`, satu entri per tiket. Yang dipakai bersama untuk seluruh pesanan hanya `event_id`, `payment_account_id`, dan satu file `proof`.
 
-1. Validasi. Selain aturan per peserta (NIK 16 digit angka, jersey, kategori), ada tiga yang menjaga integritas pesanan:
+1. Validasi. Aturan per peserta seluruhnya dari konfigurasi formulir (§7.1). Yang tetap dijaga controller:
    - `event_id` wajib `exists:events,id` — datang dari input tersembunyi, bisa diubah pembeli
-   - `participants.*.nik` memakai **`distinct`** — NIK tidak boleh berulang di dalam satu pesanan
-   - `rejectNiksAlreadyRegistered()` menolak NIK yang sudah terdaftar di event itu dari pesanan sebelumnya
+   - `payment_account_id` wajib rekening aktif milik event ini (§7.2)
+   - Kalau field `nik` aktif: `distinct` di dalam pesanan, plus `rejectNiksAlreadyRegistered()` terhadap pesanan sebelumnya. Kalau `nik` dimatikan, kedua pengecekan itu dilewati
 2. Pemilik pesanan diambil dari `$request->user()` — selalu ada karena route dilindungi `role:user`
 3. `resolveEvent()` memastikan event ada di DB beserta kategori bawaannya
 4. Dalam satu `DB::transaction()`: buat `Order`, lalu untuk tiap peserta buat `Participant` + `Ticket` berstatus `pending`
@@ -589,7 +601,7 @@ Tidak ada lagi `/admin/login` — login admin memakai `/login` yang sama dengan 
 - `tests/Feature/Auth/*` dan `tests/Feature/ProfileTest.php` — bawaan Breeze (login, registrasi, reset password, verifikasi email, update profil).
 - `tests/Feature/RoleAccessTest.php` — matriks akses tiga role: redirect setelah login per role, `user` ditolak di `/admin/*`, `admin` ditolak di `/dashboard` dan di halaman khusus super admin, guest diarahkan ke `/login`, registrasi publik selalu menghasilkan role `user`, dan dashboard peserta hanya menampilkan pendaftaran miliknya sendiri.
 - `tests/Feature/TicketPurchaseFlowTest.php` (22 test) — alur beli tiket, multi-tiket, dan isolasi antar-event: pembelian wajib login, admin tidak bisa membeli, pesanan terikat akun pembeli, `event_id` palsu ditolak, satu pesanan berisi tiga tiket dengan kategori berbeda dan total yang benar, NIK kembar dalam satu pesanan ditolak, NIK yang sudah terdaftar di event itu ditolak, NIK sama boleh mendaftar di event lain, batas 10 tiket ditegakkan, admin event hanya melihat & hanya bisa menyetujui pesanan event-nya, satu approve menerbitkan seluruh tiket, penolakan wajib beralasan, `/tickets` hanya menampilkan tiket terbit milik sendiri, dan pesanan orang lain tidak bisa diakses.
-- `tests/Feature/EventFormFieldTest.php` (21 test) — formulir per event: admin hanya bisa mengatur event sendiri, super admin bisa pilih event, field bawaan ter-seed otomatis, key custom tidak menabrak nama kolom bawaan, field bawaan tidak bisa dihapus, mematikan field bawaan menghilangkannya dari form dan validasi, field opsional boleh kosong, field wajib tetap memblokir, jawaban tersimpan di `custom_data`, persetujuan wajib harus dicentang, tipe angka menolak teks, konfigurasi terisolasi antar-event, dan jawaban ikut ke CSV.
+- `tests/Feature/EventFormFieldTest.php` (27 test) — formulir per event: admin hanya bisa mengatur event sendiri, super admin bisa pilih event, field bawaan ter-seed otomatis, key custom tidak menabrak nama kolom bawaan, field bawaan tidak bisa dihapus, mematikan field bawaan menghilangkannya dari form dan validasi, field opsional boleh kosong, field wajib tetap memblokir, jawaban tersimpan di `custom_data`, persetujuan wajib harus dicentang, tipe angka menolak teks, konfigurasi terisolasi antar-event, dan jawaban ikut ke CSV. Enam test terakhir menutup kondisi "tidak ada yang wajib": seluruh field termasuk identitas bisa dimatikan, harga tetap benar saat kategori dimatikan, tiket jatuh ke nama akun saat nama dimatikan, pengecekan NIK ganda dilewati saat NIK dimatikan, field identitas bisa jadi opsional tanpa dimatikan, dan format NIK tetap diperiksa selama field-nya aktif.
 - `tests/Feature/EventPaymentAccountTest.php` (17 test) — rekening per event: hanya super admin yang bisa menambah/mengubah/menghapus, admin event ditolak 403 dan hanya melihat rekening event-nya, form pembelian hanya menampilkan rekening event tersebut, event tanpa rekening tidak bisa menjual tiket, rekening event lain dan rekening nonaktif ditolak, pesanan menyimpan salinan yang bertahan walau rekening diubah atau dihapus, serta bukti transfer dan rekening tujuan terlihat admin di antrian verifikasi.
 - `tests/Unit/ExampleTest.php`, `tests/Feature/ExampleTest.php` — bawaan Laravel.
 

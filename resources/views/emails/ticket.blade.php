@@ -19,7 +19,7 @@
         </div>
         
         <div class="details">
-            <p>Hi <strong>{{ $ticket->participant->fullname }}</strong>,</p>
+            <p>Hi <strong>{{ $ticket->participant->displayName() }}</strong>,</p>
             <p>Thank you for your payment. Here are your E-Ticket details:</p>
             <ul>
                 <li><strong>Ticket Code:</strong> {{ $ticket->ticket_code }}</li>

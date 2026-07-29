@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\EventFormField;
 use App\Models\EventPaymentAccount;
+use App\Models\Order;
 use App\Models\Participant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -387,5 +388,111 @@ class EventFormFieldTest extends TestCase
 
         $this->assertStringContainsString('Nama Komunitas Lari', $csv);
         $this->assertStringContainsString('Lari Pagi Squad', $csv);
+    }
+
+    // ===== Tidak ada field yang wajib ada =====
+
+    public function test_every_core_field_including_identity_can_be_disabled(): void
+    {
+        $buyer = User::factory()->create();
+        EventFormField::ensureCoreFields($this->voltRhythm->id);
+
+        // Matikan semuanya, termasuk nama, NIK, WhatsApp, dan kategori.
+        EventFormField::where('event_id', $this->voltRhythm->id)->update(['enabled' => false]);
+
+        $this->actingAs($buyer)->get('/register-event?event_id='.$this->voltRhythm->id)
+            ->assertOk()
+            ->assertSee('Penyelenggara tidak meminta data tambahan');
+
+        $this->actingAs($buyer)->post('/register-event', [
+            'event_id' => $this->voltRhythm->id,
+            'payment_account_id' => $this->voltRhythm->paymentAccounts()->value('id'),
+            'proof' => UploadedFile::fake()->image('bukti.jpg'),
+            'participants' => [[]],
+        ])->assertSessionHasNoErrors();
+
+        $participant = Participant::first();
+
+        $this->assertNotNull($participant);
+        $this->assertNull($participant->fullname);
+        $this->assertNull($participant->nik);
+        $this->assertNull($participant->phone);
+    }
+
+    public function test_order_still_priced_correctly_when_category_field_is_disabled(): void
+    {
+        $buyer = User::factory()->create();
+        EventFormField::ensureCoreFields($this->voltRhythm->id);
+        EventFormField::where('event_id', $this->voltRhythm->id)->where('key', 'category')->update(['enabled' => false]);
+
+        $payload = $this->orderPayload($this->voltRhythm);
+        unset($payload['participants'][0]['category']);
+
+        $this->actingAs($buyer)->post('/register-event', $payload)->assertSessionHasNoErrors();
+
+        // Jatuh ke kategori pertama event: 5K seharga 150.000.
+        $this->assertSame('150000.00', Order::first()->total_amount);
+        $this->assertSame('5K', Participant::first()->category);
+    }
+
+    public function test_ticket_falls_back_to_account_name_when_name_field_is_disabled(): void
+    {
+        $buyer = User::factory()->create(['name' => 'Pemilik Akun']);
+        EventFormField::ensureCoreFields($this->voltRhythm->id);
+        EventFormField::where('event_id', $this->voltRhythm->id)->where('key', 'fullname')->update(['enabled' => false]);
+
+        $payload = $this->orderPayload($this->voltRhythm);
+        unset($payload['participants'][0]['fullname']);
+
+        $this->actingAs($buyer)->post('/register-event', $payload)->assertSessionHasNoErrors();
+
+        $participant = Participant::first();
+        $this->assertNull($participant->fullname);
+        $this->assertSame('Pemilik Akun', $participant->displayName());
+    }
+
+    public function test_duplicate_nik_check_is_skipped_when_nik_field_is_disabled(): void
+    {
+        $buyer = User::factory()->create();
+        EventFormField::ensureCoreFields($this->voltRhythm->id);
+        EventFormField::where('event_id', $this->voltRhythm->id)->where('key', 'nik')->update(['enabled' => false]);
+
+        // NIK yang sama dua kali tidak lagi diperiksa karena tidak ditanyakan.
+        $payload = $this->orderPayload($this->voltRhythm);
+        unset($payload['participants'][0]['nik']);
+        $payload['participants'][1] = $payload['participants'][0];
+
+        $this->actingAs($buyer)->post('/register-event', $payload)->assertSessionHasNoErrors();
+
+        $this->assertSame(2, Participant::count());
+    }
+
+    public function test_identity_fields_can_be_made_optional_without_being_disabled(): void
+    {
+        $buyer = User::factory()->create();
+        EventFormField::ensureCoreFields($this->voltRhythm->id);
+        EventFormField::where('event_id', $this->voltRhythm->id)
+            ->whereIn('key', ['fullname', 'nik', 'phone'])
+            ->update(['required' => false]);
+
+        $payload = $this->orderPayload($this->voltRhythm, [
+            'fullname' => '',
+            'nik' => '',
+            'phone' => '',
+        ]);
+
+        $this->actingAs($buyer)->post('/register-event', $payload)->assertSessionHasNoErrors();
+        $this->assertSame(1, Participant::count());
+    }
+
+    public function test_nik_format_is_still_checked_when_the_field_stays_on(): void
+    {
+        $buyer = User::factory()->create();
+        EventFormField::ensureCoreFields($this->voltRhythm->id);
+
+        $payload = $this->orderPayload($this->voltRhythm, ['nik' => '123']);
+
+        $this->actingAs($buyer)->post('/register-event', $payload)
+            ->assertSessionHasErrors('participants.0.nik');
     }
 }

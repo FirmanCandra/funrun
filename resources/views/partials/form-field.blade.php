@@ -19,6 +19,11 @@
         ? ($row[$field->key] ?? '')
         : ($row['custom'][$field->key] ?? '');
 
+    // Nama peserta pertama diisi otomatis dari akun pemesan.
+    if ($field->is_core && $field->key === 'fullname' && $value === '' && $i === 0) {
+        $value = auth()->user()->name;
+    }
+
     $inputClass = 'field';
     $selectClass = 'field';
 @endphp
@@ -48,7 +53,28 @@
             @if ($field->required)<span class="text-red-500">*</span>@endif
         </label>
 
-        @if ($field->is_core && isset(EventFormField::SELECT_OPTIONS[$field->key]))
+        @if ($field->is_core && $field->key === 'category')
+            {{-- Pilihannya kategori milik event ini; kelas category-select dipakai
+                 JS untuk menghitung ulang total harga. --}}
+            <select name="{{ $name }}" {{ $field->required ? 'required' : '' }} class="category-select {{ $selectClass }}">
+                @unless ($field->required)
+                    <option value="">— Pilih —</option>
+                @endunless
+                @foreach ($categories as $cat)
+                    <option value="{{ $cat->code }}" {{ (string) $value === (string) $cat->code ? 'selected' : '' }}>
+                        {{ $cat->name }} (Rp {{ number_format($cat->price, 0, ',', '.') }})
+                    </option>
+                @endforeach
+            </select>
+
+        @elseif ($field->is_core && $field->key === 'nik')
+            <input type="text" name="{{ $name }}" value="{{ $value }}" {{ $field->required ? 'required' : '' }}
+                minlength="16" maxlength="16" pattern="[0-9]{16}" inputmode="numeric"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                placeholder="{{ $field->placeholder ?: 'contoh: 3578123456789012' }}"
+                class="nik-input {{ $inputClass }}">
+
+        @elseif ($field->is_core && isset(EventFormField::SELECT_OPTIONS[$field->key]))
             <select name="{{ $name }}" {{ $field->required ? 'required' : '' }} class="{{ $selectClass }}">
                 @unless ($field->required)
                     <option value="">— Pilih —</option>

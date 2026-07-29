@@ -89,47 +89,22 @@
                                         </button>
                                     </div>
 
+                                    {{-- Seluruh isian mengikuti konfigurasi formulir milik event ini,
+                                         diatur admin lewat /admin/form-fields. Tidak ada field yang
+                                         dipaksakan dari sini. --}}
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label class="label">Nama Lengkap (sesuai KTP) *</label>
-                                            <input type="text" name="participants[{{ $i }}][fullname]" required
-                                                value="{{ $row['fullname'] ?? ($i === 0 ? auth()->user()->name : '') }}"
-                                                class="field">
-                                        </div>
-
-                                        <div>
-                                            <label class="label">NIK (16 Digit) *</label>
-                                            <input type="text" name="participants[{{ $i }}][nik]" required minlength="16" maxlength="16"
-                                                pattern="[0-9]{16}" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                                                value="{{ $row['nik'] ?? '' }}" placeholder="contoh: 3578123456789012"
-                                                class="nik-input field">
-                                            <p class="text-xs text-ink-500 mt-1">NIK tiap peserta harus berbeda.</p>
-                                        </div>
-
-                                        <div>
-                                            <label class="label">Nomor WhatsApp *</label>
-                                            <input type="text" name="participants[{{ $i }}][phone]" required value="{{ $row['phone'] ?? '' }}"
-                                                class="field">
-                                        </div>
-
-                                        <div>
-                                            <label class="label">Kategori Run <span class="text-red-500">*</span></label>
-                                            <select name="participants[{{ $i }}][category]" required
-                                                class="category-select field">
-                                                @foreach($categories as $cat)
-                                                    <option value="{{ $cat->code }}" {{ ($row['category'] ?? '') === $cat->code ? 'selected' : '' }}>
-                                                        {{ $cat->name }} (Rp {{ number_format($cat->price, 0, ',', '.') }})
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <p class="text-xs text-ink-500 mt-1">Boleh berbeda antar peserta.</p>
-                                        </div>
-
-                                        {{-- Field selebihnya mengikuti konfigurasi formulir milik event ini,
-                                             diatur admin event lewat /admin/form-fields. --}}
-                                        @foreach($formFields as $field)
-                                            @include('partials.form-field', ['field' => $field, 'i' => $i, 'row' => $row])
-                                        @endforeach
+                                        @forelse($formFields as $field)
+                                            @include('partials.form-field', [
+                                                'field' => $field,
+                                                'i' => $i,
+                                                'row' => $row,
+                                                'categories' => $categories,
+                                            ])
+                                        @empty
+                                            <p class="md:col-span-2 text-sm text-ink-500">
+                                                Penyelenggara tidak meminta data tambahan. Lanjutkan ke pembayaran.
+                                            </p>
+                                        @endforelse
                                     </div>
                                 </div>
                             @endforeach
@@ -295,6 +270,10 @@ document.addEventListener('DOMContentLoaded', function () {
         @endforeach
     };
 
+    // Kalau admin mematikan pilihan kategori, seluruh peserta memakai kategori
+    // pertama event ini — sama seperti yang dihitung di sisi server.
+    const kategoriCadangan = @json(optional($categories->first())->code);
+
     const list = document.getElementById('participantList');
     const btnAdd = document.getElementById('btnAddParticipant');
     const limitNote = document.getElementById('participantLimitNote');
@@ -341,14 +320,15 @@ document.addEventListener('DOMContentLoaded', function () {
         summaryLines.innerHTML = '';
 
         cards().forEach((card, i) => {
-            const code = card.querySelector('.category-select').value;
+            const select = card.querySelector('.category-select');
+            const code = select ? select.value : kategoriCadangan;
             const nameInput = card.querySelector('[name$="[fullname]"]');
             const info = categories[code];
             if (!info) return;
 
             total += info.price;
 
-            const label = (nameInput.value || '').trim() || ('Peserta ' + (i + 1));
+            const label = (nameInput?.value || '').trim() || ('Peserta ' + (i + 1));
             const line = document.createElement('div');
             line.className = 'flex justify-between items-start gap-3 text-sm';
             line.innerHTML =

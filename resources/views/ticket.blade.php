@@ -58,7 +58,7 @@
         <div class="p-8 grid grid-cols-2 gap-6">
             <div>
                 <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Nama Peserta</p>
-                <p class="font-semibold text-ink-900">{{ $participant->fullname }}</p>
+                <p class="font-semibold text-ink-900">{{ $participant->displayName() }}</p>
             </div>
             <div>
                 <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Kategori</p>

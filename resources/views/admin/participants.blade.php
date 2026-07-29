@@ -4,16 +4,16 @@
 
 @section('content')
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-    <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h3 class="font-bold text-lg text-slate-800">All Registered Participants</h3>
             <p class="text-xs text-slate-500 mt-1">Total: <span class="font-bold text-slate-700">{{ $participants->total() }}</span> participants</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
             <!-- Filter & Search Form -->
-            <form action="{{ route('admin.participants') }}" method="GET" class="flex flex-wrap items-center gap-2.5">
-                <div class="relative">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, WA, ticket..." class="border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-52 md:w-60">
+            <form action="{{ route('admin.participants') }}" method="GET" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                <div class="relative flex-1 min-w-[12rem]">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, WA, ticket..." class="border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-60">
                     <div class="absolute left-3 top-2.5 text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
@@ -47,8 +47,9 @@
         </div>
     </div>
     
+    {{-- Digulir mendatar di layar sempit, dengan lebar minimum agar kolomnya tetap terbaca. --}}
     <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-600">
+        <table class="w-full min-w-[60rem] text-left text-sm text-slate-600">
             <thead class="bg-slate-50 border-b border-slate-100 text-slate-500 uppercase text-xs font-semibold">
                 <tr>
                     <th class="px-6 py-4 w-10">
@@ -75,7 +76,7 @@
                     <td class="px-6 py-4 text-center text-slate-500 font-medium">
                         {{ ($participants->currentPage() - 1) * $participants->perPage() + $loop->iteration }}
                     </td>
-                    <td class="px-6 py-4 font-medium text-slate-800">{{ $participant->fullname }}</td>
+                    <td class="px-6 py-4 font-medium text-slate-800">{{ $participant->displayName() }}</td>
                     <td class="px-6 py-4">
                         <div class="text-slate-800">{{ $participant->phone }}</div>
                         <div class="text-xs text-slate-500">{{ $participant->user->email ?? '-' }}</div>

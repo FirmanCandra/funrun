@@ -32,6 +32,17 @@ class Participant extends Model
     }
 
     /**
+     * Nama yang dicetak di tiket dan daftar peserta.
+     *
+     * Admin boleh mematikan field nama. Kalau begitu, tiket memakai nama
+     * pemilik akun pemesan supaya tidak ada tiket tanpa identitas sama sekali.
+     */
+    public function displayName(): string
+    {
+        return $this->fullname ?: ($this->user->name ?? 'Peserta');
+    }
+
+    /**
      * Jawaban satu field tambahan, sudah diformat untuk ditampilkan.
      */
     public function customAnswer(EventFormField $field): string

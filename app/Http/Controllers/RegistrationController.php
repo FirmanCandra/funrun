@@ -104,25 +104,17 @@ class RegistrationController extends Controller
             'payment_account_id' => ['required', Rule::in($paymentAccounts->pluck('id')->all())],
             'proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
 
+            // Tidak ada field peserta yang dipaksakan di sini. Seluruh aturannya
+            // disusun dari konfigurasi formulir milik event, di perulangan bawah.
             'participants' => 'required|array|min:1|max:'.self::MAX_TICKETS_PER_ORDER,
-
-            // Field terkunci — selalu wajib, tidak bisa dimatikan admin.
-            'participants.*.fullname' => 'required|string|max:255',
-            // distinct: NIK tidak boleh diulang di dalam satu pesanan.
-            'participants.*.nik' => 'required|string|size:16|regex:/^[0-9]+$/|distinct',
-            'participants.*.phone' => 'required|string|max:20',
-            'participants.*.category' => ['required', Rule::in($validCategories)],
         ];
 
         $messages = [
             'participants.required' => 'Minimal satu peserta harus diisi.',
             'participants.max' => 'Maksimal '.self::MAX_TICKETS_PER_ORDER.' tiket dalam satu pesanan.',
-            'participants.*.fullname.required' => 'Nama lengkap peserta wajib diisi.',
-            'participants.*.nik.required' => 'NIK wajib diisi.',
             'participants.*.nik.size' => 'NIK harus terdiri dari 16 digit.',
             'participants.*.nik.regex' => 'NIK hanya boleh berisi angka.',
             'participants.*.nik.distinct' => 'NIK tiap peserta harus berbeda.',
-            'participants.*.category.required' => 'Kategori lomba wajib dipilih.',
             'event_id.exists' => 'Event yang dipilih tidak ditemukan.',
             'payment_account_id.required' => 'Pilih rekening tujuan transfer.',
             'payment_account_id.in' => 'Rekening tujuan tidak valid untuk event ini.',
@@ -138,8 +130,12 @@ class RegistrationController extends Controller
                 ? 'participants.*.'.$field->key
                 : 'participants.*.custom.'.$field->key;
 
-            $rules[$path] = $this->rulesForField($field);
+            $rules[$path] = $this->rulesForField($field, $validCategories);
             $attributes[$path] = strtolower($field->label);
+
+            // Label buatan admin dipakai apa adanya di pesan galat.
+            $messages[$path.'.required'] = $field->label.' wajib diisi.';
+            $messages[$path.'.in'] = $field->label.' yang dipilih tidak valid.';
 
             if ($field->required && $field->type === EventFormField::TYPE_CONSENT) {
                 $messages[$path.'.accepted'] = $field->label.' harus disetujui.';
@@ -148,18 +144,23 @@ class RegistrationController extends Controller
 
         $validated = $request->validate($rules, $messages, $attributes);
 
-        // Satu NIK hanya boleh punya satu tiket per event, termasuk terhadap
-        // pesanan yang sudah dibuat sebelumnya.
-        $this->rejectNiksAlreadyRegistered($validated['participants'], $eventId);
+        // Pengecekan NIK ganda hanya masuk akal kalau NIK memang ditanyakan.
+        if ($formFields->firstWhere('key', 'nik')) {
+            $this->rejectNiksAlreadyRegistered($validated['participants'], $eventId);
+        }
 
         $event = $this->resolveEvent($jsonEvent ?? ['id' => $eventId]);
         $categoryByCode = $categories->keyBy('code');
+
+        // Kalau admin mematikan pilihan kategori, seluruh peserta memakai
+        // kategori pertama event ini — harga dan kode BIB tetap punya sumber.
+        $kategoriCadangan = $categories->first();
 
         $proofPath = $request->file('proof')->store('proofs', 'public');
 
         $account = $paymentAccounts->firstWhere('id', (int) $validated['payment_account_id']);
 
-        $order = DB::transaction(function () use ($validated, $event, $categoryByCode, $proofPath, $request, $formFields, $account) {
+        $order = DB::transaction(function () use ($validated, $event, $categoryByCode, $kategoriCadangan, $proofPath, $request, $formFields, $account) {
             $order = Order::create([
                 'order_code' => Order::generateCode(),
                 'user_id' => $request->user()->id,
@@ -179,17 +180,17 @@ class RegistrationController extends Controller
             $total = 0;
 
             foreach ($validated['participants'] as $row) {
-                $category = $categoryByCode->get($row['category']);
-                $price = $category->price ?? 100000;
-                $bibCode = $category->bib_code ?? 'FW';
+                // Kategori dipakai untuk harga dan kode BIB. Kalau field-nya
+                // dimatikan admin, pakai kategori pertama event ini.
+                $category = $categoryByCode->get($row['category'] ?? null) ?: $kategoriCadangan;
+                $price = $category->price ?? 0;
+                $categoryCode = $category->code ?? 'UMUM';
+                $bibCode = $category->bib_code ?? 'UM';
 
                 $attributes = [
                     'user_id' => $request->user()->id,
                     'event_id' => $event->id,
-                    'fullname' => $row['fullname'],
-                    'nik' => $row['nik'],
-                    'phone' => $row['phone'],
-                    'category' => $row['category'],
+                    'category' => $categoryCode,
                     'custom_data' => [],
                 ];
 
@@ -205,12 +206,15 @@ class RegistrationController extends Controller
                     }
                 }
 
+                // Kategori tersimpan tetap yang benar-benar dipakai menghitung harga.
+                $attributes['category'] = $categoryCode;
+
                 $participant = Participant::create($attributes);
 
                 Ticket::create([
                     'participant_id' => $participant->id,
                     'order_id' => $order->id,
-                    'ticket_code' => $this->nextTicketCode($event->id, $row['category'], $bibCode),
+                    'ticket_code' => $this->nextTicketCode($event->id, $categoryCode, $bibCode),
                     'status' => 'pending',
                 ]);
 
@@ -241,7 +245,7 @@ class RegistrationController extends Controller
     /**
      * Aturan validasi untuk satu field, disusun dari tipe dan status wajibnya.
      */
-    private function rulesForField(EventFormField $field): array
+    private function rulesForField(EventFormField $field, array $categoryCodes = []): array
     {
         // Persetujuan: kalau wajib harus dicentang, kalau tidak boleh dilewati.
         if ($field->type === EventFormField::TYPE_CONSENT) {
@@ -253,6 +257,31 @@ class RegistrationController extends Controller
         // Field core bertipe select punya daftar pilihan tetap.
         if ($field->is_core && isset(EventFormField::SELECT_OPTIONS[$field->key])) {
             $rules[] = Rule::in(array_keys(EventFormField::SELECT_OPTIONS[$field->key]));
+
+            return $rules;
+        }
+
+        // Kategori: pilihannya milik event ini, bukan daftar tetap.
+        if ($field->is_core && $field->key === 'category') {
+            $rules[] = Rule::in($categoryCodes);
+
+            return $rules;
+        }
+
+        // NIK tetap divalidasi bentuknya kalau ditanyakan, dan tidak boleh
+        // diulang antar peserta dalam satu pesanan.
+        if ($field->is_core && $field->key === 'nik') {
+            $rules[] = 'string';
+            $rules[] = 'size:16';
+            $rules[] = 'regex:/^[0-9]+$/';
+            $rules[] = 'distinct';
+
+            return $rules;
+        }
+
+        if ($field->is_core && $field->key === 'phone') {
+            $rules[] = 'string';
+            $rules[] = 'max:20';
 
             return $rules;
         }

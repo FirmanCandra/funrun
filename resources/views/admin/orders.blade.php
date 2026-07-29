@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-    <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h3 class="font-bold text-lg text-slate-800">Pesanan Tiket</h3>
             <p class="text-xs text-slate-500 mt-1">
@@ -14,11 +14,11 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-            <form action="{{ route('admin.orders') }}" method="GET" class="flex flex-wrap items-center gap-2.5">
-                <div class="relative">
+            <form action="{{ route('admin.orders') }}" method="GET" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                <div class="relative flex-1 min-w-[12rem]">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="Cari kode, nama, NIK..."
-                        class="border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-52 md:w-60">
+                        class="border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-60">
                     <div class="absolute left-3 top-2.5 text-slate-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -71,8 +71,9 @@
     <form id="bulk-delete-form" action="{{ route('admin.orders.bulk-delete') }}" method="POST">
         @csrf
 
+        {{-- Digulir mendatar di layar sempit, dengan lebar minimum agar kolomnya tetap terbaca. --}}
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full min-w-[64rem] text-sm">
                 <thead class="bg-slate-50 text-slate-500 uppercase text-xs tracking-wider">
                     <tr>
                         <th class="px-6 py-4 text-left w-10">
@@ -123,7 +124,7 @@
                                 <ul class="space-y-1">
                                     @foreach($order->tickets as $ticket)
                                         <li class="text-xs">
-                                            <span class="text-slate-800">{{ $ticket->participant->fullname ?? '-' }}</span>
+                                            <span class="text-slate-800">{{ $ticket->participant?->displayName() ?? '-' }}</span>
                                             <span class="text-slate-400">·</span>
                                             <span class="text-slate-500">{{ $ticket->participant->category ?? '-' }}</span>
                                             <div class="font-mono text-[11px] text-slate-400">{{ $ticket->ticket_code }}</div>

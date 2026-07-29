@@ -81,7 +81,7 @@
                 <div class="rounded-btn border border-line p-5">
                     <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
                         <div>
-                            <p class="font-semibold text-ink-900">{{ $participant->fullname ?? '—' }}</p>
+                            <p class="font-semibold text-ink-900">{{ $participant?->displayName() ?? '—' }}</p>
                             <p class="text-xs text-ink-500 font-mono mt-0.5">{{ $ticket->ticket_code }}</p>
                         </div>
                         <span class="badge {{ $ticket->isIssued() ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-ink-500' }}">

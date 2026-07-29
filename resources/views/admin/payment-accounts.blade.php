@@ -126,7 +126,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-5 whitespace-nowrap">
+                            <div class="flex flex-wrap items-center gap-4 sm:gap-5 whitespace-nowrap">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" name="is_active" value="1" {{ $account->is_active ? 'checked' : '' }}
                                         class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">

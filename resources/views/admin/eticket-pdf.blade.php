@@ -235,7 +235,7 @@
             <table class="data-grid">
                 <tr>
                     <td class="data-label">Nama Lengkap</td>
-                    <td class="data-value">{{ $ticket->participant->fullname }}</td>
+                    <td class="data-value">{{ $ticket->participant->displayName() }}</td>
                 </tr>
                 <tr>
                     <td class="data-label">NIK</td>

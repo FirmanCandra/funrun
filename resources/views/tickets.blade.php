@@ -47,7 +47,7 @@
                     <dl class="grid grid-cols-2 sm:grid-cols-4 gap-5 mb-7">
                         <div>
                             <dt class="text-xs uppercase tracking-wider text-ink-500 mb-1">Peserta</dt>
-                            <dd class="font-semibold text-ink-900 text-sm truncate">{{ $participant->fullname }}</dd>
+                            <dd class="font-semibold text-ink-900 text-sm truncate">{{ $participant->displayName() }}</dd>
                         </div>
                         <div>
                             <dt class="text-xs uppercase tracking-wider text-ink-500 mb-1">Kategori</dt>

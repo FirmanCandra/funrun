@@ -195,10 +195,12 @@ class AdminController extends Controller
         }
 
         $request->validate([
-            'fullname' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'category' => 'required|in:' . implode(',', $validCategories),
-            'jersey_size' => 'required|in:S,M,L,XL,XXL',
+            // Semua opsional — admin event boleh mematikan field mana pun di
+            // formulir, jadi peserta bisa memang tidak punya data ini.
+            'fullname' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'category' => 'nullable|in:' . implode(',', $validCategories),
+            'jersey_size' => 'nullable|in:S,M,L,XL,XXL',
         ]);
  
         $participant->update($request->only('fullname', 'phone', 'category', 'jersey_size'));
@@ -283,7 +285,7 @@ class AdminController extends Controller
         return response()->json([
             'success' => true, 
             'message' => 'Check-in successful!',
-            'participant' => $ticket->participant->fullname
+            'participant' => $ticket->participant->displayName()
         ]);
     }
 
@@ -353,7 +355,7 @@ class AdminController extends Controller
 
                 $row = [
                     $p->id,
-                    $p->fullname,
+                    $p->displayName(),
                     $p->nik ?? '-',
                     $p->city ?? '-',
                     $p->user->email ?? '-',
@@ -543,10 +545,10 @@ class AdminController extends Controller
 
         $waMessage = "*PEMBAYARAN BERHASIL*\n" .
                      "*SeTiket*\n\n" .
-                     "Halo *{$participant->fullname}*,\n\n" .
+                     "Halo *{$participant->displayName()}*,\n\n" .
                      "Pembayaran pendaftaran Anda untuk event *SeTiket* telah berhasil diverifikasi!\n\n" .
                      "*Detail Peserta:*\n" .
-                     "• Nama Lengkap: *{$participant->fullname}*\n" .
+                     "• Nama Lengkap: *{$participant->displayName()}*\n" .
                      "• No. WhatsApp: *{$participant->phone}*\n" .
                      "• Kode Tiket: *{$ticket->ticket_code}*\n" .
                      "• Kategori: *{$ticketTitle}*\n" .
@@ -820,6 +822,117 @@ class AdminController extends Controller
         \App\Models\Event::whereIn('id', $ids)->delete();
 
         return redirect()->route('admin.events')->with('success', 'Event terpilih berhasil dihapus!');
+    }
+
+    // ===== GAMBAR / THUMBNAIL EVENT =====
+
+    /**
+     * Halaman pengaturan gambar event.
+     *
+     * Beda dengan Manajemen Event yang dikunci super admin: gambar adalah materi
+     * promosi yang dipegang penyelenggara, jadi admin event boleh mengurus
+     * gambar event yang dia tangani sendiri tanpa menunggu super admin.
+     */
+    public function eventImage(Request $request)
+    {
+        $event = $this->resolveFormEvent($request);
+        $thumbnail = $this->eventThumbnail($event->id);
+
+        $events = auth()->user()->isSuperAdmin()
+            ? \App\Models\Event::orderBy('id')->get()
+            : collect([$event]);
+
+        return view('admin.event-image', compact('event', 'thumbnail', 'events'));
+    }
+
+    public function updateEventImage(Request $request)
+    {
+        $event = $this->resolveFormEvent($request);
+
+        $request->validate([
+            'thumbnail' => 'required|image|mimes:jpeg,png,webp|max:1024',
+        ], [
+            'thumbnail.required' => 'Pilih dulu gambar yang mau diunggah.',
+            'thumbnail.image' => 'Berkas yang diunggah harus berupa gambar.',
+            'thumbnail.mimes' => 'Format gambar harus JPG, PNG, atau WebP.',
+            'thumbnail.max' => 'Ukuran gambar maksimal 1 MB.',
+        ]);
+
+        $lama = $this->eventThumbnail($event->id);
+        $path = '/storage/' . $request->file('thumbnail')->store('thumbnails', 'public');
+
+        $this->saveEventThumbnail($event->id, $path);
+        $this->deleteThumbnailFile($lama);
+
+        return redirect()->route('admin.event-image', ['event_id' => $event->id])
+            ->with('success', 'Gambar event berhasil diperbarui. Peserta langsung melihat gambar barunya di halaman event.');
+    }
+
+    public function destroyEventImage(Request $request)
+    {
+        $event = $this->resolveFormEvent($request);
+
+        $lama = $this->eventThumbnail($event->id);
+        $this->saveEventThumbnail($event->id, '');
+        $this->deleteThumbnailFile($lama);
+
+        return redirect()->route('admin.event-image', ['event_id' => $event->id])
+            ->with('success', 'Gambar event dihapus. Kartu event kembali memakai tampilan cadangan berisi inisial nama event.');
+    }
+
+    /**
+     * Thumbnail event dari events.json — file itu yang dibaca halaman publik.
+     */
+    private function eventThumbnail($eventId): string
+    {
+        foreach (\App\Http\Controllers\HomeController::loadEvents() as $ev) {
+            if ($ev['id'] == $eventId) {
+                return $ev['thumbnail'] ?? '';
+            }
+        }
+
+        return '';
+    }
+
+    private function saveEventThumbnail($eventId, string $path): void
+    {
+        $events = \App\Http\Controllers\HomeController::loadEvents();
+        $ketemu = false;
+
+        foreach ($events as &$ev) {
+            if ($ev['id'] == $eventId) {
+                $ev['thumbnail'] = $path;
+                $ketemu = true;
+                break;
+            }
+        }
+        unset($ev);
+
+        abort_if(! $ketemu, 404, 'Event ini belum terdaftar di halaman publik, jadi gambarnya belum bisa diatur.');
+
+        \App\Http\Controllers\HomeController::saveEvents($events);
+    }
+
+    /**
+     * Buang berkas gambar yang sudah tidak dipakai event mana pun.
+     *
+     * Pengecekan referensi penting karena dua event bisa saja menunjuk berkas
+     * yang sama — menghapusnya tanpa cek akan mengosongkan gambar event lain.
+     */
+    private function deleteThumbnailFile(string $path): void
+    {
+        if ($path === '' || ! str_starts_with($path, '/storage/thumbnails/')) {
+            return;
+        }
+
+        foreach (\App\Http\Controllers\HomeController::loadEvents() as $ev) {
+            if (($ev['thumbnail'] ?? '') === $path) {
+                return;
+            }
+        }
+
+        \Illuminate\Support\Facades\Storage::disk('public')
+            ->delete(substr($path, strlen('/storage/')));
     }
 
     // ===== ADMIN MANAGEMENT =====

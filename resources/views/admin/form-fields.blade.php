@@ -51,20 +51,23 @@
     @endif
 </div>
 
-{{-- Field terkunci --}}
+{{-- Catatan: seluruh field boleh dimatikan, tapi empat di antaranya punya efek samping --}}
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
-    <h3 class="font-bold text-slate-800 mb-1">Selalu ditanyakan</h3>
+    <h3 class="font-bold text-slate-800 mb-1">Semua isian ada di tangan Anda</h3>
     <p class="text-xs text-slate-500 mb-4">
-        Empat data ini tidak bisa dimatikan karena dipakai sistem: NIK mencegah satu orang dapat dua tiket,
-        WhatsApp untuk mengirim e-ticket, kategori menentukan harga dan kode BIB.
+        Tidak ada field yang dipaksakan. Matikan yang tidak dibutuhkan event ini, atau ubah dari wajib jadi
+        opsional. Empat field berikut tetap boleh dimatikan, hanya perlu Anda tahu efeknya:
     </p>
-    <div class="flex flex-wrap gap-2">
-        @foreach(['Nama Lengkap', 'NIK', 'Nomor WhatsApp', 'Kategori Lomba'] as $locked)
-            <span class="bg-slate-100 text-slate-600 text-xs px-3 py-1.5 rounded-lg font-medium">
-                {{ $locked }} · wajib
-            </span>
+    <ul class="space-y-2">
+        @foreach(EventFormField::CORE_FIELD_NOTES as $key => $catatan)
+            <li class="flex items-start gap-2.5 text-xs text-slate-600">
+                <span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-semibold whitespace-nowrap mt-px">
+                    {{ EventFormField::CORE_FIELDS[$key]['label'] }}
+                </span>
+                <span class="leading-relaxed">{{ $catatan }}</span>
+            </li>
         @endforeach
-    </div>
+    </ul>
 </div>
 
 {{-- Field bawaan yang bisa diatur --}}
@@ -107,7 +110,7 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-5 whitespace-nowrap">
+                <div class="flex flex-wrap items-center gap-4 sm:gap-5 whitespace-nowrap">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" name="enabled" value="1" {{ $field->enabled ? 'checked' : '' }}
                             class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
@@ -181,7 +184,7 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-5 whitespace-nowrap">
+                        <div class="flex flex-wrap items-center gap-4 sm:gap-5 whitespace-nowrap">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" name="enabled" value="1" {{ $field->enabled ? 'checked' : '' }}
                                     class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">

@@ -29,13 +29,13 @@
 </div>
 
 {{-- Header row --}}
-<div class="flex items-center justify-between mb-6">
-    <div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div class="min-w-0">
         <h2 class="text-xl font-bold text-slate-800">{{ $dbEvent->title }}</h2>
         <p class="text-slate-500 text-xs mt-0.5">Kelola kategori run yang terdaftar untuk event ini.</p>
     </div>
     <button onclick="document.getElementById('modalAdd').classList.remove('hidden')"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors flex items-center gap-2 text-sm">
+            class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
         Tambah Kategori
     </button>
@@ -43,8 +43,9 @@
 
 {{-- Table --}}
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    {{-- Digulir mendatar di layar sempit, dengan lebar minimum agar kolomnya tetap terbaca. --}}
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full min-w-[44rem] text-sm">
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
                     <th class="px-5 py-4 text-left font-semibold text-slate-500 w-12">No</th>
@@ -101,15 +102,15 @@
 
 {{-- ===== MODAL: ADD CATEGORY ===== --}}
 <div id="modalAdd" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-        <div class="flex items-center justify-between px-7 py-5 border-b border-slate-100">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-5 sm:px-7 py-5 border-b border-slate-100">
             <h3 class="text-lg font-bold text-slate-800">Tambah Kategori Baru</h3>
             <button onclick="document.getElementById('modalAdd').classList.add('hidden')"
                     class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <form action="{{ route('admin.events.categories.store', $dbEvent->id) }}" method="POST" class="px-7 py-6 space-y-4">
+        <form action="{{ route('admin.events.categories.store', $dbEvent->id) }}" method="POST" class="px-5 sm:px-7 py-6 space-y-4">
             @csrf
             <div>
                 <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nama Kategori *</label>
@@ -145,15 +146,15 @@
 
 {{-- ===== MODAL: EDIT CATEGORY ===== --}}
 <div id="modalEdit" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-        <div class="flex items-center justify-between px-7 py-5 border-b border-slate-100">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-5 sm:px-7 py-5 border-b border-slate-100">
             <h3 class="text-lg font-bold text-slate-800">Edit Kategori</h3>
             <button onclick="document.getElementById('modalEdit').classList.add('hidden')"
                     class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <form id="editForm" method="POST" class="px-7 py-6 space-y-4">
+        <form id="editForm" method="POST" class="px-5 sm:px-7 py-6 space-y-4">
             @csrf @method('PUT')
             <div>
                 <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Nama Kategori *</label>
