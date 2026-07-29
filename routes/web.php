@@ -60,6 +60,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/orders/bulk-delete', [AdminController::class, 'bulkDestroyOrder'])->name('orders.bulk-delete');
         Route::post('/orders/{id}/approve', [AdminController::class, 'approveOrder'])->name('orders.approve');
         Route::post('/orders/{id}/reject', [AdminController::class, 'rejectOrder'])->name('orders.reject');
+        // Rekening tujuan transfer per event.
+        // Admin event hanya bisa melihat; menambah/mengubah/menghapus dibatasi
+        // super admin lewat checkSuperAdmin() di dalam controller.
+        Route::get('/payment-accounts', [AdminController::class, 'paymentAccounts'])->name('payment-accounts');
+        Route::post('/payment-accounts', [AdminController::class, 'storePaymentAccount'])->name('payment-accounts.store');
+        Route::put('/payment-accounts/{id}', [AdminController::class, 'updatePaymentAccount'])->name('payment-accounts.update');
+        Route::delete('/payment-accounts/{id}', [AdminController::class, 'destroyPaymentAccount'])->name('payment-accounts.destroy');
+
         // Formulir pendaftaran per event — admin mengatur event yang dia tangani
         Route::get('/form-fields', [AdminController::class, 'formFields'])->name('form-fields');
         Route::post('/form-fields', [AdminController::class, 'storeFormField'])->name('form-fields.store');

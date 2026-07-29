@@ -67,7 +67,6 @@ class AdminController extends Controller
                     'date' => self::parseDateString($ev['tanggal']),
                     'location' => $ev['lokasi'] ?? 'City Square',
                     'quota' => 5000,
-                    'payment_methods' => $ev['payment_methods'] ?? null
                 ]
             );
         }
@@ -687,10 +686,6 @@ class AdminController extends Controller
             'waktu'            => 'nullable|string|max:100',
             'deskripsi'        => 'nullable|string|max:5000',
             'syarat_ketentuan' => 'nullable|string|max:5000',
-            'payment_name'     => 'required|array|min:1',
-            'payment_name.*'   => 'required|string|max:255',
-            'payment_number.*' => 'required|string|max:255',
-            'payment_holder.*' => 'required|string|max:255',
         ]);
 
         $events = \App\Http\Controllers\HomeController::loadEvents();
@@ -700,19 +695,6 @@ class AdminController extends Controller
         if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')->store('thumbnails', 'public');
             $thumbnailPath = '/storage/' . $path;
-        }
-
-        $paymentMethods = [];
-        if ($request->has('payment_name')) {
-            foreach ($request->payment_name as $index => $name) {
-                if (!empty($name)) {
-                    $paymentMethods[] = [
-                        'name' => $name,
-                        'account_number' => $request->payment_number[$index] ?? '',
-                        'account_holder' => $request->payment_holder[$index] ?? '',
-                    ];
-                }
-            }
         }
 
         $newEventId = $maxId + 1;
@@ -728,7 +710,6 @@ class AdminController extends Controller
             'waktu'            => $request->waktu ?? '',
             'deskripsi'        => $request->deskripsi ?? '',
             'syarat_ketentuan' => $request->syarat_ketentuan ?? '',
-            'payment_methods'  => $paymentMethods,
         ];
 
         \App\Http\Controllers\HomeController::saveEvents($events);
@@ -741,11 +722,11 @@ class AdminController extends Controller
                 'date' => self::parseDateString($request->tanggal),
                 'location' => $request->lokasi,
                 'quota' => 5000,
-                'payment_methods' => $paymentMethods
             ]
         );
 
-        return redirect()->route('admin.events')->with('success', 'Event berhasil ditambahkan!');
+        return redirect()->route('admin.payment-accounts', ['event_id' => $newEventId])
+            ->with('success', 'Event berhasil ditambahkan! Tambahkan rekening tujuan transfer agar peserta bisa membeli tiket.');
     }
 
     public function updateEvent(Request $request, $id)
@@ -762,27 +743,10 @@ class AdminController extends Controller
             'waktu'            => 'nullable|string|max:100',
             'deskripsi'        => 'nullable|string|max:5000',
             'syarat_ketentuan' => 'nullable|string|max:5000',
-            'payment_name'     => 'required|array|min:1',
-            'payment_name.*'   => 'required|string|max:255',
-            'payment_number.*' => 'required|string|max:255',
-            'payment_holder.*' => 'required|string|max:255',
         ]);
 
         $events = \App\Http\Controllers\HomeController::loadEvents();
         $found = false;
-
-        $paymentMethods = [];
-        if ($request->has('payment_name')) {
-            foreach ($request->payment_name as $index => $name) {
-                if (!empty($name)) {
-                    $paymentMethods[] = [
-                        'name' => $name,
-                        'account_number' => $request->payment_number[$index] ?? '',
-                        'account_holder' => $request->payment_holder[$index] ?? '',
-                    ];
-                }
-            }
-        }
 
         foreach ($events as &$ev) {
             if ($ev['id'] == $id) {
@@ -795,7 +759,6 @@ class AdminController extends Controller
                 $ev['waktu']            = $request->waktu ?? '';
                 $ev['deskripsi']        = $request->deskripsi ?? '';
                 $ev['syarat_ketentuan'] = $request->syarat_ketentuan ?? '';
-                $ev['payment_methods']  = $paymentMethods;
                 
                 if ($request->hasFile('thumbnail')) {
                     $path = $request->file('thumbnail')->store('thumbnails', 'public');
@@ -818,7 +781,6 @@ class AdminController extends Controller
                     'date' => self::parseDateString($request->tanggal),
                     'location' => $request->lokasi,
                     'quota' => 5000,
-                    'payment_methods' => $paymentMethods
                 ]
             );
         }
@@ -1045,6 +1007,102 @@ class AdminController extends Controller
         $category->delete();
 
         return redirect()->route('admin.events.categories', $eventId)->with('success', 'Kategori berhasil dihapus!');
+    }
+
+    // ===== REKENING TUJUAN TRANSFER PER EVENT =====
+
+    /**
+     * Daftar rekening sebuah event.
+     *
+     * Admin event boleh melihat rekening event yang dia tangani — dia yang
+     * mencocokkan bukti transfer masuk. Yang boleh mengubahnya hanya super admin.
+     */
+    public function paymentAccounts(Request $request)
+    {
+        $event = $this->resolveFormEvent($request);
+
+        $accounts = $event->paymentAccounts()->get();
+
+        $events = auth()->user()->isSuperAdmin()
+            ? \App\Models\Event::orderBy('id')->get()
+            : collect([$event]);
+
+        return view('admin.payment-accounts', compact('event', 'accounts', 'events'));
+    }
+
+    public function storePaymentAccount(Request $request)
+    {
+        $this->checkSuperAdmin();
+
+        $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'bank_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:64',
+            'account_holder' => 'required|string|max:255',
+        ], $this->paymentAccountMessages());
+
+        $event = \App\Models\Event::findOrFail($request->event_id);
+
+        \App\Models\EventPaymentAccount::create([
+            'event_id' => $event->id,
+            'bank_name' => $request->bank_name,
+            'account_number' => $request->account_number,
+            'account_holder' => $request->account_holder,
+            'is_active' => true,
+            'sort_order' => (int) $event->paymentAccounts()->max('sort_order') + 10,
+        ]);
+
+        return redirect()->route('admin.payment-accounts', ['event_id' => $event->id])
+            ->with('success', 'Rekening berhasil ditambahkan.');
+    }
+
+    public function updatePaymentAccount(Request $request, $id)
+    {
+        $this->checkSuperAdmin();
+
+        $account = \App\Models\EventPaymentAccount::findOrFail($id);
+
+        $request->validate([
+            'bank_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:64',
+            'account_holder' => 'required|string|max:255',
+            'sort_order' => 'nullable|integer|min:0',
+        ], $this->paymentAccountMessages());
+
+        $account->update([
+            'bank_name' => $request->bank_name,
+            'account_number' => $request->account_number,
+            'account_holder' => $request->account_holder,
+            'is_active' => $request->boolean('is_active'),
+            'sort_order' => $request->filled('sort_order') ? (int) $request->sort_order : $account->sort_order,
+        ]);
+
+        return redirect()->route('admin.payment-accounts', ['event_id' => $account->event_id])
+            ->with('success', 'Rekening berhasil diperbarui. Pesanan lama tetap menyimpan nomor rekening yang berlaku saat itu.');
+    }
+
+    public function destroyPaymentAccount($id)
+    {
+        $this->checkSuperAdmin();
+
+        $account = \App\Models\EventPaymentAccount::findOrFail($id);
+        $eventId = $account->event_id;
+
+        // Pesanan yang terlanjur memakai rekening ini tidak ikut terhapus —
+        // kolom snapshot pada pesanan sudah menyimpan nomornya.
+        $account->delete();
+
+        return redirect()->route('admin.payment-accounts', ['event_id' => $eventId])
+            ->with('success', 'Rekening dihapus. Pesanan yang sudah memakainya tetap menyimpan nomor rekening lamanya.');
+    }
+
+    private function paymentAccountMessages(): array
+    {
+        return [
+            'bank_name.required' => 'Nama bank / e-wallet wajib diisi.',
+            'account_number.required' => 'Nomor rekening / nomor HP wajib diisi.',
+            'account_holder.required' => 'Nama pemilik rekening wajib diisi.',
+        ];
     }
 
     // ===== FORMULIR PENDAFTARAN PER EVENT =====

@@ -65,6 +65,15 @@
                         title="Pesanan menunggu verifikasi">{{ $pendingBadge }}</span>
                 @endif
             </a>
+            <a href="{{ route('admin.payment-accounts') }}"
+                class="sidebar-item px-6 py-3 flex items-center gap-3 text-slate-600 hover:bg-slate-50 transition-colors {{ request()->routeIs('admin.payment-accounts') ? 'active' : '' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                    </path>
+                </svg>
+                Rekening Pembayaran
+            </a>
             <a href="{{ route('admin.form-fields') }}"
                 class="sidebar-item px-6 py-3 flex items-center gap-3 text-slate-600 hover:bg-slate-50 transition-colors {{ request()->routeIs('admin.form-fields') ? 'active' : '' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

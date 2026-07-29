@@ -53,71 +53,14 @@
 </div>
 
 <div class="mt-4 border-t border-slate-100 pt-4">
-    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Metode Pembayaran Transfer *</label>
-    <div id="payment-methods-container" class="space-y-3">
-        <!-- Default BCA -->
-        <div class="payment-method-row flex gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-100 relative">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
-                <input type="text" name="payment_name[]" value="Transfer Bank BCA" placeholder="Nama Bank / E-Wallet" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-                <input type="text" name="payment_number[]" value="80771234567890" placeholder="Nomor Rekening / HP" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-                <input type="text" name="payment_holder[]" value="SeTiket Organizer" placeholder="Nama Pemilik" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-            </div>
-            <button type="button" onclick="removePaymentRow(this)" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            </button>
-        </div>
-        <!-- Default DANA -->
-        <div class="payment-method-row flex gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-100 relative">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
-                <input type="text" name="payment_name[]" value="E-Wallet DANA" placeholder="Nama Bank / E-Wallet" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-                <input type="text" name="payment_number[]" value="081234567890" placeholder="Nomor Rekening / HP" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-                <input type="text" name="payment_holder[]" value="SeTiket Organizer" placeholder="Nama Pemilik" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-            </div>
-            <button type="button" onclick="removePaymentRow(this)" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            </button>
-        </div>
+    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Rekening Pembayaran</label>
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-800">
+        Rekening tujuan transfer diatur terpisah di menu
+        <a href="{{ route('admin.payment-accounts') }}" class="font-semibold underline">Rekening Pembayaran</a>,
+        supaya satu event bisa punya beberapa rekening dan riwayat pesanan tetap menyimpan nomor yang berlaku saat itu.
+        <div class="text-xs text-blue-700 mt-1">Event baru wajib diberi minimal satu rekening sebelum tiketnya bisa dibeli.</div>
     </div>
-    <button type="button" onclick="addPaymentRow()" class="mt-2 inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        Tambah Metode Pembayaran
-    </button>
 </div>
 
 <script>
-    function addPaymentRow(name = '', number = '', holder = '') {
-        const container = document.getElementById('payment-methods-container');
-        const row = document.createElement('div');
-        row.className = 'payment-method-row flex gap-2 items-center bg-slate-50 p-3 rounded-xl border border-slate-100 relative';
-        row.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
-                <input type="text" name="payment_name[]" value="${name}" placeholder="Nama Bank / E-Wallet" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-                <input type="text" name="payment_number[]" value="${number}" placeholder="Nomor Rekening / HP" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-                <input type="text" name="payment_holder[]" value="${holder}" placeholder="Nama Pemilik" required
-                       class="border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none transition bg-white">
-            </div>
-            <button type="button" onclick="removePaymentRow(this)" class="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            </button>
-        `;
-        container.appendChild(row);
-    }
-
-    function removePaymentRow(button) {
-        const container = document.getElementById('payment-methods-container');
-        const rows = container.querySelectorAll('.payment-method-row');
-        if (rows.length > 1) {
-            button.closest('.payment-method-row').remove();
-        } else {
-            alert('Minimal harus ada 1 metode pembayaran.');
-        }
-    }
 </script>

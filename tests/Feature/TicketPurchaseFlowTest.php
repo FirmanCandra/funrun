@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Controllers\AdminController;
 use App\Models\Event;
 use App\Models\EventCategory;
+use App\Models\EventPaymentAccount;
 use App\Models\Order;
 use App\Models\Participant;
 use App\Models\Ticket;
@@ -51,6 +52,14 @@ class TicketPurchaseFlowTest extends TestCase
             ['event_id' => $event->id, 'name' => '10K Challenger', 'code' => '10K', 'bib_code' => 'CH', 'price' => 250000],
         ]);
 
+        // Tanpa rekening tujuan, event tidak menerima pesanan sama sekali.
+        EventPaymentAccount::create([
+            'event_id' => $event->id,
+            'bank_name' => 'Transfer Bank BCA',
+            'account_number' => '1234567890',
+            'account_holder' => 'Panitia '.$title,
+        ]);
+
         return $event;
     }
 
@@ -77,7 +86,7 @@ class TicketPurchaseFlowTest extends TestCase
     {
         return [
             'event_id' => $event->id,
-            'payment_method' => 'Transfer Bank BCA',
+            'payment_account_id' => $event->paymentAccounts()->value('id'),
             'proof' => UploadedFile::fake()->image('bukti.jpg'),
             'participants' => $participants,
         ];
@@ -94,6 +103,8 @@ class TicketPurchaseFlowTest extends TestCase
             'event_id' => $event->id,
             'total_amount' => 150000 * $tickets,
             'payment_method' => 'Transfer Bank BCA',
+            'payment_account_id' => $event->paymentAccounts()->value('id'),
+            'payment_account_number' => '1234567890',
             'payment_status' => Order::STATUS_WAITING,
             'proof_of_payment' => 'proofs/bukti.jpg',
         ]);

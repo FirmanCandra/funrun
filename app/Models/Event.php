@@ -11,10 +11,6 @@ class Event extends Model
 
     protected $guarded = [];
 
-    protected $casts = [
-        'payment_methods' => 'array',
-    ];
-
     public function participants()
     {
         return $this->hasMany(Participant::class);
@@ -33,6 +29,11 @@ class Event extends Model
     public function formFields()
     {
         return $this->hasMany(EventFormField::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function paymentAccounts()
+    {
+        return $this->hasMany(EventPaymentAccount::class)->orderBy('sort_order')->orderBy('id');
     }
 
     public function admins()

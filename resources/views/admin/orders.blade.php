@@ -106,7 +106,14 @@
                             <td class="px-6 py-4">
                                 <div class="font-medium text-slate-800">{{ $order->user->name ?? '-' }}</div>
                                 <div class="text-xs text-slate-500">{{ $order->user->email ?? '-' }}</div>
-                                <div class="text-xs text-slate-500 mt-1">{{ $order->payment_method ?? '-' }}</div>
+                                {{-- Rekening tujuan seperti yang dilihat pembeli saat memesan --}}
+                                <div class="mt-2 text-xs">
+                                    <div class="text-slate-600 font-medium">{{ $order->payment_method ?? '-' }}</div>
+                                    @if($order->payment_account_number)
+                                        <div class="font-mono text-slate-500">{{ $order->payment_account_number }}</div>
+                                        <div class="text-slate-400">a.n. {{ $order->payment_account_holder }}</div>
+                                    @endif
+                                </div>
                             </td>
 
                             <td class="px-6 py-4">

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\EventFormField;
+use App\Models\EventPaymentAccount;
 use App\Models\Participant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,6 +52,13 @@ class EventFormFieldTest extends TestCase
             'price' => 150000,
         ]);
 
+        EventPaymentAccount::create([
+            'event_id' => $event->id,
+            'bank_name' => 'Transfer Bank BCA',
+            'account_number' => '1234567890',
+            'account_holder' => 'Panitia '.$title,
+        ]);
+
         return $event;
     }
 
@@ -78,7 +86,7 @@ class EventFormFieldTest extends TestCase
 
         return [
             'event_id' => $event->id,
-            'payment_method' => 'Transfer Bank BCA',
+            'payment_account_id' => $event->paymentAccounts()->value('id'),
             'proof' => UploadedFile::fake()->image('bukti.jpg'),
             'participants' => [$participant],
         ];

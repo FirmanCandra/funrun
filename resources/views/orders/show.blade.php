@@ -43,8 +43,12 @@
 
         <dl class="grid grid-cols-2 gap-4 text-sm mt-6 pt-6 border-t border-white/5">
             <div>
-                <dt class="text-slate-500 mb-1">Metode Pembayaran</dt>
+                <dt class="text-slate-500 mb-1">Ditransfer ke</dt>
                 <dd class="text-slate-200">{{ $order->payment_method ?? '—' }}</dd>
+                @if ($order->payment_account_number)
+                    <dd class="text-slate-400 font-mono text-xs mt-0.5">{{ $order->payment_account_number }}</dd>
+                    <dd class="text-slate-500 text-xs">a.n. {{ $order->payment_account_holder }}</dd>
+                @endif
             </div>
             <div>
                 <dt class="text-slate-500 mb-1">Jumlah Tiket</dt>

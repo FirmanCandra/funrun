@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\EventFormField;
+use App\Models\EventPaymentAccount;
 use App\Models\Order;
 use App\Models\Participant;
 use App\Models\Ticket;
@@ -46,12 +47,14 @@ class RegistrationController extends Controller
 
         $dbEvent = $this->resolveEvent($event);
         $categories = $dbEvent->categories;
-        $paymentMethods = $this->paymentMethodsFor($event);
+
+        // Rekening tujuan transfer milik event ini, diatur super admin.
+        $paymentAccounts = EventPaymentAccount::activeFor($dbEvent->id);
 
         // Susunan field mengikuti konfigurasi formulir milik event ini.
         $formFields = EventFormField::activeFor($dbEvent->id);
 
-        return view('register', compact('event', 'categories', 'paymentMethods', 'formFields'));
+        return view('register', compact('event', 'categories', 'paymentAccounts', 'formFields'));
     }
 
     /**
@@ -80,7 +83,16 @@ class RegistrationController extends Controller
         }
 
         $jsonEvent = collect(HomeController::loadEvents())->firstWhere('id', $eventId);
-        $validPaymentMethods = collect($this->paymentMethodsFor($jsonEvent ?? []))->pluck('name')->all();
+
+        // Rekening tujuan harus salah satu milik event ini dan masih aktif —
+        // tanpa itu pembeli bisa mengarahkan transfernya ke rekening event lain.
+        $paymentAccounts = EventPaymentAccount::activeFor($eventId);
+
+        if ($paymentAccounts->isEmpty()) {
+            throw ValidationException::withMessages([
+                'payment_account_id' => 'Event ini belum punya rekening tujuan transfer. Hubungi penyelenggara.',
+            ]);
+        }
 
         // Field bawaan yang aktif dan field tambahan diambil dari konfigurasi
         // formulir milik event ini, bukan dari daftar tetap.
@@ -89,7 +101,7 @@ class RegistrationController extends Controller
         $rules = [
             // event_id berasal dari input tersembunyi, jadi wajib diikat ke event nyata.
             'event_id' => 'required|integer|exists:events,id',
-            'payment_method' => 'required|in:'.implode(',', $validPaymentMethods),
+            'payment_account_id' => ['required', Rule::in($paymentAccounts->pluck('id')->all())],
             'proof' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
 
             'participants' => 'required|array|min:1|max:'.self::MAX_TICKETS_PER_ORDER,
@@ -112,7 +124,11 @@ class RegistrationController extends Controller
             'participants.*.nik.distinct' => 'NIK tiap peserta harus berbeda.',
             'participants.*.category.required' => 'Kategori lomba wajib dipilih.',
             'event_id.exists' => 'Event yang dipilih tidak ditemukan.',
-            'payment_method.in' => 'Metode pembayaran tidak valid.',
+            'payment_account_id.required' => 'Pilih rekening tujuan transfer.',
+            'payment_account_id.in' => 'Rekening tujuan tidak valid untuk event ini.',
+            'proof.required' => 'Bukti transfer wajib diunggah.',
+            'proof.image' => 'Bukti transfer harus berupa gambar (JPG/PNG/GIF).',
+            'proof.max' => 'Ukuran bukti transfer maksimal 2 MB.',
         ];
 
         $attributes = [];
@@ -141,13 +157,21 @@ class RegistrationController extends Controller
 
         $proofPath = $request->file('proof')->store('proofs', 'public');
 
-        $order = DB::transaction(function () use ($validated, $event, $categoryByCode, $proofPath, $request, $formFields) {
+        $account = $paymentAccounts->firstWhere('id', (int) $validated['payment_account_id']);
+
+        $order = DB::transaction(function () use ($validated, $event, $categoryByCode, $proofPath, $request, $formFields, $account) {
             $order = Order::create([
                 'order_code' => Order::generateCode(),
                 'user_id' => $request->user()->id,
                 'event_id' => $event->id,
                 'total_amount' => 0,
-                'payment_method' => $validated['payment_method'],
+                // Nomor rekening ikut disalin, bukan hanya direferensikan: kalau
+                // super admin mengganti rekening nanti, pesanan ini tetap
+                // menunjukkan ke mana pembeli sebenarnya diminta transfer.
+                'payment_method' => $account->bank_name,
+                'payment_account_id' => $account->id,
+                'payment_account_number' => $account->account_number,
+                'payment_account_holder' => $account->account_holder,
                 'payment_status' => Order::STATUS_WAITING,
                 'proof_of_payment' => $proofPath,
             ]);
@@ -287,31 +311,6 @@ class RegistrationController extends Controller
         }
 
         return $event;
-    }
-
-    /**
-     * Metode pembayaran milik event, dengan fallback bawaan.
-     */
-    private function paymentMethodsFor(array $jsonEvent): array
-    {
-        $methods = $jsonEvent['payment_methods'] ?? [];
-
-        if (! empty($methods)) {
-            return $methods;
-        }
-
-        return [
-            [
-                'name' => 'Transfer Bank BCA',
-                'account_number' => '80771234567890',
-                'account_holder' => 'SeTiket Organizer',
-            ],
-            [
-                'name' => 'E-Wallet DANA',
-                'account_number' => '081234567890',
-                'account_holder' => 'SeTiket Organizer',
-            ],
-        ];
     }
 
     /**

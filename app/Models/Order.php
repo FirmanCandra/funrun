@@ -41,6 +41,29 @@ class Order extends Model
         return $this->hasMany(Ticket::class);
     }
 
+    /**
+     * Rekening tujuan transfer. Bisa null kalau rekeningnya sudah dihapus —
+     * nomornya tetap tersimpan di kolom snapshot pada pesanan ini.
+     */
+    public function paymentAccount()
+    {
+        return $this->belongsTo(EventPaymentAccount::class, 'payment_account_id');
+    }
+
+    /**
+     * Rekening tujuan seperti yang dilihat pembeli saat memesan, apa pun yang
+     * terjadi pada data rekening sesudahnya.
+     */
+    public function paymentTargetLabel(): string
+    {
+        if (! $this->payment_account_number) {
+            return $this->payment_method ?? '—';
+        }
+
+        return trim(($this->payment_method ?? '').' '.$this->payment_account_number
+            .($this->payment_account_holder ? ' a.n. '.$this->payment_account_holder : ''));
+    }
+
     public function verifier()
     {
         return $this->belongsTo(User::class, 'verified_by');

@@ -11,6 +11,28 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-10">
 
+    {{-- Tanpa rekening tujuan, pesanan tidak bisa diproses — formulir tidak
+         ditampilkan sama sekali daripada peserta terlanjur mengisi lalu ditolak. --}}
+    @if($paymentAccounts->isEmpty())
+        <div class="max-w-2xl mx-auto glass-panel rounded-3xl p-8 md:p-10 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.33 16a2 2 0 001.74 3z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-white mb-3">Pendaftaran belum dibuka</h1>
+            <p class="text-slate-400 text-sm leading-relaxed mb-8">
+                Penyelenggara <span class="text-slate-200 font-medium">{{ $event['nama'] }}</span> belum menetapkan
+                rekening tujuan pembayaran, jadi pemesanan tiket belum bisa diproses. Silakan cek kembali nanti.
+            </p>
+            <a href="{{ route('home') }}"
+                class="inline-block bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-semibold px-6 py-3 rounded-xl transition-all">
+                Kembali ke Beranda
+            </a>
+        </div>
+    @else
+
     <form id="regForm" action="{{ url('/register-event') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
@@ -142,29 +164,31 @@
                         <div class="bg-slate-900/30 p-5 rounded-2xl border border-white/5 space-y-4">
                             <div class="text-sm text-gray-400">
                                 Transfer <span class="font-bold text-amber-400" id="paymentTotalText">Rp 0</span>
-                                (total seluruh tiket) ke salah satu metode di bawah ini, lalu unggah satu bukti transfer.
+                                (total seluruh tiket) ke salah satu rekening resmi event ini, lalu unggah satu bukti transfer.
                             </div>
 
+                            {{-- Rekening milik event ini, diatur super admin --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                @foreach($paymentMethods as $index => $pm)
+                                @foreach($paymentAccounts as $index => $account)
                                     <label class="relative cursor-pointer block">
-                                        <input type="radio" name="payment_method" value="{{ $pm['name'] }}" class="peer sr-only"
-                                            {{ old('payment_method', $paymentMethods[0]['name']) === $pm['name'] ? 'checked' : '' }}>
+                                        <input type="radio" name="payment_account_id" value="{{ $account->id }}" class="peer sr-only"
+                                            required
+                                            {{ (int) old('payment_account_id', $paymentAccounts->first()->id) === $account->id ? 'checked' : '' }}>
                                         <div class="p-4 rounded-xl border border-white/10 bg-slate-950/40 hover:bg-slate-900/30 peer-checked:border-amber-500 peer-checked:bg-amber-500/10 transition-all">
-                                            <div class="font-bold text-white mb-1">{{ $pm['name'] }}</div>
+                                            <div class="font-bold text-white mb-1">{{ $account->bank_name }}</div>
                                             <div class="text-xs text-amber-400 font-mono tracking-wider font-bold">
-                                                @if(stripos($pm['name'], 'e-wallet') !== false || stripos($pm['name'], 'dana') !== false || stripos($pm['name'], 'gopay') !== false || stripos($pm['name'], 'ovo') !== false || stripos($pm['name'], 'linkaja') !== false)
-                                                    No. HP:
-                                                @else
-                                                    No. Rek:
-                                                @endif
-                                                {{ $pm['account_number'] ?? '-' }}
+                                                {{ $account->numberLabel() }}: {{ $account->account_number }}
                                             </div>
-                                            <div class="text-xs text-gray-400 mt-1">a.n. {{ $pm['account_holder'] ?? '-' }}</div>
+                                            <div class="text-xs text-gray-400 mt-1">a.n. {{ $account->account_holder }}</div>
                                         </div>
                                     </label>
                                 @endforeach
                             </div>
+
+                            <p class="text-xs text-gray-500">
+                                Rekening di atas adalah rekening resmi <span class="text-gray-300">{{ $event['nama'] }}</span>.
+                                Jangan mentransfer ke nomor lain.
+                            </p>
                         </div>
 
                         {{-- Upload Receipt File --}}
@@ -252,8 +276,11 @@
 
         </div>
     </form>
+
+    @endif
 </div>
 
+@if($paymentAccounts->isNotEmpty())
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const MAX_TICKETS = {{ $maxTickets }};
@@ -421,4 +448,5 @@ document.addEventListener('DOMContentLoaded', function () {
     @endif
 });
 </script>
+@endif
 @endsection

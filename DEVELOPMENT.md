@@ -245,14 +245,19 @@ users ──┬──< participants >──┬── events
 `custom_data` adalah kolom JSON berisi jawaban field tambahan, dikunci dengan `event_form_fields.key`.
 Kolom `dob`, `gender`, `address`, `city`, `medical_history`, `jersey_size`, `emergency_contact` semuanya **nullable** — semuanya bisa dimatikan admin, jadi tidak boleh ada yang `NOT NULL`. (`city` semula `NOT NULL`; diubah oleh migration `2026_07_29_020000`.)
 
-**orders** — `id, order_code (unique), user_id, event_id, total_amount, payment_method, payment_status, proof_of_payment, rejection_reason, verified_by, verified_at, timestamps`
-Satu pesanan = satu kali transfer, berisi satu atau banyak tiket. `payment_status`: `waiting_verification` → `paid` | `rejected`. `event_id` disimpan langsung di sini supaya penyaringan admin per-event tidak perlu `whereHas` berlapis.
+**orders** — `id, order_code (unique), user_id, event_id, total_amount, payment_method, payment_account_id, payment_account_number, payment_account_holder, payment_status, proof_of_payment, rejection_reason, verified_by, verified_at, timestamps`
+Satu pesanan = satu kali transfer, berisi satu atau banyak tiket. `payment_account_number` dan `payment_account_holder` adalah **salinan** rekening tujuan saat memesan, bukan hanya referensi — lihat §7.2. `payment_status`: `waiting_verification` → `paid` | `rejected`. `event_id` disimpan langsung di sini supaya penyaringan admin per-event tidak perlu `whereHas` berlapis.
+
+**event_payment_accounts** — `id, event_id, bank_name, account_number, account_holder, is_active, sort_order, timestamps`
+Rekening tujuan transfer milik satu event. Hanya super admin yang boleh menulis; admin event hanya membaca. Lihat §7.2.
 
 **event_form_fields** — `id, event_id, key, label, type, is_core, enabled, required, placeholder, help_text, sort_order, timestamps`
 Definisi formulir pendaftaran milik satu event. `key` unik per event. Lihat §7.1.
 
 **tickets** — `id, participant_id, order_id, ticket_code (unique), qr_code, status, timestamps`
 `status`: `pending` → `valid` → `checked-in`.
+
+Kolom `events.payment_methods` **sudah tidak ada** — digantikan tabel `event_payment_accounts` oleh migration `2026_07_29_030000`, yang memindahkan isinya lebih dulu.
 
 Tabel `payments` **sudah tidak ada** — digantikan `orders` oleh migration `2026_07_29_010000_create_orders_table`, yang memindahkan baris lama menjadi pesanan berisi satu tiket sebelum tabelnya dibuang. `down()` mengembalikannya.
 
