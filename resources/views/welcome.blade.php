@@ -9,7 +9,7 @@
      */
     $allEvents = collect($highlightEvents)->concat($upcomingEvents);
 
-    // Chip penyaring dibangun dari data yang benar-benar ada.
+    // Chip penyaring dari data yang benar-benar ada.
     $kotaTeratas = $allEvents
         ->map(fn ($e) => trim(last(explode(',', $e['lokasi'] ?? ''))))
         ->filter()
@@ -21,322 +21,342 @@
 
 @section('content')
 
-{{-- ===== HERO ===== --}}
-<section class="bg-white border-b border-line">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center py-16 lg:py-0 lg:min-h-[550px]">
+{{-- ===== HERO / MAIN BANNER ===== --}}
+<div class="main-banner wow fadeIn" id="top" data-wow-duration="1s" data-wow-delay="0.5s">
+    <div class="container">
+        <div class="row align-items-center">
 
-            <div class="animate-fade-up">
-                <span class="badge bg-brand-50 text-brand-700 mb-5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-brand-600"></span>
-                    Pendaftaran sedang dibuka
-                </span>
+            {{-- Kiri: teks + form pencarian --}}
+            <div class="col-lg-6">
+                <div class="left-content header-text wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.8s">
+                    <h6>Selamat Datang di SeTiket</h6>
+                    <h2>
+                        Temukan Event <em>Seru</em> &
+                        <span>Pesan Tiket</span> Sekarang
+                    </h2>
+                    <p>
+                        Platform pemesanan tiket fun run, festival, seminar, olahraga, dan pameran
+                        paling mudah. e-Ticket dengan QR Code langsung tersimpan di akun Anda.
+                    </p>
 
-                <h1 class="text-4xl sm:text-5xl lg:text-[3.4rem] font-bold leading-[1.08] text-ink-900 mb-5">
-                    Temukan Event<br class="hidden sm:block"> Seru di Sekitar Anda
-                </h1>
-
-                <p class="text-lg text-ink-500 leading-relaxed mb-8 max-w-lg">
-                    Pesan tiket fun run, festival, seminar, olahraga, dan pameran dengan mudah —
-                    e-ticket langsung tersimpan di akun Anda.
-                </p>
-
-                {{-- Pencarian utama --}}
-                <form action="{{ route('home') }}" method="GET" class="max-w-lg">
-                    <div class="search-pill flex items-center gap-3 pl-5 pr-2 py-2">
-                        <svg class="w-5 h-5 text-ink-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    {{-- Form pencarian bergaya Space Dynamic --}}
+                    <form action="{{ route('home') }}" method="GET" class="banner-search-form">
+                        <svg style="width:18px;height:18px;color:rgba(255,255,255,0.8);flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
                         </svg>
                         <input type="text" name="q" value="{{ request('q') }}"
-                            placeholder="Cari nama event atau kota…"
-                            class="w-full bg-transparent py-2 text-[15px] text-ink-900 placeholder-gray-400 focus:outline-none">
-                        <button type="submit" class="btn btn-primary px-6 py-2.5 text-sm shrink-0">Cari</button>
-                    </div>
-                </form>
+                            placeholder="Cari nama event atau kota…" autocomplete="off">
+                        <button type="submit">Cari Event</button>
+                    </form>
 
-                <div class="flex flex-wrap items-center gap-x-8 gap-y-3 mt-8 text-sm text-ink-500">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
-                        </svg>
-                        E-ticket dengan QR code
-                    </span>
-                    <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
-                        </svg>
-                        Verifikasi oleh panitia resmi
-                    </span>
+                    {{-- Fitur highlights --}}
+                    <div class="banner-feature-pills">
+                        <span class="banner-pill">
+                            <span class="dot-green"></span>
+                            E-ticket dengan QR Code
+                        </span>
+                        <span class="banner-pill">
+                            <span class="dot-green"></span>
+                            Verifikasi panitia resmi
+                        </span>
+                        <span class="banner-pill">
+                            <span class="dot-green"></span>
+                            {{ $allEvents->count() }} event tersedia
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            {{-- Kartu event unggulan di kanan --}}
+            {{-- Kanan: kartu event unggulan --}}
             @php $sorot = $allEvents->first(); @endphp
-            <div class="hidden lg:block animate-fade-in">
-                @if($sorot)
-                    <a href="{{ route('event.show', $sorot['id']) }}" class="block card card-hover overflow-hidden">
-                        <div class="relative">
-                            @include('partials.event-image', [
-                                'nama' => $sorot['nama'],
-                                'thumbnail' => $sorot['thumbnail'] ?? null,
-                            ])
-                            <span class="badge bg-accent-500 text-white absolute top-4 left-4">Event Pilihan</span>
-                        </div>
-
-                        {{-- Keterangan diletakkan di bawah gambar, bukan menimpanya:
-                             tanpa foto asli, teks putih di atas gambar jadi tidak terbaca. --}}
-                        <div class="p-6">
-                            <p class="font-display font-semibold text-xl text-ink-900 leading-snug clamp-2">
-                                {{ $sorot['nama'] }}
-                            </p>
-                            <p class="text-ink-500 text-sm mt-2 flex items-center gap-2">
-                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                </svg>
-                                {{ $sorot['lokasi'] }}
-                            </p>
-
-                            <div class="flex items-center justify-between gap-4 mt-5 pt-5 border-t border-line">
-                                <div class="flex items-center gap-2.5">
-                                    <span class="w-9 h-9 rounded-lg bg-green-50 text-green-600 flex items-center justify-center shrink-0">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
-                                        </svg>
-                                    </span>
-                                    <div>
-                                        <p class="text-sm font-semibold text-ink-900">{{ $allEvents->count() }} event tersedia</p>
-                                        <p class="text-xs text-ink-500">Siap dipesan hari ini</p>
-                                    </div>
-                                </div>
-                                <span class="text-sm font-semibold text-brand-600 whitespace-nowrap">Lihat detail &rarr;</span>
+            <div class="col-lg-6">
+                <div class="right-image wow fadeInRight" data-wow-duration="1s" data-wow-delay="0.5s">
+                    @if($sorot)
+                        <a href="{{ route('event.show', $sorot['id']) }}"
+                            class="event-card-sd d-block" style="text-decoration:none;">
+                            <div class="event-thumb">
+                                @include('partials.event-image', [
+                                    'nama'      => $sorot['nama'],
+                                    'thumbnail' => $sorot['thumbnail'] ?? null,
+                                ])
+                                <span class="badge"
+                                    style="position:absolute;top:14px;left:14px;background:#ea580c;color:#fff;font-size:11px;">
+                                    Event Pilihan
+                                </span>
                             </div>
-                        </div>
-                    </a>
-                @endif
+                            <div class="event-body">
+                                <h4>{{ $sorot['nama'] }}</h4>
+                                <div class="event-meta">
+                                    <span>
+                                        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                        {{ $sorot['lokasi'] }}
+                                    </span>
+                                    <span>
+                                        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                                        </svg>
+                                        {{ $sorot['tanggal'] }}
+                                    </span>
+                                </div>
+                                <div class="event-footer">
+                                    <div>
+                                        <small style="font-size:11px;color:#6b7280;display:block;font-weight:500;">Mulai dari</small>
+                                        <span style="font-size:17px;font-weight:700;color:{{ (int)($sorot['harga']??0)===0 ? '#16a34a' : '#111827' }};">
+                                            {{ (int)($sorot['harga']??0)===0 ? 'Gratis' : 'Rp'.number_format($sorot['harga'],0,',','.') }}
+                                        </span>
+                                    </div>
+                                    <span class="btn-ticket-cta" style="font-size:13px;padding:9px 18px;">
+                                        Pesan Tiket
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    @else
+                        <img src="{{ asset('vendor/space-dynamic/images/banner-right-image.png') }}" alt="SeTiket Events">
+                    @endif
+                </div>
             </div>
+
         </div>
     </div>
-</section>
+</div>
 
-{{-- ===== SAPAAN RINGKAS UNTUK PESERTA YANG SUDAH LOGIN ===== --}}
+{{-- ===== SAPAAN PESERTA YANG SUDAH LOGIN ===== --}}
 @auth
     @if(auth()->user()->isUser() && ($myTicketCount > 0 || $myPendingOrders > 0))
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-px">
-            <div class="card p-5 mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <span class="w-11 h-11 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <div class="container" style="margin-top:30px;">
+            <div class="greeting-card wow fadeIn d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3"
+                data-wow-duration="0.5s">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:44px;height:44px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg style="width:22px;height:22px;color:#2563eb;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5Z" />
                         </svg>
-                    </span>
+                    </div>
                     <div>
-                        <p class="font-semibold text-ink-900">
-                            Halo, {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}
+                        <p style="font-weight:600;color:#111827;margin:0;">
+                            Halo, {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}!
                         </p>
-                        <p class="text-sm text-ink-500">
-                            @if($myTicketCount > 0)
-                                {{ $myTicketCount }} tiket aktif siap dipakai check-in.
-                            @endif
-                            @if($myPendingOrders > 0)
-                                {{ $myPendingOrders }} pesanan menunggu verifikasi panitia.
-                            @endif
+                        <p style="font-size:14px;color:#6b7280;margin:0;">
+                            @if($myTicketCount > 0){{ $myTicketCount }} tiket aktif.@endif
+                            @if($myPendingOrders > 0){{ $myPendingOrders }} pesanan menunggu verifikasi.@endif
                         </p>
                     </div>
                 </div>
-                <div class="flex gap-3">
+                <div class="d-flex gap-2">
                     @if($myTicketCount > 0)
-                        <a href="{{ route('tickets') }}" class="btn btn-primary px-5 py-2.5 text-sm">Lihat Tiket</a>
+                        <a href="{{ route('tickets') }}" class="btn-ticket-cta">Lihat Tiket Saya</a>
                     @endif
-                    <a href="{{ route('dashboard') }}" class="btn btn-outline px-5 py-2.5 text-sm">Pesanan Saya</a>
+                    <a href="{{ route('dashboard') }}" class="btn-ticket-registered">Pesanan Saya</a>
                 </div>
             </div>
-        </section>
+        </div>
     @endif
 @endauth
 
-{{-- ===== KATEGORI / PENYARING ===== --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
-    <h2 class="text-xl font-bold text-ink-900 mb-1">Jelajahi berdasarkan</h2>
-    <p class="text-sm text-ink-500 mb-6">Saring event sesuai yang Anda cari.</p>
 
-    <div class="flex md:flex-wrap gap-3 overflow-x-auto md:overflow-visible pb-2 -mx-1 px-1">
-        @php
-            $chips = collect([
-                ['key' => 'all', 'label' => 'Semua Event', 'icon' => 'M4 6h16M4 12h16M4 18h16'],
-                ['key' => 'featured', 'label' => 'Pilihan', 'icon' => 'm11.5 3.5 2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L3.7 9.2l5.4-.8 2.4-4.9Z'],
-                ['key' => 'upcoming', 'label' => 'Akan Datang', 'icon' => 'M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z'],
-                ['key' => 'free', 'label' => 'Gratis', 'icon' => 'M12 8c-1.7 0-3 .9-3 2s1.3 2 3 2 3 .9 3 2-1.3 2-3 2m0-8c1.1 0 2.1.4 2.6 1M12 8V7m0 1v8m0 0v1m9-5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
-            ]);
-        @endphp
 
-        @foreach($chips as $chip)
-            <button type="button" data-filter="{{ $chip['key'] }}"
-                class="filter-chip card card-hover shrink-0 flex items-center gap-3 px-5 py-4 text-left cursor-pointer {{ $loop->first ? 'is-active' : '' }}">
-                <span class="chip-icon w-10 h-10 rounded-xl bg-gray-100 text-ink-500 flex items-center justify-center shrink-0 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $chip['icon'] }}" />
-                    </svg>
-                </span>
-                <span class="font-semibold text-sm text-ink-900 whitespace-nowrap">{{ $chip['label'] }}</span>
-            </button>
-        @endforeach
-
-        @foreach($kotaTeratas as $kota)
-            <button type="button" data-filter="kota:{{ strtolower($kota) }}"
-                class="filter-chip card card-hover shrink-0 flex items-center gap-3 px-5 py-4 text-left cursor-pointer">
-                <span class="chip-icon w-10 h-10 rounded-xl bg-gray-100 text-ink-500 flex items-center justify-center shrink-0 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    </svg>
-                </span>
-                <span class="font-semibold text-sm text-ink-900 whitespace-nowrap">{{ $kota }}</span>
-            </button>
-        @endforeach
-    </div>
-</section>
-
-{{-- ===== EVENT PILIHAN ===== --}}
-<section id="featured" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
-    <div class="flex items-end justify-between gap-6 mb-8">
-        <div>
-            <h2 class="text-2xl sm:text-3xl font-bold text-ink-900">Event Pilihan</h2>
-            <p class="text-ink-500 mt-2">Yang paling banyak dicari peserta bulan ini.</p>
-        </div>
-        <a href="#events" class="hidden sm:inline-flex btn btn-ghost text-sm">
-            Lihat semua
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-        </a>
-    </div>
-
-    <div id="events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-        @forelse($highlightEvents as $ev)
-            @include('partials.event-card', ['ev' => $ev, 'grup' => 'featured'])
-        @empty
-            <p class="col-span-full text-ink-500 py-8">Belum ada event pilihan.</p>
-        @endforelse
-    </div>
-</section>
-
-{{-- ===== EVENT MENDATANG (tata letak mendatar) ===== --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
-    <div class="mb-8">
-        <h2 class="text-2xl sm:text-3xl font-bold text-ink-900">Akan Datang</h2>
-        <p class="text-ink-500 mt-2">Jadwal terdekat yang masih membuka pendaftaran.</p>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        @forelse($upcomingEvents as $ev)
-            @php
-                $sudahTerdaftar = $myEventIds->contains($ev['id']);
-                $gratis = (int) ($ev['harga'] ?? 0) === 0;
-            @endphp
-            <article class="event-card card card-hover overflow-hidden flex flex-col sm:flex-row"
-                data-search="{{ strtolower(($ev['nama'] ?? '') . ' ' . ($ev['lokasi'] ?? '')) }}"
-                data-groups="upcoming{{ $gratis ? ' free' : '' }} kota:{{ strtolower(trim(last(explode(',', $ev['lokasi'] ?? '')))) }}">
-
-                <a href="{{ route('event.show', $ev['id']) }}" class="sm:w-56 shrink-0 relative overflow-hidden">
-                    @include('partials.event-image', [
-                        'nama' => $ev['nama'],
-                        'thumbnail' => $ev['thumbnail'] ?? null,
-                        'class' => 'media-16-9 sm:h-full sm:aspect-auto',
-                    ])
-                    @if($sudahTerdaftar)
-                        <span class="badge bg-green-600 text-white absolute top-3 left-3">Sudah Terdaftar</span>
-                    @endif
-                </a>
-
-                <div class="p-6 flex flex-col flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="badge bg-brand-50 text-brand-700">Akan Datang</span>
-                        @if($gratis)<span class="badge bg-green-50 text-green-700">Gratis</span>@endif
-                    </div>
-
-                    <a href="{{ route('event.show', $ev['id']) }}"
-                        class="font-display font-semibold text-lg text-ink-900 leading-snug clamp-2 hover:text-brand-600 transition-colors">
-                        {{ $ev['nama'] }}
-                    </a>
-
-                    <div class="mt-3 space-y-1.5 text-sm text-ink-500">
-                        <p class="flex items-center gap-2 truncate">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                            </svg>
-                            {{ $ev['lokasi'] }}
-                        </p>
-                        <p class="flex items-center gap-2">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
-                            </svg>
-                            {{ $ev['tanggal'] }}
-                        </p>
-                    </div>
-
-                    <div class="mt-auto pt-5 flex items-end justify-between gap-4">
-                        <div>
-                            <p class="text-xs text-ink-500">Mulai dari</p>
-                            <p class="font-display font-bold text-lg text-accent-600">
-                                {{ $gratis ? 'Gratis' : 'Rp' . number_format($ev['harga'], 0, ',', '.') }}
-                            </p>
-                        </div>
-                        <a href="{{ $sudahTerdaftar ? route('dashboard') : route('event.show', $ev['id']) }}"
-                            class="btn {{ $sudahTerdaftar ? 'btn-outline' : 'btn-primary' }} px-5 py-2.5 text-sm">
-                            {{ $sudahTerdaftar ? 'Lihat Pesanan' : 'Pesan Tiket' }}
-                        </a>
-                    </div>
+{{-- ===== EVENT PILIHAN — Blog / Featured layout ===== --}}
+@if(!isset($q) || $q === '')
+<div id="blog" class="events-section" style="background:#fff;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 wow fadeInDown" data-wow-duration="1s" data-wow-delay="0.25s">
+                <div class="section-heading">
+                    <h2>
+                        Event <em>Pilihan</em> yang Paling
+                        <span>Banyak Dicari</span>
+                    </h2>
+                    <p>Yang paling banyak dicari peserta bulan ini.</p>
                 </div>
-            </article>
-        @empty
-            <p class="col-span-full text-ink-500 py-8">Belum ada event mendatang.</p>
-        @endforelse
-    </div>
-
-    <p id="searchEmpty" class="hidden text-center text-ink-500 py-16">
-        Tidak ada event yang cocok dengan pencarian Anda.
-    </p>
-</section>
-
-{{-- ===== CTA ===== --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
-    <div class="rounded-card overflow-hidden bg-brand-700 px-8 sm:px-14 py-14 sm:py-16 relative">
-        <div class="absolute inset-0 opacity-20"
-            style="background-image: radial-gradient(circle at 20% 20%, #fff 0, transparent 45%), radial-gradient(circle at 85% 70%, #fff 0, transparent 40%);"></div>
-
-        <div class="relative max-w-2xl">
-            <h2 class="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
-                Jangan sampai kehabisan tiket
-            </h2>
-            <p class="text-brand-100 text-lg leading-relaxed mb-8">
-                Kuota event favorit biasanya habis jauh sebelum hari-H. Amankan tempat Anda sekarang.
-            </p>
-            <div class="flex flex-wrap gap-4">
-                <a href="#events" class="btn bg-white text-brand-700 hover:bg-brand-50 px-7 py-3.5">Jelajahi Event</a>
-                @guest
-                    <a href="{{ route('register') }}"
-                        class="btn border border-white/40 text-white hover:bg-white/10 px-7 py-3.5">Buat Akun Gratis</a>
-                @endguest
             </div>
         </div>
+
+        <div id="featured" class="row g-4 mt-2">
+            @forelse($highlightEvents as $ev)
+                @include('partials.event-card', ['ev' => $ev, 'grup' => 'featured'])
+            @empty
+                <div class="col-12">
+                    <p style="color:#6b7280;text-align:center;padding:40px 0;">Belum ada event pilihan.</p>
+                </div>
+            @endforelse
+        </div>
     </div>
-</section>
+</div>
+@endif
+
+{{-- ===== EVENT MENDATANG — horizontal list ===== --}}
+<div id="events" class="events-section" style="background:#f8fafc;">
+    <div class="container">
+        <div class="section-heading mb-5 wow fadeInDown" data-wow-duration="1s" data-wow-delay="0.2s">
+            @if(!empty($q))
+                <h2>Hasil <em>Pencarian</em> untuk: <span>"{{ $q }}"</span></h2>
+                <p>
+                    Ditemukan {{ count($upcomingEvents) + count($highlightEvents) }} event.
+                    <a href="{{ route('home') }}" style="color:#2563eb;font-size:14px;font-weight:500;margin-left:8px;">← Tampilkan semua</a>
+                </p>
+            @else
+                <h2>Event <em>Akan</em> <span>Datang</span></h2>
+                <p>Jadwal terdekat yang masih membuka pendaftaran.</p>
+            @endif
+        </div>
+
+        <div class="row g-4">
+            @forelse($upcomingEvents as $ev)
+                @php
+                    $sudahTerdaftar = $myEventIds->contains($ev['id']);
+                    $gratis = (int) ($ev['harga'] ?? 0) === 0;
+                    $kota = strtolower(trim(last(explode(',', $ev['lokasi'] ?? ''))));
+                @endphp
+                <div class="col-lg-6 wow fadeInUp"
+                    data-wow-duration="1s" data-wow-delay="{{ 0.2 + ($loop->index % 2) * 0.15 }}s">
+                    <article class="event-card-h event-card"
+                        data-search="{{ strtolower(($ev['nama']??'') . ' ' . ($ev['lokasi']??'')) }}"
+                        data-groups="upcoming{{ $gratis ? ' free' : '' }} kota:{{ $kota }}">
+
+                        <a href="{{ route('event.show', $ev['id']) }}" class="thumb">
+                            @include('partials.event-image', [
+                                'nama'      => $ev['nama'],
+                                'thumbnail' => $ev['thumbnail'] ?? null,
+                                'class'     => '',
+                            ])
+                            @if($sudahTerdaftar)
+                                <span class="badge" style="position:absolute;top:10px;left:10px;background:#22c55e;color:#fff;">
+                                    ✓ Terdaftar
+                                </span>
+                            @endif
+                        </a>
+
+                        <div class="body">
+                            <div class="d-flex gap-2 mb-2" style="flex-wrap:wrap;">
+                                <span class="badge" style="background:#eff6ff;color:#2563eb;">Akan Datang</span>
+                                @if($gratis)<span class="badge" style="background:#f0fdf4;color:#16a34a;">Gratis</span>@endif
+                            </div>
+
+                            <h4 class="clamp-2">
+                                <a href="{{ route('event.show', $ev['id']) }}">{{ $ev['nama'] }}</a>
+                            </h4>
+
+                            <div class="meta mt-2">
+                                <span>
+                                    <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>
+                                    {{ $ev['lokasi'] }}
+                                </span>
+                                <span>
+                                    <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
+                                    </svg>
+                                    {{ $ev['tanggal'] }}
+                                </span>
+                            </div>
+
+                            <div class="footer">
+                                <div>
+                                    <small style="font-size:11px;color:#6b7280;display:block;font-weight:500;">Mulai dari</small>
+                                    <span style="font-size:16px;font-weight:700;color:{{ $gratis ? '#16a34a' : '#111827' }};">
+                                        {{ $gratis ? 'Gratis' : 'Rp'.number_format($ev['harga'],0,',','.') }}
+                                    </span>
+                                </div>
+                                <a href="{{ $sudahTerdaftar ? route('dashboard') : route('event.show', $ev['id']) }}"
+                                    class="{{ $sudahTerdaftar ? 'btn-ticket-registered' : 'btn-ticket-cta' }}">
+                                    @if($sudahTerdaftar)
+                                        Lihat Pesanan
+                                    @else
+                                        Pesan Tiket
+                                    @endif
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            @empty
+                <div class="col-12" style="text-align:center;padding:60px 0;">
+                    @if(!empty($q))
+                        <svg style="width:56px;height:56px;color:#d1d5db;margin:0 auto 16px;display:block;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
+                        </svg>
+                        <p style="color:#374151;font-weight:600;font-size:16px;margin:0 0 8px;">Event tidak ditemukan</p>
+                        <p style="color:#6b7280;margin:0 0 20px;">Tidak ada event yang cocok dengan <strong>"{{ $q }}"</strong>.</p>
+                        <a href="{{ route('home') }}" class="btn-ticket-cta" style="text-decoration:none;">← Lihat Semua Event</a>
+                    @else
+                        <p style="color:#6b7280;">Belum ada event mendatang.</p>
+                    @endif
+                </div>
+            @endforelse
+        </div>
+
+        <p id="searchEmpty" class="hidden text-center" style="color:#6b7280;padding:60px 0;display:none;">
+            Tidak ada event yang cocok dengan pencarian Anda.
+        </p>
+    </div>
+</div>
+
+{{-- ===== CTA — Contact-style section ===== --}}
+<div id="contact" class="cta-section wow fadeIn" data-wow-duration="1s" data-wow-delay="0.2s">
+    <div class="container">
+        <div class="row align-items-center">
+
+            <div class="col-lg-7 wow fadeInLeft" data-wow-duration="0.5s" data-wow-delay="0.25s">
+                <div class="section-heading">
+                    <h2 style="color:#fff;">
+                        Jangan Sampai <em style="color:#fde68a;">Kehabisan</em>
+                        <span style="color:#fed7aa;">Tiket</span> Favorit Anda
+                    </h2>
+                    <p>
+                        Kuota event biasanya habis jauh sebelum hari-H.
+                        Amankan tempat Anda sekarang — daftar hanya butuh beberapa menit.
+                    </p>
+                    <div class="cta-phone">
+                        <h4>
+                            Butuh bantuan? Hubungi kami:
+                            <span>
+                                <span class="phone-icon">
+                                    <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2 6.5C2 14.5 9.5 22 17.5 22c.66 0 1.3-.05 1.93-.13A1 1 0 0 0 20 21v-3.28a1 1 0 0 0-.75-.97l-3.28-.82a1 1 0 0 0-1.04.38l-.97 1.4a15.06 15.06 0 0 1-6.67-6.67l1.4-.97a1 1 0 0 0 .38-1.04l-.82-3.28A1 1 0 0 0 7.28 5H4a2 2 0 0 0-2 1.5Z"/>
+                                    </svg>
+                                </span>
+                                <a href="https://wa.me/6289681201941" target="_blank" rel="noopener"
+                                    style="color:#fde68a;font-size:15px;font-weight:500;">+62 896-8120-1941</a>
+                            </span>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 mt-5 mt-lg-0 wow fadeInRight" data-wow-duration="0.5s" data-wow-delay="0.25s">
+                <div style="background:#fff;border-radius:20px;padding:48px 36px;position:relative;">
+                    <h3 style="font-size:22px;font-weight:700;color:#2a2a2a;margin-bottom:20px;">
+                        Mulai Sekarang
+                    </h3>
+                    <p style="color:#6b7280;font-size:14px;margin-bottom:28px;">
+                        Bergabunglah dengan ribuan peserta yang sudah memesan tiket melalui SeTiket.
+                    </p>
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                        <a href="{{ route('home') }}#events" class="btn-ticket-cta" style="width:100%;padding:13px 24px;font-size:15px;">
+                            Jelajahi Semua Event
+                        </a>
+                        @guest
+                            <a href="{{ route('register') }}" class="btn-ticket-registered" style="width:100%;padding:12px 24px;font-size:14px;border:1.5px solid #2563eb;color:#2563eb;background:#eff6ff;">
+                                Buat Akun Gratis
+                            </a>
+                        @endguest
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 @push('scripts')
-<style>
-    .filter-chip.is-active {
-        border-color: var(--color-brand-600);
-        box-shadow: 0 0 0 3px rgb(37 99 235 / 0.12);
-    }
-    .filter-chip.is-active .chip-icon {
-        background: var(--color-brand-600);
-        color: #fff;
-    }
-</style>
 <script>
-    // Penyaring kategori — bekerja atas kartu yang sudah ada di halaman.
+    // ---- Filter kartu event ----
     (function () {
         const chips = document.querySelectorAll('.filter-chip');
         const cards = document.querySelectorAll('.event-card');
@@ -345,21 +365,62 @@
 
         chips.forEach(chip => chip.addEventListener('click', function () {
             const key = this.dataset.filter;
-
             chips.forEach(c => c.classList.toggle('is-active', c === this));
 
             let visible = 0;
             cards.forEach(card => {
                 const groups = (card.dataset.groups || '').split(' ');
                 const match = key === 'all' || groups.includes(key);
-                card.style.display = match ? '' : 'none';
+                card.closest('[class*="col"]').style.display = match ? '' : 'none';
                 if (match) visible++;
             });
 
-            if (empty) empty.classList.toggle('hidden', visible > 0);
+            if (empty) empty.style.display = (visible === 0) ? 'block' : 'none';
             document.getElementById('featured')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }));
     })();
+
+    // ---- Pencarian dari navbar ----
+    (function () {
+        const inputs = [document.getElementById('navbarSearch'), document.getElementById('navbarSearchMobile')].filter(Boolean);
+        if (!inputs.length) return;
+
+        function filter(query) {
+            const q = query.toLowerCase().trim();
+            let visible = 0;
+            document.querySelectorAll('.event-card').forEach(card => {
+                const haystack = (card.getAttribute('data-search') || '').toLowerCase();
+                const match = haystack.includes(q);
+                const col = card.closest('[class*="col"]');
+                if (col) col.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            const empty = document.getElementById('searchEmpty');
+            if (empty) empty.style.display = (visible === 0 && q !== '') ? 'block' : 'none';
+        }
+
+        inputs.forEach(input => {
+            input.addEventListener('input', function (e) {
+                if (document.querySelector('.event-card')) {
+                    filter(e.target.value);
+                    inputs.forEach(other => { if (other !== e.target) other.value = e.target.value; });
+                }
+            });
+            input.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter' && !document.querySelector('.event-card')) {
+                    window.location.href = '{{ route('home') }}?q=' + encodeURIComponent(this.value);
+                }
+            });
+        });
+
+        const q = new URLSearchParams(window.location.search).get('q');
+        if (q && document.querySelector('.event-card')) {
+            inputs.forEach(i => { i.value = q; });
+            filter(q);
+            document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' });
+        }
+    })();
 </script>
 @endpush
+
 @endsection

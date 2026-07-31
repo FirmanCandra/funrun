@@ -39,10 +39,10 @@
 
             <div class="animate-fade-up">
                 <div class="flex flex-wrap items-center gap-2 mb-4">
-                    <span class="badge bg-brand-50 text-brand-700">
+                    <span class="badge" style="background-color: var(--color-brand-50); color: var(--color-brand-700);">
                         {{ ucfirst($event['kategori']) === 'Highlight' ? 'Event Pilihan' : 'Akan Datang' }}
                     </span>
-                    @if($gratis)<span class="badge bg-green-50 text-green-700">Gratis</span>@endif
+                    @if($gratis)<span class="badge" style="background-color: #f0fdf4; color: #16a34a;">Gratis</span>@endif
                     @if($sudahTerdaftar)
                         <span class="badge bg-green-600 text-white">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
@@ -155,10 +155,7 @@
                         class="btn btn-outline w-full py-3.5">Pesan Lagi</a>
                 @else
                     <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
-                        class="btn btn-accent w-full py-3.5 text-base">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5Z" />
-                        </svg>
+                        class="btn-ticket-cta w-full py-3.5 text-base">
                         Pesan Tiket
                     </a>
 

@@ -70,7 +70,7 @@
             </div>
             <div>
                 <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Status</p>
-                <span class="badge {{ $terbit ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-ink-500' }}">
+                <span class="badge" style="{{ $terbit ? 'background-color: #f0fdf4; color: #16a34a;' : 'background-color: #f3f4f6; color: #4b5563;' }}">
                     <span class="w-1.5 h-1.5 rounded-full {{ $terbit ? 'bg-green-600' : 'bg-gray-400' }}"></span>
                     {{ $ticket->statusLabel() }}
                 </span>

@@ -171,11 +171,32 @@ class HomeController extends Controller
     public function index()
     {
         $events = self::loadEvents();
-        $upcomingEvents = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'upcoming'));
-        $highlightEvents = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'highlight'));
+        $q = trim(request('q', ''));
+
+        if ($q !== '') {
+            // Filter semua event yang cocok dengan nama atau lokasi (case-insensitive)
+            $filtered = array_values(array_filter(
+                $events,
+                fn ($e) =>
+                    mb_stripos($e['nama'] ?? '', $q) !== false ||
+                    mb_stripos($e['lokasi'] ?? '', $q) !== false
+            ));
+
+            // Tampilkan hasil pencarian di kedua slot agar tidak tersembunyi
+            $upcomingEvents  = array_values(array_filter($filtered, fn ($e) => ($e['kategori'] ?? '') !== 'highlight'));
+            $highlightEvents = array_values(array_filter($filtered, fn ($e) => ($e['kategori'] ?? '') === 'highlight'));
+
+            // Jika tidak ada yang masuk highlight, masukkan semua hasil ke upcoming
+            if (empty($highlightEvents) && empty($upcomingEvents)) {
+                $upcomingEvents  = $filtered;
+            }
+        } else {
+            $upcomingEvents  = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'upcoming'));
+            $highlightEvents = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'highlight'));
+        }
 
         return view('welcome', array_merge(
-            compact('upcomingEvents', 'highlightEvents'),
+            compact('upcomingEvents', 'highlightEvents', 'q'),
             self::participantContext()
         ));
     }

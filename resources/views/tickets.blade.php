@@ -38,7 +38,7 @@
                                 {{ $event->title ?? 'Event' }}
                             </h2>
                         </div>
-                        <span class="badge {{ $checkedIn ? 'bg-gray-100 text-ink-500' : 'bg-green-50 text-green-700' }}">
+                        <span class="badge" style="{{ $checkedIn ? 'background-color: #f3f4f6; color: #4b5563;' : 'background-color: #f0fdf4; color: #16a34a;' }}">
                             <span class="w-1.5 h-1.5 rounded-full {{ $checkedIn ? 'bg-gray-400' : 'bg-green-600' }}"></span>
                             {{ $ticket->statusLabel() }}
                         </span>

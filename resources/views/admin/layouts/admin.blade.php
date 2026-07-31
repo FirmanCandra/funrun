@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - SeTiket</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -28,14 +29,14 @@
     menetap, lebarnya menghabiskan hampir seluruh layar ponsel.
 --}}
 
-<body class="flex h-dvh overflow-hidden text-slate-800">
+<body class="flex flex-row h-dvh w-screen overflow-hidden text-slate-800" style="display: flex !important; flex-direction: row !important; height: 100vh !important; width: 100vw !important;">
 
     <!-- Latar gelap saat laci terbuka di layar kecil -->
     <div id="sidebarOverlay" class="hidden fixed inset-0 z-30 bg-slate-900/50 lg:hidden"></div>
 
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] -translate-x-full transition-transform duration-200 ease-out overflow-y-auto bg-white border-r border-slate-200 flex flex-col lg:static lg:z-auto lg:w-64 lg:max-w-none lg:translate-x-0">
+        class="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] -translate-x-full transition-transform duration-200 ease-out overflow-y-auto bg-white border-r border-slate-200 flex flex-col shrink-0 lg:static lg:z-auto lg:w-64 lg:max-w-none lg:translate-x-0" style="height: 100vh !important;">
         <div class="h-20 flex items-center justify-between px-4 sm:px-6 border-b border-slate-200 shrink-0">
             <div class="flex items-center min-w-0">
                 <img src="{{ asset('images/setiketbg.webp') }}" alt="SeTiket Logo"
@@ -180,7 +181,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 min-w-0 flex flex-col h-dvh overflow-hidden bg-slate-50">
+    <main class="flex-1 min-w-0 flex flex-col h-dvh overflow-hidden bg-slate-50" style="flex: 1 1 0% !important; min-width: 0 !important; height: 100vh !important;">
         <!-- Header -->
         <header
             class="h-20 shrink-0 bg-white border-b border-slate-200 flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 z-10">

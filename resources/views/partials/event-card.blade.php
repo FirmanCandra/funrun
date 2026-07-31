@@ -1,5 +1,5 @@
 {{--
-    Kartu event untuk grid.
+    Kartu event untuk grid — Space Dynamic style.
 
     Variabel: $ev (array event dari events.json), $grup (kelompok penyaring).
 --}}
@@ -9,60 +9,74 @@
     $kota = strtolower(trim(last(explode(',', $ev['lokasi'] ?? ''))));
 @endphp
 
-<article class="event-card card card-hover overflow-hidden flex flex-col"
+@php $cardIndex = isset($loop) ? $loop->index : (isset($cardIdx) ? $cardIdx : 0); @endphp
+<div class="col-lg-4 col-sm-6 wow bounceInUp" data-wow-duration="1s" data-wow-delay="{{ 0.3 + ($cardIndex % 3) * 0.1 }}s">
+<article class="event-card-sd event-card"
     data-search="{{ strtolower(($ev['nama'] ?? '') . ' ' . ($ev['lokasi'] ?? '')) }}"
     data-groups="{{ $grup }}{{ $gratis ? ' free' : '' }} kota:{{ $kota }}">
 
-    <a href="{{ route('event.show', $ev['id']) }}" class="relative block overflow-hidden">
+    <a href="{{ route('event.show', $ev['id']) }}" class="event-thumb" style="display:block;position:relative;overflow:hidden;">
         @include('partials.event-image', ['nama' => $ev['nama'], 'thumbnail' => $ev['thumbnail'] ?? null])
 
-        <span class="badge bg-white/95 text-ink-900 absolute top-3 left-3 backdrop-blur-sm">
-            {{ ucfirst($ev['kategori'] ?? 'Event') === 'Highlight' ? 'Pilihan' : 'Akan Datang' }}
+        {{-- Badge status --}}
+        <span style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.95);color:#2a2a2a;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;backdrop-filter:blur(4px);">
+            {{ ucfirst($ev['kategori'] ?? 'Event') === 'Highlight' ? ' Pilihan' : ' Akan Datang' }}
         </span>
 
         @if($sudahTerdaftar)
-            <span class="badge bg-green-600 text-white absolute top-3 right-3">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <span style="position:absolute;top:12px;right:12px;background:#22c55e;color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:4px;">
+                <svg style="width:11px;height:11px;" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
                 </svg>
                 Terdaftar
             </span>
         @endif
+
+        @if($gratis)
+            <span style="position:absolute;bottom:12px;left:12px;background:#22c55e;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">
+                GRATIS
+            </span>
+        @endif
     </a>
 
-    <div class="p-6 flex flex-col flex-1">
-        <a href="{{ route('event.show', $ev['id']) }}"
-            class="font-display font-semibold text-lg text-ink-900 leading-snug clamp-2 hover:text-brand-600 transition-colors">
-            {{ $ev['nama'] }}
-        </a>
+    <div class="event-body">
+        <h4>
+            <a href="{{ route('event.show', $ev['id']) }}">{{ $ev['nama'] }}</a>
+        </h4>
 
-        <div class="mt-3 space-y-1.5 text-sm text-ink-500">
-            <p class="flex items-center gap-2 truncate">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <div class="event-meta">
+            <span>
+                <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
                 {{ $ev['lokasi'] }}
-            </p>
-            <p class="flex items-center gap-2">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            </span>
+            <span>
+                <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
                 </svg>
                 {{ $ev['tanggal'] }}
-            </p>
+            </span>
         </div>
 
-        <div class="mt-auto pt-5 border-t border-line mt-5 flex items-end justify-between gap-4">
+        <div class="event-footer">
             <div>
-                <p class="text-xs text-ink-500">Mulai dari</p>
-                <p class="font-display font-bold text-lg text-accent-600">
+                <small style="font-size:11px;color:#6b7280;display:block;font-weight:500;">Mulai dari</small>
+                <span style="font-size:17px;font-weight:700;color:{{ $gratis ? '#16a34a' : '#111827' }};">
                     {{ $gratis ? 'Gratis' : 'Rp' . number_format($ev['harga'], 0, ',', '.') }}
-                </p>
+                </span>
             </div>
             <a href="{{ $sudahTerdaftar ? route('dashboard') : route('event.show', $ev['id']) }}"
-                class="btn {{ $sudahTerdaftar ? 'btn-outline' : 'btn-primary' }} px-5 py-2.5 text-sm">
-                {{ $sudahTerdaftar ? 'Lihat Pesanan' : 'Pesan Tiket' }}
+                class="{{ $sudahTerdaftar ? 'btn-ticket-registered' : 'btn-ticket-cta' }}">
+                @if($sudahTerdaftar)
+                    Lihat Pesanan
+                @else
+                    Pesan Tiket
+                @endif
             </a>
         </div>
     </div>
+
 </article>
+</div>
