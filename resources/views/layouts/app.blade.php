@@ -136,9 +136,26 @@
 
                             {{-- Mobile auth (hanya di mobile nav) --}}
                             <li class="nav-auth-mobile" style="display:none;">
-                                @guest
+                                @auth
+                                    <div class="mobile-user-info">
+                                        <div class="mobile-user-avatar">{{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</div>
+                                        <div class="mobile-user-detail">
+                                            <p class="mobile-user-name">{{ auth()->user()->name }}</p>
+                                            <p class="mobile-user-email">{{ auth()->user()->email }}</p>
+                                        </div>
+                                    </div>
+                                    @if(auth()->user()->isUser())
+                                        <a href="{{ route('dashboard') }}" class="mobile-nav-link">Pesanan Saya</a>
+                                        <a href="{{ route('tickets') }}" class="mobile-nav-link">Tiket Saya</a>
+                                    @endif
+                                    <a href="{{ route('profile.edit') }}" class="mobile-nav-link">Profil</a>
+                                    <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+                                        @csrf
+                                        <button type="submit" class="mobile-logout-btn">Keluar</button>
+                                    </form>
+                                @else
                                     <a href="{{ route('login') }}" style="color:#2563eb;">Masuk</a>
-                                @endguest
+                                @endauth
                             </li>
                         </ul>
 
@@ -168,8 +185,7 @@
                         <span class="brand-name">SeTiket</span>
                     </div>
                     <p class="footer-desc">
-                        Temukan dan pesan tiket event favorit Anda — fun run, festival,
-                        seminar, dan pameran — dalam beberapa langkah saja.
+                        Temukan event seru dan kebutuhan event favorit Anda
                     </p>
                 </div>
 

@@ -590,6 +590,15 @@ class AdminController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        // Load enabled fields for this event so the PDF only shows active fields
+        $enabledFields = collect();
+        if ($ticket->participant && $ticket->participant->event_id) {
+            \App\Models\EventFormField::ensureCoreFields($ticket->participant->event_id);
+            $enabledFields = \App\Models\EventFormField::where('event_id', $ticket->participant->event_id)
+                ->where('enabled', true)
+                ->get();
+        }
+
         // Fetch QR code as base64 so DomPDF can embed it without external HTTP requests
         $qrBase64 = null;
         if ($ticket->qr_code) {
@@ -632,7 +641,7 @@ class AdminController extends Controller
             }
         }
 
-        $pdf = Pdf::loadView('admin.eticket-pdf', compact('ticket', 'qrBase64'))
+        $pdf = Pdf::loadView('admin.eticket-pdf', compact('ticket', 'qrBase64', 'enabledFields'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->download('eticket-' . $ticket->ticket_code . '.pdf');
@@ -986,6 +995,7 @@ class AdminController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'plain_password' => $request->password,
             'role'     => 'admin',
             'event_id' => $request->event_id,
         ]);
@@ -1013,6 +1023,7 @@ class AdminController extends Controller
 
         if ($request->filled('password')) {
             $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
+            $data['plain_password'] = $request->password;
         }
 
         $admin->update($data);

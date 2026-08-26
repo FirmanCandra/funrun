@@ -206,7 +206,7 @@
 
         {{-- QR Code Section --}}
         <div class="qr-section">
-            @if(!empty($qrBase64))
+            @if (!empty($qrBase64))
                 <img src="{{ $qrBase64 }}" alt="QR Code">
             @elseif($ticket->qr_code)
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ urlencode($ticket->qr_code) }}"
@@ -219,7 +219,7 @@
             @endif
             <div class="ticket-code">{{ $ticket->ticket_code }}</div>
             <div>
-                @if($ticket->status === 'valid')
+                @if ($ticket->status === 'valid')
                     <span class="ticket-status status-valid">VALID</span>
                 @elseif($ticket->status === 'checked-in')
                     <span class="ticket-status status-checkedin">CHECKED-IN</span>
@@ -232,47 +232,72 @@
         {{-- Participant Data --}}
         <div class="data-section">
             <div class="section-title">Data Peserta</div>
+            @php
+                // Collect enabled field keys for quick lookup
+                $enabledKeys = isset($enabledFields) ? $enabledFields->pluck('key')->toArray() : [];
+                // If no enabledFields provided (backward compat), show all
+                $showAll = empty($enabledKeys);
+            @endphp
             <table class="data-grid">
+                @if($showAll || in_array('fullname', $enabledKeys))
                 <tr>
                     <td class="data-label">Nama Lengkap</td>
                     <td class="data-value">{{ $ticket->participant->displayName() }}</td>
                 </tr>
+                @endif
+                @if($showAll || in_array('nik', $enabledKeys))
                 <tr>
                     <td class="data-label">NIK</td>
                     <td class="data-value">{{ $ticket->participant->nik ?? '-' }}</td>
                 </tr>
+                @endif
+                @if($showAll || in_array('phone', $enabledKeys))
                 <tr>
                     <td class="data-label">No. WhatsApp</td>
                     <td class="data-value">{{ $ticket->participant->phone }}</td>
                 </tr>
+                @endif
+                @if($showAll || in_array('city', $enabledKeys))
                 <tr>
                     <td class="data-label">Asal Kota/Kabupaten</td>
                     <td class="data-value">{{ $ticket->participant->city ?? '-' }}</td>
                 </tr>
+                @endif
+                @if($showAll || in_array('dob', $enabledKeys))
                 <tr>
                     <td class="data-label">Tanggal Lahir</td>
                     <td class="data-value">
                         {{ $ticket->participant->dob ? \Carbon\Carbon::parse($ticket->participant->dob)->format('d F Y') : '-' }}
                     </td>
                 </tr>
+                @endif
+                @if($showAll || in_array('gender', $enabledKeys))
                 <tr>
                     <td class="data-label">Jenis Kelamin</td>
                     <td class="data-value">{{ $ticket->participant->gender === 'male' ? 'Laki-laki' : 'Perempuan' }}
                     </td>
                 </tr>
+                @endif
+                @if($showAll || in_array('category', $enabledKeys))
                 <tr>
                     <td class="data-label">Kategori</td>
-                    <td class="data-value"><span class="category-badge">{{ $ticket->participant->category }}</span></td>
+                    <td class="data-value"><span class="category-badge">{{ $ticket->participant->category }}</span>
+                    </td>
                 </tr>
+                @endif
+                @if($showAll || in_array('jersey_size', $enabledKeys))
                 <tr>
                     <td class="data-label">Ukuran Jersey</td>
                     <td class="data-value">{{ $ticket->participant->jersey_size }}</td>
                 </tr>
+                @endif
+                @if($showAll || in_array('emergency_contact', $enabledKeys))
                 <tr>
                     <td class="data-label">Kontak Darurat</td>
                     <td class="data-value">{{ $ticket->participant->emergency_contact ?? '-' }}</td>
                 </tr>
-                @if($ticket->participant->medical_history)
+                @endif
+                @if(($showAll || in_array('medical_history', $enabledKeys)) && $ticket->participant->medical_history)
                     <tr>
                         <td class="data-label">Riwayat Penyakit</td>
                         <td class="data-value" style="color: #dc2626;">{{ $ticket->participant->medical_history }}</td>
@@ -286,7 +311,7 @@
             <div class="checkin-title">Informasi Check-In</div>
             <div class="checkin-info">
                 <strong>Untuk Peserta:</strong> Tunjukkan E-Ticket ini (cetak/digital) di meja registrasi event untuk
-                mengambil Race Pack dan nomor BIB Anda.
+                mengambil pesanan.
             </div>
         </div>
 

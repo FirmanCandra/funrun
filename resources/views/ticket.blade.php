@@ -55,19 +55,29 @@
         </div>
 
         {{-- Detail --}}
+        @php
+            $enabledKeys = isset($enabledFields) ? $enabledFields->pluck('key')->toArray() : [];
+            $showAll = empty($enabledKeys);
+        @endphp
         <div class="p-8 grid grid-cols-2 gap-6">
+            @if($showAll || in_array('fullname', $enabledKeys))
             <div>
                 <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Nama Peserta</p>
                 <p class="font-semibold text-ink-900">{{ $participant->displayName() }}</p>
             </div>
+            @endif
+            @if($showAll || in_array('category', $enabledKeys))
             <div>
                 <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Kategori</p>
                 <p class="font-semibold text-ink-900">{{ $participant->category }}</p>
             </div>
+            @endif
+            @if($showAll || in_array('jersey_size', $enabledKeys))
             <div>
                 <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Ukuran Jersey</p>
                 <p class="font-semibold text-ink-900">{{ $participant->jersey_size ?? '—' }}</p>
             </div>
+            @endif
             <div>
                 <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Status</p>
                 <span class="badge" style="{{ $terbit ? 'background-color: #f0fdf4; color: #16a34a;' : 'background-color: #f3f4f6; color: #4b5563;' }}">

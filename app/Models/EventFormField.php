@@ -66,7 +66,7 @@ class EventFormField extends Model
     /** Pilihan tetap untuk field core bertipe select. */
     public const SELECT_OPTIONS = [
         'gender' => ['male' => 'Laki-laki', 'female' => 'Perempuan'],
-        'jersey_size' => ['S' => 'S', 'M' => 'M', 'L' => 'L', 'XL' => 'XL', 'XXL' => 'XXL'],
+        'jersey_size' => ['S' => 'S', 'M' => 'M', 'L' => 'L', 'XL' => 'XL', 'XXL' => 'XXL', '3XL' => '3XL', '4XL' => '4XL', '5XL' => '5XL'],
     ];
 
     protected $guarded = [];

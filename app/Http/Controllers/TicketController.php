@@ -4,14 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\EventFormField;
 
 class TicketController extends Controller
 {
     public function showTicket($ticket_code)
     {
         $ticket = \App\Models\Ticket::with(['participant.event'])->where('ticket_code', $ticket_code)->firstOrFail();
-        
-        return view('ticket', compact('ticket'));
+
+        // Load enabled fields for this event so the ticket view only shows active fields
+        $enabledFields = collect();
+        if ($ticket->participant && $ticket->participant->event_id) {
+            EventFormField::ensureCoreFields($ticket->participant->event_id);
+            $enabledFields = EventFormField::where('event_id', $ticket->participant->event_id)
+                ->where('enabled', true)
+                ->get();
+        }
+
+        return view('ticket', compact('ticket', 'enabledFields'));
     }
 
     public function downloadPdf($ticket_code)
@@ -19,6 +29,15 @@ class TicketController extends Controller
         $ticket = \App\Models\Ticket::with(['participant.event'])
             ->where('ticket_code', $ticket_code)
             ->firstOrFail();
+
+        // Load enabled fields for this event so the PDF only shows active fields
+        $enabledFields = collect();
+        if ($ticket->participant && $ticket->participant->event_id) {
+            EventFormField::ensureCoreFields($ticket->participant->event_id);
+            $enabledFields = EventFormField::where('event_id', $ticket->participant->event_id)
+                ->where('enabled', true)
+                ->get();
+        }
 
         // Fetch QR code as base64 so DomPDF can embed it without external HTTP requests
         $qrBase64 = null;
@@ -62,7 +81,7 @@ class TicketController extends Controller
             }
         }
 
-        $pdf = Pdf::loadView('admin.eticket-pdf', compact('ticket', 'qrBase64'))
+        $pdf = Pdf::loadView('admin.eticket-pdf', compact('ticket', 'qrBase64', 'enabledFields'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->download('eticket-' . $ticket->ticket_code . '.pdf');
