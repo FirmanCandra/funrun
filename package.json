@@ -7,7 +7,6 @@
         "dev": "vite"
     },
     "devDependencies": {
-        "@rolldown/binding-win32-x64-msvc": "^1.0.3",
         "@tailwindcss/vite": "^4.3.1",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^3.1",

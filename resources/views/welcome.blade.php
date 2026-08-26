@@ -46,7 +46,10 @@
                         </svg>
                         <input type="text" name="q" value="{{ request('q') }}"
                             placeholder="Cari nama event atau kota…" autocomplete="off">
-                        <button type="submit">Cari Event</button>
+                        <button type="submit">
+                            <span class="hidden sm:inline">Cari Event</span>
+                            <span class="inline sm:hidden">Cari</span>
+                        </button>
                     </form>
 
                     {{-- Fitur highlights --}}

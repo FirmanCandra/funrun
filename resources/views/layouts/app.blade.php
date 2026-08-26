@@ -162,7 +162,7 @@
             <div class="row">
 
                 {{-- Brand --}}
-                <div class="col-lg-4 col-md-6 mb-5">
+                <div class="col-lg-4 col-md-6 mb-4 sm:mb-5">
                     <div class="footer-brand">
                         <img src="{{ asset('images/setiket.webp') }}" alt="SeTiket" onerror="this.style.display='none'">
                         <span class="brand-name">SeTiket</span>
@@ -171,23 +171,10 @@
                         Temukan dan pesan tiket event favorit Anda — fun run, festival,
                         seminar, dan pameran — dalam beberapa langkah saja.
                     </p>
-                    <div class="social-links mt-4">
-                        @foreach([
-                            ['label' => 'Instagram', 'path' => 'M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2Zm0 5.6a4.2 4.2 0 1 0 0 8.4 4.2 4.2 0 0 0 0-8.4Zm0 6.9a2.7 2.7 0 1 1 0-5.4 2.7 2.7 0 0 1 0 5.4Zm5.4-7.1a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z'],
-                            ['label' => 'Twitter', 'path' => 'M18.9 3H22l-6.9 7.9L23 21h-6.4l-5-6.5L5.8 21H2.7l7.4-8.5L1.5 3H8l4.5 6 6.4-6Zm-1.1 16.1h1.7L7.3 4.8H5.5l12.3 14.3Z'],
-                            ['label' => 'Facebook', 'path' => 'M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z'],
-                        ] as $social)
-                            <a href="#" aria-label="{{ $social['label'] }}">
-                                <svg class="fill-current" style="width:16px;height:16px;" viewBox="0 0 24 24">
-                                    <path d="{{ $social['path'] }}" />
-                                </svg>
-                            </a>
-                        @endforeach
-                    </div>
                 </div>
 
                 {{-- Jelajahi --}}
-                <div class="col-lg-2 col-md-3 col-sm-6 mb-5">
+                <div class="col-lg-2 col-md-3 col-6 mb-4 sm:mb-5">
                     <h5>Jelajahi</h5>
                     <ul>
                         <li><a href="{{ route('home') }}">Beranda</a></li>
@@ -197,7 +184,7 @@
                 </div>
 
                 {{-- Akun --}}
-                <div class="col-lg-2 col-md-3 col-sm-6 mb-5">
+                <div class="col-lg-2 col-md-3 col-6 mb-4 sm:mb-5">
                     <h5>Akun</h5>
                     <ul>
                         @auth
@@ -214,7 +201,7 @@
                 </div>
 
                 {{-- Bantuan --}}
-                <div class="col-lg-2 col-md-6 mb-5">
+                <div class="col-lg-2 col-md-6 mb-4 sm:mb-5">
                     <h5>Bantuan</h5>
                     <ul>
                         <li><a href="https://wa.me/6289681201941" target="_blank" rel="noopener">Hubungi Kami</a></li>
@@ -226,7 +213,6 @@
 
             <div class="footer-bottom">
                 <p>&copy; {{ date('Y') }} SeTiket. Seluruh hak cipta dilindungi.</p>
-                <p style="font-size:12px;">Dibuat dengan ❤️ untuk komunitas event Indonesia.</p>
             </div>
         </div>
     </footer>
