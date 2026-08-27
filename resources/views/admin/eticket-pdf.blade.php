@@ -287,7 +287,7 @@
                 @endif
                 @if($showAll || in_array('jersey_size', $enabledKeys))
                 <tr>
-                    <td class="data-label">Ukuran Jersey</td>
+                    <td class="data-label">Ukuran T-Shirt</td>
                     <td class="data-value">{{ $ticket->participant->jersey_size }}</td>
                 </tr>
                 @endif
@@ -302,6 +302,19 @@
                         <td class="data-label">Riwayat Penyakit</td>
                         <td class="data-value" style="color: #dc2626;">{{ $ticket->participant->medical_history }}</td>
                     </tr>
+                @endif
+
+                {{-- Custom / additional fields (non-core fields added by admin) --}}
+                @if(isset($enabledFields))
+                    @foreach($enabledFields->where('is_core', false) as $customField)
+                        @php $answer = $ticket->participant->customAnswer($customField); @endphp
+                        @if($answer !== '-')
+                        <tr>
+                            <td class="data-label">{{ $customField->label }}</td>
+                            <td class="data-value">{{ $answer }}</td>
+                        </tr>
+                        @endif
+                    @endforeach
                 @endif
             </table>
         </div>

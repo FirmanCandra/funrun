@@ -24,7 +24,7 @@
             <ul>
                 <li><strong>Ticket Code:</strong> {{ $ticket->ticket_code }}</li>
                 <li><strong>Category:</strong> {{ $ticket->participant->category }}</li>
-                <li><strong>Jersey Size:</strong> {{ $ticket->participant->jersey_size }}</li>
+                <li><strong>T-Shirt Size:</strong> {{ $ticket->participant->jersey_size }}</li>
             </ul>
         </div>
         

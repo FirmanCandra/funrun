@@ -95,7 +95,7 @@
                             <dd class="text-ink-900 font-medium">{{ $category->name ?? $participant?->category }}</dd>
                         </div>
                         <div>
-                            <dt class="text-ink-500 text-xs mb-1">Jersey</dt>
+                            <dt class="text-ink-500 text-xs mb-1">T-Shirt</dt>
                             <dd class="text-ink-900 font-medium">{{ $participant->jersey_size ?? '—' }}</dd>
                         </div>
                         <div>

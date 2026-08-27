@@ -45,7 +45,7 @@ class EventFormField extends Model
         'category' => ['label' => 'Kategori Lomba', 'type' => 'select', 'required' => true, 'sort' => 40],
         'dob' => ['label' => 'Tanggal Lahir', 'type' => self::TYPE_DATE, 'required' => true, 'sort' => 50],
         'gender' => ['label' => 'Jenis Kelamin', 'type' => 'select', 'required' => true, 'sort' => 60],
-        'jersey_size' => ['label' => 'Ukuran Jersey', 'type' => 'select', 'required' => true, 'sort' => 70],
+        'jersey_size' => ['label' => 'Ukuran T-Shirt', 'type' => 'select', 'required' => true, 'sort' => 70],
         'emergency_contact' => ['label' => 'Kontak Darurat (Nama - No. Telp)', 'type' => self::TYPE_TEXT, 'required' => true, 'sort' => 80],
         'address' => ['label' => 'Alamat Lengkap', 'type' => self::TYPE_TEXTAREA, 'required' => true, 'sort' => 90],
         'city' => ['label' => 'Asal Kota/Kabupaten', 'type' => self::TYPE_TEXT, 'required' => true, 'sort' => 100],

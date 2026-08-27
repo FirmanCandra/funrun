@@ -15,10 +15,7 @@ class TicketController extends Controller
         // Load enabled fields for this event so the ticket view only shows active fields
         $enabledFields = collect();
         if ($ticket->participant && $ticket->participant->event_id) {
-            EventFormField::ensureCoreFields($ticket->participant->event_id);
-            $enabledFields = EventFormField::where('event_id', $ticket->participant->event_id)
-                ->where('enabled', true)
-                ->get();
+            $enabledFields = EventFormField::activeFor($ticket->participant->event_id);
         }
 
         return view('ticket', compact('ticket', 'enabledFields'));
@@ -33,10 +30,7 @@ class TicketController extends Controller
         // Load enabled fields for this event so the PDF only shows active fields
         $enabledFields = collect();
         if ($ticket->participant && $ticket->participant->event_id) {
-            EventFormField::ensureCoreFields($ticket->participant->event_id);
-            $enabledFields = EventFormField::where('event_id', $ticket->participant->event_id)
-                ->where('enabled', true)
-                ->get();
+            $enabledFields = EventFormField::activeFor($ticket->participant->event_id);
         }
 
         // Fetch QR code as base64 so DomPDF can embed it without external HTTP requests

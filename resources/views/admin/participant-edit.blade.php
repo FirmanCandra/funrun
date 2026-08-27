@@ -34,13 +34,11 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Jersey Size</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">T-Shirt Size</label>
                     <select name="jersey_size" required class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="S" {{ $participant->jersey_size == 'S' ? 'selected' : '' }}>S</option>
-                        <option value="M" {{ $participant->jersey_size == 'M' ? 'selected' : '' }}>M</option>
-                        <option value="L" {{ $participant->jersey_size == 'L' ? 'selected' : '' }}>L</option>
-                        <option value="XL" {{ $participant->jersey_size == 'XL' ? 'selected' : '' }}>XL</option>
-                        <option value="XXL" {{ $participant->jersey_size == 'XXL' ? 'selected' : '' }}>XXL</option>
+                        @foreach(\App\Models\EventFormField::SELECT_OPTIONS['jersey_size'] as $val => $label)
+                            <option value="{{ $val }}" {{ $participant->jersey_size == $val ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>

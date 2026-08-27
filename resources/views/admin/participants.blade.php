@@ -114,7 +114,7 @@
                     @endif
                     <td class="px-6 py-4 text-center">
                         <div class="font-bold text-blue-600">{{ $participant->category }}</div>
-                        <div class="text-xs text-slate-500">Jersey: {{ $participant->jersey_size }}</div>
+                        <div class="text-xs text-slate-500">T-Shirt: {{ $participant->jersey_size }}</div>
                     </td>
                     <td class="px-6 py-4 text-center">
                         @if($participant->ticket)

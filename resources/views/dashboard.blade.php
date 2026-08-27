@@ -73,7 +73,7 @@
                             <div class="min-w-0">
                                 <p class="font-medium text-ink-900 text-sm truncate">{{ $participant?->displayName() ?? '—' }}</p>
                                 <p class="text-xs text-ink-500">
-                                    {{ $category->name ?? $participant?->category }} · Jersey {{ $participant->jersey_size ?? '—' }}
+                                    {{ $category->name ?? $participant?->category }} · T-Shirt {{ $participant->jersey_size ?? '—' }}
                                 </p>
                             </div>
                             <div class="flex items-center gap-4">

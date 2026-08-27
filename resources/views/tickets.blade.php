@@ -60,7 +60,7 @@
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-xs uppercase tracking-wider text-ink-500 mb-1">Jersey</dt>
+                            <dt class="text-xs uppercase tracking-wider text-ink-500 mb-1">T-Shirt</dt>
                             <dd class="font-semibold text-ink-900 text-sm">{{ $participant->jersey_size ?? '—' }}</dd>
                         </div>
                     </dl>

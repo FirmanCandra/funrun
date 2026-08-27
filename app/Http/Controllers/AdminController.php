@@ -200,7 +200,7 @@ class AdminController extends Controller
             'fullname' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
             'category' => 'nullable|in:' . implode(',', $validCategories),
-            'jersey_size' => 'nullable|in:S,M,L,XL,XXL',
+            'jersey_size' => 'nullable|in:' . implode(',', array_keys(\App\Models\EventFormField::SELECT_OPTIONS['jersey_size'])),
         ]);
  
         $participant->update($request->only('fullname', 'phone', 'category', 'jersey_size'));
@@ -341,7 +341,7 @@ class AdminController extends Controller
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             // Write column headers
-            $header = ['ID', 'Nama Lengkap', 'NIK', 'Asal Kota', 'Email', 'No. WhatsApp', 'Kategori', 'Ukuran Jersey', 'Riwayat Penyakit', 'Kode Pesanan', 'Kode Tiket', 'Status Pembayaran', 'Status Check-in'];
+            $header = ['ID', 'Nama Lengkap', 'NIK', 'Asal Kota', 'Email', 'No. WhatsApp', 'Kategori', 'Ukuran T-Shirt', 'Riwayat Penyakit', 'Kode Pesanan', 'Kode Tiket', 'Status Pembayaran', 'Status Check-in'];
             foreach ($customFields as $field) {
                 $header[] = $field->label;
             }
@@ -552,10 +552,10 @@ class AdminController extends Controller
                      "• No. WhatsApp: *{$participant->phone}*\n" .
                      "• Kode Tiket: *{$ticket->ticket_code}*\n" .
                      "• Kategori: *{$ticketTitle}*\n" .
-                     "• Ukuran Jersey: *{$participant->jersey_size}*\n\n" .
+                     "• Ukuran T-Shirt: *{$participant->jersey_size}*\n\n" .
                      "*Download PDF Resmi E-Ticket:*\n{$pdfUrl}\n\n" .
                      "*Catatan:*\n" .
-                     "Silakan simpan link di atas atau unduh PDF tiket Anda. Tunjukkan QR Code pada tiket saat melakukan check-in di lokasi acara untuk pengambilan Race Pack & BIB.\n\n" .
+                     "Silakan simpan link di atas atau unduh PDF tiket Anda. Tunjukkan QR Code pada tiket saat melakukan check-in di lokasi acara untuk pengambilan Pesanan.\n\n" .
                      "Terima kasih atas partisipasi Anda, sampai jumpa di garis start!";
 
         // Attempt to send via Fonnte WA API (if configured in .env)
@@ -593,10 +593,7 @@ class AdminController extends Controller
         // Load enabled fields for this event so the PDF only shows active fields
         $enabledFields = collect();
         if ($ticket->participant && $ticket->participant->event_id) {
-            \App\Models\EventFormField::ensureCoreFields($ticket->participant->event_id);
-            $enabledFields = \App\Models\EventFormField::where('event_id', $ticket->participant->event_id)
-                ->where('enabled', true)
-                ->get();
+            $enabledFields = \App\Models\EventFormField::activeFor($ticket->participant->event_id);
         }
 
         // Fetch QR code as base64 so DomPDF can embed it without external HTTP requests
