@@ -95,11 +95,11 @@
                                     </li>
                                 @endif
 
-                                {{-- Profile dropdown --}}
-                                <li class="nav-profile" style="position:relative;padding-left:16px!important;">
+                                {{-- Profile dropdown (DESKTOP) --}}
+                                <li class="nav-profile desktop-only-nav" style="position:relative;padding-left:16px!important;">
                                     <a href="#" id="profileTrigger" onclick="toggleProfile(event)"
                                         style="display:flex;align-items:center;gap:8px;height:40px;line-height:1!important;color:#2a2a2a;">
-                                        <span class="profile-avatar">
+                                        <span class="profile-avatar" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg, #2563eb, #7c3aed);color:#fff;font-weight:700;font-size:14px;">
                                             {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
                                         </span>
                                         <svg style="width:14px;height:14px;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -108,15 +108,15 @@
                                     </a>
                                     <div id="profileDropdown" class="profile-dropdown">
                                         <div class="profile-header">
-                                            <p style="font-weight:600;color:#111827;font-size:14px;">{{ auth()->user()->name }}</p>
-                                            <p style="color:#6b7280;font-size:12px;">{{ auth()->user()->email }}</p>
+                                            <p style="font-weight:600;color:#111827;font-size:14px;margin:0;line-height:1.2;">{{ auth()->user()->name }}</p>
+                                            <p style="color:#6b7280;font-size:12px;margin:5px 0 0;line-height:1.2;">{{ auth()->user()->email }}</p>
                                         </div>
                                         @if(auth()->user()->isUser())
                                             <a href="{{ route('dashboard') }}">Pesanan Saya</a>
                                             <a href="{{ route('tickets') }}">Tiket Saya</a>
                                         @endif
                                         <a href="{{ route('profile.edit') }}">Profil</a>
-                                        <div class="profile-sep"></div>
+                                        <div style="height:1px;background:#f0f0f0;margin:4px 0;"></div>
                                         <form action="{{ route('logout') }}" method="POST" style="margin:0;">
                                             @csrf
                                             <button type="submit" class="logout-btn">Keluar</button>
@@ -124,37 +124,40 @@
                                     </div>
                                 </li>
                             @else
-                                <li class="scroll-to-section">
+                                <li class="scroll-to-section desktop-only-nav">
                                     <a href="{{ route('login') }}">Masuk</a>
                                 </li>
-                                <li class="nav-cta">
+                                <li class="nav-cta desktop-only-nav">
                                     <div class="main-red-button">
                                         <a href="{{ route('register') }}">Daftar Sekarang</a>
                                     </div>
                                 </li>
                             @endauth
 
-                            {{-- Mobile auth (hanya di mobile nav) --}}
-                            <li class="nav-auth-mobile" style="display:none;">
+                            {{-- Mobile auth (HANYA MOBILE) --}}
+                            <li class="nav-auth-mobile mobile-only-nav !p-0 !border-none" style="display:none;">
                                 @auth
-                                    <div class="mobile-user-info">
-                                        <div class="mobile-user-avatar">{{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</div>
-                                        <div class="mobile-user-detail">
-                                            <p class="mobile-user-name">{{ auth()->user()->name }}</p>
-                                            <p class="mobile-user-email">{{ auth()->user()->email }}</p>
+                                    <div class="flex items-center gap-3 px-5 py-3.5 bg-slate-50 border-b border-slate-200">
+                                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                                            {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="font-semibold text-slate-900 text-sm m-0 leading-tight">{{ auth()->user()->name }}</p>
+                                            <p class="text-slate-500 text-xs m-0 leading-tight truncate">{{ auth()->user()->email }}</p>
                                         </div>
                                     </div>
                                     @if(auth()->user()->isUser())
-                                        <a href="{{ route('dashboard') }}" class="mobile-nav-link">Pesanan Saya</a>
-                                        <a href="{{ route('tickets') }}" class="mobile-nav-link">Tiket Saya</a>
+                                        <a href="{{ route('dashboard') }}" class="block px-5 py-3 text-slate-700 text-sm font-medium border-b border-slate-100 hover:bg-slate-50 hover:text-orange-600 !h-auto !leading-normal !flex-none">Pesanan Saya</a>
+                                        <a href="{{ route('tickets') }}" class="block px-5 py-3 text-slate-700 text-sm font-medium border-b border-slate-100 hover:bg-slate-50 hover:text-orange-600 !h-auto !leading-normal !flex-none">Tiket Saya</a>
                                     @endif
-                                    <a href="{{ route('profile.edit') }}" class="mobile-nav-link">Profil</a>
-                                    <form action="{{ route('logout') }}" method="POST" style="margin:0;">
+                                    <a href="{{ route('profile.edit') }}" class="block px-5 py-3 text-slate-700 text-sm font-medium border-b border-slate-100 hover:bg-slate-50 hover:text-orange-600 !h-auto !leading-normal !flex-none">Profil</a>
+                                    <form action="{{ route('logout') }}" method="POST" class="m-0">
                                         @csrf
-                                        <button type="submit" class="mobile-logout-btn">Keluar</button>
+                                        <button type="submit" class="block w-full text-left px-5 py-3 text-red-500 text-sm font-semibold border-t border-slate-200 hover:bg-red-50 bg-transparent m-0 !h-auto !leading-normal">Keluar</button>
                                     </form>
                                 @else
-                                    <a href="{{ route('login') }}" style="color:#2563eb;">Masuk</a>
+                                    <a href="{{ route('login') }}" class="block px-5 py-3 text-blue-600 font-medium border-b border-slate-100 !h-auto !leading-normal">Masuk</a>
+                                    <a href="{{ route('register') }}" class="block px-5 py-3 text-orange-600 font-medium !h-auto !leading-normal">Daftar Sekarang</a>
                                 @endauth
                             </li>
                         </ul>
@@ -238,6 +241,76 @@
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/space-dynamic/js/animation.js') }}"></script>
     <script src="{{ asset('vendor/space-dynamic/js/templatemo-custom.js') }}"></script>
+
+    <style>
+        /* Responsive Nav Visibility */
+        @media (max-width: 767px) {
+            .desktop-only-nav { display: none !important; }
+            .mobile-only-nav { display: block !important; }
+            .header-area .main-nav .nav li.mobile-only-nav { display: block !important; }
+        }
+        @media (min-width: 768px) {
+            .mobile-only-nav { display: none !important; }
+            .desktop-only-nav { display: block !important; }
+            /* Specifically for list items in desktop header */
+            .header-area .main-nav .nav li.desktop-only-nav { display: block !important; }
+        }
+
+        /* Profile Dropdown (Desktop) */
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 5px);
+            width: 220px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #f0f0f0;
+            padding: 8px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .profile-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .profile-dropdown .profile-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 4px;
+            background: #f9fafb;
+        }
+        .profile-dropdown a, .profile-dropdown .logout-btn {
+            display: block !important;
+            padding: 8px 20px !important;
+            color: #4b5563 !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            line-height: 1.5 !important;
+            height: auto !important;
+            border: none !important;
+            text-align: left;
+            width: 100%;
+            background: transparent;
+            cursor: pointer;
+            text-decoration: none !important;
+            transition: all 0.2s;
+        }
+        .profile-dropdown a:hover {
+            background: #f3f4f6 !important;
+            color: #ea580c !important;
+        }
+        .profile-dropdown .logout-btn {
+            color: #ef4444 !important;
+        }
+        .profile-dropdown .logout-btn:hover {
+            background: #fef2f2 !important;
+        }
+    </style>
 
     <script>
         // ---- Profil dropdown ----
