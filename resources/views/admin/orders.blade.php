@@ -240,7 +240,7 @@
 {{-- Lightbox bukti --}}
 <div id="lightbox" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4"
     onclick="closeLightbox()">
-    <img id="lightbox-img" src="" alt="Bukti pembayaran" class="max-h-[90vh] max-w-full rounded-lg">
+    <img id="lightbox-img" src="" alt="Bukti pembayaran" class="max-h-[90vh] max-w-[90vw] w-auto h-auto object-contain rounded-lg shadow-2xl">
 </div>
 
 <script>
