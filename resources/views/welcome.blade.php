@@ -341,8 +341,7 @@
                 <div class="col-lg-7 wow fadeInLeft" data-wow-duration="0.5s" data-wow-delay="0.25s">
                     <div class="section-heading">
                         <h2 style="color:#fff;">
-                            Jangan Sampai <em style="color:#fde68a;">Kehabisan</em>
-                            <span style="color:#fed7aa;">Tiket</span> Favorit Anda
+                            AMANKAN <em style="color:#fde68a;">TIKETMU</em>
                         </h2>
                         <p>
                             Kuota event biasanya habis jauh sebelum hari-H.

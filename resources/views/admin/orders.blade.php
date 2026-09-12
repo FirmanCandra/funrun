@@ -4,49 +4,19 @@
 
 @section('content')
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-    <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h3 class="font-bold text-lg text-slate-800">Pesanan Tiket</h3>
-            <p class="text-xs text-slate-500 mt-1">
-                Satu pesanan bisa berisi beberapa tiket dengan satu bukti transfer. Menyetujui pesanan akan
-                menerbitkan seluruh tiket di dalamnya sekaligus.
-            </p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3">
-            <form action="{{ route('admin.orders') }}" method="GET" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-                <div class="relative flex-1 min-w-[12rem]">
-                    <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="Cari kode, nama, NIK..."
-                        class="border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-60">
-                    <div class="absolute left-3 top-2.5 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-
-                <select name="status" onchange="this.form.submit()"
-                    class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="all" {{ $currentStatus == 'all' ? 'selected' : '' }}>Semua Status</option>
-                    <option value="waiting_verification" {{ $currentStatus == 'waiting_verification' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                    <option value="paid" {{ $currentStatus == 'paid' ? 'selected' : '' }}>Lunas</option>
-                    <option value="rejected" {{ $currentStatus == 'rejected' ? 'selected' : '' }}>Ditolak</option>
-                </select>
-
-                <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">
-                    Cari
-                </button>
-
-                @if(request('search') || $currentStatus !== 'all')
-                    <a href="{{ route('admin.orders') }}" class="text-slate-500 hover:text-slate-700 text-sm font-medium px-1">Reset</a>
-                @endif
-            </form>
+    <div class="p-5 sm:p-6 border-b border-slate-100 space-y-4">
+        {{-- Baris 1: Judul + tombol aksi --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h3 class="font-bold text-lg text-slate-800">Pesanan Tiket</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Satu pesanan bisa berisi beberapa tiket dengan satu bukti transfer. Menyetujui pesanan akan
+                    menerbitkan seluruh tiket di dalamnya sekaligus.
+                </p>
+            </div>
 
             <button type="button" id="bulk-delete-btn" onclick="confirmBulkDelete()"
-                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap shrink-0"
                 style="display: none;">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -55,6 +25,47 @@
                 Hapus Terpilih (<span id="selected-count">0</span>)
             </button>
         </div>
+
+        {{-- Baris 2: Filter & Search --}}
+        <form action="{{ route('admin.orders') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div class="relative flex-1 min-w-0">
+                <input type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Cari kode, nama, NIK..."
+                    class="border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                <div class="absolute left-3 top-2.5 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                <select name="status" onchange="this.form.submit()"
+                    class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all" {{ $currentStatus == 'all' ? 'selected' : '' }}>Semua Status</option>
+                    <option value="waiting_verification" {{ $currentStatus == 'waiting_verification' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                    <option value="paid" {{ $currentStatus == 'paid' ? 'selected' : '' }}>Lunas</option>
+                    <option value="rejected" {{ $currentStatus == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                </select>
+
+                <select name="sort" onchange="this.form.submit()"
+                    class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="newest" {{ $currentSort == 'newest' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="oldest" {{ $currentSort == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                </select>
+
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
+                    Cari
+                </button>
+
+                @if(request('search') || $currentStatus !== 'all' || $currentSort !== 'newest')
+                    <a href="{{ route('admin.orders') }}" class="text-slate-500 hover:text-slate-700 text-sm font-medium whitespace-nowrap">Reset</a>
+                @endif
+            </div>
+        </form>
+    </div>
     </div>
 
     @if(session('success'))

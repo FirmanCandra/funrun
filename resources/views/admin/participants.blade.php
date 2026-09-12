@@ -4,21 +4,36 @@
 
 @section('content')
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-    <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h3 class="font-bold text-lg text-slate-800">All Registered Participants</h3>
-            <p class="text-xs text-slate-500 mt-1">Total: <span class="font-bold text-slate-700">{{ $participants->total() }}</span> participants</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
-            <!-- Filter & Search Form -->
-            <form action="{{ route('admin.participants') }}" method="GET" class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-                <div class="relative flex-1 min-w-[12rem]">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, WA, ticket..." class="border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full md:w-60">
-                    <div class="absolute left-3 top-2.5 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </div>
-                </div>
+    <div class="p-5 sm:p-6 border-b border-slate-100 space-y-4">
+        {{-- Baris 1: Judul + tombol aksi --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h3 class="font-bold text-lg text-slate-800">All Registered Participants</h3>
+                <p class="text-xs text-slate-500 mt-1">Total: <span class="font-bold text-slate-700">{{ $participants->total() }}</span> participants</p>
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0">
+                <button type="button" id="bulk-delete-btn" onclick="confirmBulkDelete()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap" style="display: none;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Delete Selected (<span id="selected-count">0</span>)
+                </button>
 
+                <a href="{{ route('admin.export', request()->query()) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Export CSV
+                </a>
+            </div>
+        </div>
+
+        {{-- Baris 2: Filter & Search --}}
+        <form action="{{ route('admin.participants') }}" method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <div class="relative flex-1 min-w-0">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, WA, ticket..." class="border border-slate-200 rounded-lg pl-9 pr-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                <div class="absolute left-3 top-2.5 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
                 <select name="category" onchange="this.form.submit()" class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="all" {{ $currentCategory == 'all' ? 'selected' : '' }}>All Categories</option>
                     @foreach($categories as $cat)
@@ -26,25 +41,21 @@
                     @endforeach
                 </select>
 
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors">
+                <select name="sort" onchange="this.form.submit()" class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="newest" {{ $currentSort == 'newest' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="oldest" {{ $currentSort == 'oldest' ? 'selected' : '' }}>Terlama</option>
+                </select>
+
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
                     Search
                 </button>
 
-                @if(request('search') || $currentCategory !== 'all')
-                    <a href="{{ route('admin.participants') }}" class="text-slate-500 hover:text-slate-700 text-sm font-medium px-1">Reset</a>
+                @if(request('search') || $currentCategory !== 'all' || $currentSort !== 'newest')
+                    <a href="{{ route('admin.participants') }}" class="text-slate-500 hover:text-slate-700 text-sm font-medium whitespace-nowrap">Reset</a>
                 @endif
-            </form>
-
-            <button type="button" id="bulk-delete-btn" onclick="confirmBulkDelete()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap" style="display: none;">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                Delete Selected (<span id="selected-count">0</span>)
-            </button>
-
-            <a href="{{ route('admin.export', request()->query()) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Export CSV
-            </a>
-        </div>
+            </div>
+        </form>
+    </div>
     </div>
     
     {{-- Digulir mendatar di layar sempit, dengan lebar minimum agar kolomnya tetap terbaca. --}}

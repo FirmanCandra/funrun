@@ -116,7 +116,7 @@ class AdminController extends Controller
 
     public function participants(Request $request)
     {
-        $query = \App\Models\Participant::with(['ticket.order', 'user', 'event.admins'])->latest();
+        $query = \App\Models\Participant::with(['ticket.order', 'user', 'event.admins']);
         $user = auth()->user();
  
         if ($user->role === 'admin') {
@@ -152,10 +152,18 @@ class AdminController extends Controller
                   });
             });
         }
+
+        // Urutan berdasarkan waktu — default: terbaru dulu
+        $currentSort = $request->sort ?? 'newest';
+        if ($currentSort === 'oldest') {
+            $query->oldest(); // orderBy('created_at', 'asc')
+        } else {
+            $query->latest(); // orderBy('created_at', 'desc')
+        }
  
         $participants = $query->paginate(10)->withQueryString();
  
-        return view('admin.participants', compact('participants', 'currentCategory', 'categories'));
+        return view('admin.participants', compact('participants', 'currentCategory', 'categories', 'currentSort'));
     }
  
     public function editParticipant($id)
@@ -388,8 +396,7 @@ class AdminController extends Controller
     public function orders(Request $request)
     {
         $query = \App\Models\Order::with(['event', 'user', 'tickets.participant'])
-            ->withCount('tickets')
-            ->latest();
+            ->withCount('tickets');
         $user = auth()->user();
 
         if ($user->role === 'admin') {
@@ -423,9 +430,17 @@ class AdminController extends Controller
             });
         }
 
+        // Urutan berdasarkan waktu — default: terbaru dulu
+        $currentSort = $request->sort ?? 'newest';
+        if ($currentSort === 'oldest') {
+            $query->oldest(); // orderBy('created_at', 'asc')
+        } else {
+            $query->latest(); // orderBy('created_at', 'desc')
+        }
+
         $orders = $query->paginate(10)->withQueryString();
 
-        return view('admin.orders', compact('orders', 'currentStatus'));
+        return view('admin.orders', compact('orders', 'currentStatus', 'currentSort'));
     }
 
     public function bulkDestroyOrder(Request $request)
