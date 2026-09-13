@@ -209,18 +209,18 @@
 @endphp
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "Event",
+  "@@context": "https://schema.org",
+  "@@type": "Event",
   "name": "{{ $event['nama'] }}",
   "startDate": "{{ $eventDateIso }}",
   "endDate": "{{ $eventDateIso }}",
   "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
   "eventStatus": "https://schema.org/EventScheduled",
   "location": {
-    "@type": "Place",
+    "@@type": "Place",
     "name": "{{ $event['lokasi'] }}",
     "address": {
-      "@type": "PostalAddress",
+      "@@type": "PostalAddress",
       "addressLocality": "{{ trim(last(explode(',', $event['lokasi'] ?? ''))) }}"
     }
   },
@@ -229,7 +229,7 @@
   ],
   "description": "{{ Str::limit(strip_tags($event['deskripsi'] ?? ''), 155) }}",
   "offers": {
-    "@type": "Offer",
+    "@@type": "Offer",
     "url": "{{ url()->current() }}",
     "price": "{{ $event['harga'] ?? 0 }}",
     "priceCurrency": "IDR",
