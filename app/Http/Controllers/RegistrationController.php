@@ -40,9 +40,12 @@ class RegistrationController extends Controller
             ];
         }
 
-        // Apply fallbacks
         if (empty($event['waktu'])) {
             $event['waktu'] = '16.00 - 23.00';
+        }
+
+        if ($event['is_closed'] ?? false) {
+            return redirect()->route('event.show', $event['id'])->with('error', 'Mohon maaf, pendaftaran untuk event ini telah ditutup.');
         }
 
         $dbEvent = $this->resolveEvent($event);
@@ -83,6 +86,12 @@ class RegistrationController extends Controller
         }
 
         $jsonEvent = collect(HomeController::loadEvents())->firstWhere('id', $eventId);
+
+        if ($jsonEvent && ($jsonEvent['is_closed'] ?? false)) {
+            throw ValidationException::withMessages([
+                'event_id' => 'Mohon maaf, pendaftaran untuk event ini telah ditutup.',
+            ]);
+        }
 
         // Rekening tujuan harus salah satu milik event ini dan masih aktif —
         // tanpa itu pembeli bisa mengarahkan transfernya ke rekening event lain.

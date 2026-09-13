@@ -141,6 +141,7 @@
                     {{ $gratis ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
                 </p>
 
+                @php $isClosed = $event['is_closed'] ?? false; @endphp
                 @if($sudahTerdaftar)
                     <div class="rounded-btn bg-green-50 border border-green-200 px-4 py-3.5 mb-4 flex items-start gap-3">
                         <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -153,8 +154,14 @@
                     </div>
 
                     <a href="{{ route('dashboard') }}" class="btn btn-primary w-full py-3.5 mb-3">Lihat Pesanan Saya</a>
-                    <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
-                        class="btn btn-outline w-full py-3.5">Pesan Lagi</a>
+                    @if(!$isClosed)
+                        <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
+                            class="btn btn-outline w-full py-3.5">Pesan Lagi</a>
+                    @endif
+                @elseif($isClosed)
+                    <button disabled class="btn-ticket-cta w-full py-3.5 text-base" style="background: #9ca3af; color: white; cursor: not-allowed; border-color: #9ca3af;">
+                        Pendaftaran Ditutup
+                    </button>
                 @else
                     <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
                         class="btn-ticket-cta w-full py-3.5 text-base">

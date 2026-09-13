@@ -77,7 +77,11 @@
                 <div class="col-lg-6">
                     <div class="right-image wow fadeInRight" data-wow-duration="1s" data-wow-delay="0.5s">
                         @if ($sorot)
-                            <a href="{{ route('event.show', $sorot['id']) }}" class="event-card-sd d-block"
+                            @php
+                                $isClosed = $sorot['is_closed'] ?? false;
+                                $sudahTerdaftarSorot = isset($myEventIds) && $myEventIds->contains($sorot['id']);
+                            @endphp
+                            <a href="{{ $sudahTerdaftarSorot ? route('dashboard') : route('event.show', $sorot['id']) }}" class="event-card-sd d-block"
                                 style="text-decoration:none;">
                                 <div class="event-thumb">
                                     @include('partials.event-image', [
@@ -88,6 +92,15 @@
                                         style="position:absolute;top:14px;left:14px;background:#ea580c;color:#fff;font-size:11px;">
                                         Event Pilihan
                                     </span>
+                                    @if($sudahTerdaftarSorot)
+                                        <span class="badge"
+                                            style="position:absolute;top:14px;right:14px;background:#22c55e;color:#fff;font-size:11px;display:flex;align-items:center;gap:4px;">
+                                            <svg style="width:11px;height:11px;" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
+                                            </svg>
+                                            Terdaftar
+                                        </span>
+                                    @endif
                                 </div>
                                 <div class="event-body">
                                     <h4>{{ $sorot['nama'] }}</h4>
@@ -120,8 +133,15 @@
                                                 {{ (int) ($sorot['harga'] ?? 0) === 0 ? 'Gratis' : 'Rp' . number_format($sorot['harga'], 0, ',', '.') }}
                                             </span>
                                         </div>
-                                        <span class="btn-ticket-cta" style="font-size:13px;padding:9px 18px;">
-                                            Pesan Tiket
+                                        <span class="{{ $sudahTerdaftarSorot ? 'btn-ticket-registered' : 'btn-ticket-cta' }}"
+                                            style="font-size:13px;padding:9px 18px; {{ ($isClosed && !$sudahTerdaftarSorot) ? 'background: #9ca3af; color: white; cursor: not-allowed; border-color: #9ca3af;' : '' }}">
+                                            @if($sudahTerdaftarSorot)
+                                                Lihat Pesanan
+                                            @elseif($isClosed)
+                                                Ditutup
+                                            @else
+                                                Pesan Tiket
+                                            @endif
                                         </span>
                                     </div>
                                 </div>
@@ -294,10 +314,14 @@
                                             {{ $gratis ? 'Gratis' : 'Rp' . number_format($ev['harga'], 0, ',', '.') }}
                                         </span>
                                     </div>
+                                    @php $isClosed = $ev['is_closed'] ?? false; @endphp
                                     <a href="{{ $sudahTerdaftar ? route('dashboard') : route('event.show', $ev['id']) }}"
-                                        class="{{ $sudahTerdaftar ? 'btn-ticket-registered' : 'btn-ticket-cta' }}">
+                                        class="{{ $sudahTerdaftar ? 'btn-ticket-registered' : 'btn-ticket-cta' }}"
+                                        @if($isClosed && !$sudahTerdaftar) style="background: #9ca3af; color: white; border-color: #9ca3af; cursor: not-allowed;" @endif>
                                         @if ($sudahTerdaftar)
                                             Lihat Pesanan
+                                        @elseif($isClosed)
+                                            Ditutup
                                         @else
                                             Pesan Tiket
                                         @endif

@@ -46,6 +46,12 @@
     <textarea name="deskripsi" placeholder="Deskripsi lengkap event (kosongkan untuk default)" rows="3"
               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"></textarea>
 </div>
+<div class="flex items-center gap-2 mt-4 mb-2">
+    <input type="checkbox" name="is_closed" value="1" id="add_is_closed" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4">
+    <label for="add_is_closed" class="text-sm font-semibold text-slate-700 cursor-pointer">
+        Tutup Pendaftaran (Event tetap aktif untuk Scanner / Check-in)
+    </label>
+</div>
 <div>
     <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Syarat & Ketentuan</label>
     <textarea name="syarat_ketentuan" placeholder="Syarat & ketentuan event (kosongkan untuk default)" rows="3"

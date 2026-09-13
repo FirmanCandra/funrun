@@ -733,6 +733,7 @@ class AdminController extends Controller
             'waktu'            => $request->waktu ?? '',
             'deskripsi'        => $request->deskripsi ?? '',
             'syarat_ketentuan' => $request->syarat_ketentuan ?? '',
+            'is_closed'        => $request->has('is_closed') ? true : false,
         ];
 
         \App\Http\Controllers\HomeController::saveEvents($events);
@@ -782,6 +783,7 @@ class AdminController extends Controller
                 $ev['waktu']            = $request->waktu ?? '';
                 $ev['deskripsi']        = $request->deskripsi ?? '';
                 $ev['syarat_ketentuan'] = $request->syarat_ketentuan ?? '';
+                $ev['is_closed']        = $request->has('is_closed') ? true : false;
                 
                 if ($request->hasFile('thumbnail')) {
                     $path = $request->file('thumbnail')->store('thumbnails', 'public');
