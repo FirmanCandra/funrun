@@ -4,7 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="SeTiket — Platform pemesanan tiket event online. Temukan fun run, festival, seminar, dan pameran dengan mudah.">
+    <meta name="description" content="@yield('meta_description', 'SeTiket — Platform pemesanan tiket event online. Temukan fun run, festival, seminar, dan pameran dengan mudah.')">
+    
+    {{-- Canonical URL --}}
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    {{-- Open Graph / SEO --}}
+    <meta property="og:title" content="@yield('title', 'SeTiket — Temukan & Pesan Tiket Event')">
+    <meta property="og:description" content="@yield('meta_description', 'SeTiket — Platform pemesanan tiket event online. Temukan fun run, festival, seminar, dan pameran dengan mudah.')">
+    <meta property="og:image" content="@yield('og_image', asset('images/setiket.webp'))">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="@yield('og_type', 'website')">
+
     <title>@yield('title', 'SeTiket — Temukan & Pesan Tiket Event')</title>
     <link rel="icon" type="image/webp" href="{{ asset('images/setiket.webp') }}">
 

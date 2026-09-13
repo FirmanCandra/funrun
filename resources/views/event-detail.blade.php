@@ -8,6 +8,10 @@
     $petaUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($event['lokasi'] ?? '');
 @endphp
 
+@section('meta_description', Str::limit(strip_tags($event['deskripsi'] ?? ''), 155))
+@section('og_image', !empty($event['thumbnail']) ? asset($event['thumbnail']) : asset('images/setiket.webp'))
+@section('og_type', 'event')
+
 @section('content')
 
 {{-- ===== COVER ===== --}}
@@ -192,3 +196,46 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+@php
+    // Tanggal event disimpan sebagai string lokal (e.g. '25 Juli 2026').
+    // Carbon biasanya bisa parse format ini, tapi kita beri fallback agar aman.
+    try {
+        $eventDateIso = \Carbon\Carbon::parse($event['tanggal'])->toIso8601String();
+    } catch (\Exception $e) {
+        $eventDateIso = now()->toIso8601String();
+    }
+@endphp
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "{{ $event['nama'] }}",
+  "startDate": "{{ $eventDateIso }}",
+  "endDate": "{{ $eventDateIso }}",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "location": {
+    "@type": "Place",
+    "name": "{{ $event['lokasi'] }}",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "{{ trim(last(explode(',', $event['lokasi'] ?? ''))) }}"
+    }
+  },
+  "image": [
+    "{{ !empty($event['thumbnail']) ? asset($event['thumbnail']) : asset('images/setiket.webp') }}"
+  ],
+  "description": "{{ Str::limit(strip_tags($event['deskripsi'] ?? ''), 155) }}",
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ url()->current() }}",
+    "price": "{{ $event['harga'] ?? 0 }}",
+    "priceCurrency": "IDR",
+    "availability": "https://schema.org/InStock",
+    "validFrom": "{{ now()->toIso8601String() }}"
+  }
+}
+</script>
+@endpush

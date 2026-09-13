@@ -13,6 +13,21 @@ use App\Http\Controllers\ProfileController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/event/{id}', [HomeController::class, 'showEvent'])->name('event.show');
 
+// Sitemap SEO
+Route::get('/sitemap.xml', function () {
+    $events = collect(\App\Http\Controllers\HomeController::loadEvents());
+
+    return response()->view('sitemap', [
+        'events' => $events,
+    ])->header('Content-Type', 'text/xml');
+})->name('sitemap');
+
+// robots.txt dinamis supaya URL sitemap selalu sesuai APP_URL
+Route::get('/robots.txt', function () {
+    return response()->view('robots')
+        ->header('Content-Type', 'text/plain');
+})->name('robots');
+
 // Alur Pembelian Tiket — wajib login sebagai peserta, supaya setiap pesanan
 // terikat ke akun pembeli dan bisa dilacak lewat /dashboard.
 // Route pembelian dinamai 'event.register' agar tidak bentrok dengan route

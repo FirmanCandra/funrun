@@ -30,10 +30,10 @@
                 <div class="col-lg-6">
                     <div class="left-content header-text wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.8s">
                         <h6>Selamat Datang di SeTiket</h6>
-                        <h2>
+                        <h1>
                             Temukan Event <em>Seru</em> &
                             <span>Kebutuhan Event</span> Sekarang
-                        </h2>
+                        </h1>
                         <p>
                             Platform pemesanan tiket event merchandise dan perlengkapan event lainnya. e-Ticket dengan QR
                             Code langsung tersimpan di akun Anda.
@@ -474,3 +474,22 @@
     @endpush
 
 @endsection
+
+@push('scripts')
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "SeTiket",
+  "url": "{{ url('/') }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "{{ url('/') }}?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+@endpush
