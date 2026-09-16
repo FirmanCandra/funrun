@@ -41,6 +41,16 @@
             </div>
 
             <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                @if(auth()->user()->role === 'super_admin' && $events->isNotEmpty())
+                    <select name="event_id" onchange="this.form.submit()"
+                        class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all" {{ $currentEventId == 'all' ? 'selected' : '' }}>Semua Event</option>
+                        @foreach($events as $ev)
+                            <option value="{{ $ev->id }}" {{ $currentEventId == $ev->id ? 'selected' : '' }}>{{ $ev->title }}</option>
+                        @endforeach
+                    </select>
+                @endif
+
                 <select name="status" onchange="this.form.submit()"
                     class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="all" {{ $currentStatus == 'all' ? 'selected' : '' }}>Semua Status</option>
@@ -60,7 +70,7 @@
                     Cari
                 </button>
 
-                @if(request('search') || $currentStatus !== 'all' || $currentSort !== 'newest')
+                @if(request('search') || $currentStatus !== 'all' || $currentSort !== 'newest' || (isset($currentEventId) && $currentEventId !== 'all'))
                     <a href="{{ route('admin.orders') }}" class="text-slate-500 hover:text-slate-700 text-sm font-medium whitespace-nowrap">Reset</a>
                 @endif
             </div>

@@ -70,6 +70,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/participants/{id}', [AdminController::class, 'updateParticipant'])->name('participants.update');
         Route::delete('/participants/{id}', [AdminController::class, 'deleteParticipant'])->name('participants.delete');
         Route::get('/export-csv', [AdminController::class, 'exportCSV'])->name('export');
+        Route::post('/participants/import', [AdminController::class, 'importParticipants'])->name('participants.import');
+        Route::get('/participants/import-template', [AdminController::class, 'downloadImportTemplate'])->name('participants.import-template');
         // Antrian verifikasi pesanan (satu baris per pesanan, bukan per tiket)
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
         Route::post('/orders/bulk-delete', [AdminController::class, 'bulkDestroyOrder'])->name('orders.bulk-delete');
@@ -86,6 +88,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Formulir pendaftaran per event — admin mengatur event yang dia tangani
         Route::get('/form-fields', [AdminController::class, 'formFields'])->name('form-fields');
         Route::post('/form-fields', [AdminController::class, 'storeFormField'])->name('form-fields.store');
+        Route::put('/form-fields/bulk', [AdminController::class, 'bulkUpdateFormFields'])->name('form-fields.bulk-update');
         Route::put('/form-fields/{id}', [AdminController::class, 'updateFormField'])->name('form-fields.update');
         Route::delete('/form-fields/{id}', [AdminController::class, 'destroyFormField'])->name('form-fields.destroy');
 

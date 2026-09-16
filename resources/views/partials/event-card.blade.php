@@ -67,12 +67,17 @@
                     {{ $gratis ? 'Gratis' : 'Rp' . number_format($ev['harga'], 0, ',', '.') }}
                 </span>
             </div>
-            @php $isClosed = $ev['is_closed'] ?? false; @endphp
+            @php 
+                $isClosed = $ev['is_closed'] ?? false; 
+                $isPrivate = $ev['is_private'] ?? false;
+            @endphp
             <a href="{{ $sudahTerdaftar ? route('dashboard') : route('event.show', $ev['id']) }}"
-                class="{{ $sudahTerdaftar ? 'btn-ticket-registered' : ($isClosed ? 'btn-ticket-cta' : 'btn-ticket-cta') }}"
-                @if($isClosed && !$sudahTerdaftar) style="background: #9ca3af; color: white; border-color: #9ca3af; cursor: not-allowed;" @endif>
+                class="{{ $sudahTerdaftar ? 'btn-ticket-registered' : 'btn-ticket-cta' }}"
+                @if(($isClosed || $isPrivate) && !$sudahTerdaftar) style="background: #9ca3af; color: white; border-color: #9ca3af; cursor: not-allowed;" @endif>
                 @if($sudahTerdaftar)
                     Lihat Pesanan
+                @elseif($isPrivate)
+                    Private
                 @elseif($isClosed)
                     Ditutup
                 @else

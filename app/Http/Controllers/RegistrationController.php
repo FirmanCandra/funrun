@@ -48,6 +48,10 @@ class RegistrationController extends Controller
             return redirect()->route('event.show', $event['id'])->with('error', 'Mohon maaf, pendaftaran untuk event ini telah ditutup.');
         }
 
+        if ($event['is_private'] ?? false) {
+            return redirect()->route('event.show', $event['id'])->with('error', 'Mohon maaf, event ini bersifat private dan hanya menerima pendaftaran via undangan/import.');
+        }
+
         $dbEvent = $this->resolveEvent($event);
         $categories = $dbEvent->categories;
 
@@ -90,6 +94,12 @@ class RegistrationController extends Controller
         if ($jsonEvent && ($jsonEvent['is_closed'] ?? false)) {
             throw ValidationException::withMessages([
                 'event_id' => 'Mohon maaf, pendaftaran untuk event ini telah ditutup.',
+            ]);
+        }
+
+        if ($jsonEvent && ($jsonEvent['is_private'] ?? false)) {
+            throw ValidationException::withMessages([
+                'event_id' => 'Mohon maaf, event ini bersifat private dan hanya menerima pendaftaran via undangan/import.',
             ]);
         }
 

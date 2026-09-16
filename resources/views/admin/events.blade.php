@@ -121,6 +121,11 @@
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">Ditutup</span>
                                     </div>
                                 @endif
+                                @if($ev['is_private'] ?? false)
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700">Private</span>
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-5 py-4">
                                 <div class="flex items-center gap-2">
@@ -135,7 +140,7 @@
                                     </a>
                                     {{-- Edit button --}}
                                     <button
-                                        onclick="openEdit({{ $ev['id'] }}, @js($ev['nama']), @js($ev['lokasi']), @js($ev['tanggal']), {{ $ev['harga'] }}, @js($ev['kategori']), @js($ev['urlBeli'] ?? ''), @js($ev['thumbnail'] ?? ''), @js($ev['waktu'] ?? ''), @js($ev['deskripsi'] ?? ''), @js($ev['syarat_ketentuan'] ?? ''), @js($ev['is_closed'] ?? false))"
+                                        onclick="openEdit({{ $ev['id'] }}, @js($ev['nama']), @js($ev['lokasi']), @js($ev['tanggal']), {{ $ev['harga'] }}, @js($ev['kategori']), @js($ev['urlBeli'] ?? ''), @js($ev['thumbnail'] ?? ''), @js($ev['waktu'] ?? ''), @js($ev['deskripsi'] ?? ''), @js($ev['syarat_ketentuan'] ?? ''), @js($ev['is_closed'] ?? false), @js($ev['is_private'] ?? false))"
                                         class="inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -285,10 +290,16 @@
                         placeholder="Deskripsi lengkap event (kosongkan untuk default)" rows="3"
                         class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"></textarea>
                 </div>
-                <div class="flex items-center gap-2 mt-4 mb-2">
+                <div class="flex items-center gap-2 mt-4">
                     <input type="checkbox" name="is_closed" value="1" id="edit_is_closed" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4">
                     <label for="edit_is_closed" class="text-sm font-semibold text-slate-700 cursor-pointer">
                         Tutup Pendaftaran (Event tetap aktif untuk Scanner / Check-in)
+                    </label>
+                </div>
+                <div class="flex items-center gap-2 mt-2 mb-2">
+                    <input type="checkbox" name="is_private" value="1" id="edit_is_private" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4">
+                    <label for="edit_is_private" class="text-sm font-semibold text-slate-700 cursor-pointer">
+                        Event Private (Pendaftaran hanya via Import)
                     </label>
                 </div>
                 <div>
@@ -318,7 +329,7 @@
 
     <script>
 
-        function openEdit(id, nama, lokasi, tanggal, harga, kategori, urlBeli, thumbnail, waktu, deskripsi, syarat_ketentuan, is_closed) {
+        function openEdit(id, nama, lokasi, tanggal, harga, kategori, urlBeli, thumbnail, waktu, deskripsi, syarat_ketentuan, is_closed, is_private) {
             var form = document.getElementById('editForm');
             form.action = '/admin/events/' + id;
             document.getElementById('edit_nama').value = nama;
@@ -341,6 +352,7 @@
             document.getElementById('edit_deskripsi').value = deskripsi || '';
             document.getElementById('edit_syarat_ketentuan').value = syarat_ketentuan || '';
             document.getElementById('edit_is_closed').checked = is_closed ? true : false;
+            document.getElementById('edit_is_private').checked = is_private ? true : false;
 
             document.getElementById('modalEdit').classList.remove('hidden');
         }

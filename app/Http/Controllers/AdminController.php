@@ -119,11 +119,24 @@ class AdminController extends Controller
         $query = \App\Models\Participant::with(['ticket.order', 'user', 'event.admins']);
         $user = auth()->user();
  
+        // Event filter: admin biasa terkunci ke event-nya, super_admin bisa pilih
+        $events = collect(); // kosong untuk admin biasa
+        $currentEventId = 'all';
+
         if ($user->role === 'admin') {
             $query->where('event_id', $user->event_id);
             $categories = \App\Models\EventCategory::where('event_id', $user->event_id)->get();
         } else {
-            $categories = \App\Models\EventCategory::select('code', 'name')->groupBy('code', 'name')->get();
+            // Super admin: load daftar event untuk dropdown filter
+            $events = \App\Models\Event::orderBy('id', 'desc')->get();
+            $currentEventId = $request->event_id ?? 'all';
+
+            if ($currentEventId !== 'all') {
+                $query->where('event_id', $currentEventId);
+                $categories = \App\Models\EventCategory::where('event_id', $currentEventId)->get();
+            } else {
+                $categories = \App\Models\EventCategory::select('code', 'name')->groupBy('code', 'name')->get();
+            }
         }
 
         if ($categories->isEmpty()) {
@@ -163,7 +176,7 @@ class AdminController extends Controller
  
         $participants = $query->paginate(10)->withQueryString();
  
-        return view('admin.participants', compact('participants', 'currentCategory', 'categories', 'currentSort'));
+        return view('admin.participants', compact('participants', 'currentCategory', 'categories', 'currentSort', 'events', 'currentEventId'));
     }
  
     public function editParticipant($id)
@@ -302,8 +315,14 @@ class AdminController extends Controller
         $query = \App\Models\Participant::with(['user', 'ticket.order'])->latest();
         $user = auth()->user();
 
+        $eventId = $request->query('event_id', 'all');
         if ($user->role === 'admin') {
-            $query->where('event_id', $user->event_id);
+            $eventId = $user->event_id;
+            $query->where('event_id', $eventId);
+        } else {
+            if ($eventId !== 'all') {
+                $query->where('event_id', $eventId);
+            }
         }
 
         if ($request->has('category') && $request->category !== 'all') {
@@ -326,68 +345,106 @@ class AdminController extends Controller
 
         $participants = $query->get();
         
-        $filename = "participants_setiket.csv";
-        
-        $headers = [
-            'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
+        if ($eventId === 'all') {
+            $eventIds = $participants->pluck('event_id')->unique();
+            $customFields = \App\Models\EventFormField::whereIn('event_id', $eventIds)
+                ->where('is_core', false)
+                ->where('enabled', true)
+                ->orderBy('event_id')
+                ->orderBy('sort_order')
+                ->get();
+            $coreFields = \App\Models\EventFormField::whereIn('event_id', $eventIds)
+                ->where('is_core', true)
+                ->where('enabled', true)
+                ->pluck('key')
+                ->toArray();
+        } else {
+            $customFields = \App\Models\EventFormField::where('event_id', $eventId)
+                ->where('is_core', false)
+                ->where('enabled', true)
+                ->orderBy('event_id')
+                ->orderBy('sort_order')
+                ->get();
+            $coreFields = \App\Models\EventFormField::where('event_id', $eventId)
+                ->where('is_core', true)
+                ->where('enabled', true)
+                ->pluck('key')
+                ->toArray();
+        }
 
-        // Kolom tambahan diambil dari field custom milik event yang muncul di
-        // hasil export. Untuk admin yang terikat satu event, ini persis daftar
-        // pertanyaan tambahan event itu.
-        $customFields = \App\Models\EventFormField::whereIn('event_id', $participants->pluck('event_id')->unique())
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ParticipantsExport($participants, $customFields, $coreFields),
+            'participants_setiket.xlsx'
+        );
+    }
+
+    /**
+     * Import partisipan dari file CSV/Excel ke event tujuan.
+     *
+     * Tiket langsung terbit (status 'valid') karena ini data yang sudah
+     * pernah di-approve. Baris dengan NIK duplikat di-skip.
+     */
+    public function importParticipants(Request $request)
+    {
+        $request->validate([
+            'import_file'     => 'required|file|mimes:csv,xlsx,xls,txt|max:5120',
+            'target_event_id' => 'required|integer|exists:events,id',
+        ], [
+            'import_file.required'     => 'File import wajib diunggah.',
+            'import_file.mimes'        => 'Format file harus CSV atau Excel (.xlsx/.xls).',
+            'import_file.max'          => 'Ukuran file maksimal 5 MB.',
+            'target_event_id.required' => 'Pilih event tujuan.',
+            'target_event_id.exists'   => 'Event tujuan tidak ditemukan.',
+        ]);
+
+        $import = new \App\Imports\ParticipantImport((int) $request->target_event_id);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('import_file'));
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'Gagal membaca file: ' . $e->getMessage());
+        }
+
+        $eventName = \App\Models\Event::find($request->target_event_id)->title ?? 'Event';
+
+        $msg = "{$import->imported} partisipan berhasil diimport ke \"{$eventName}\".";
+        if ($import->skipped > 0) {
+            $msg .= " {$import->skipped} baris dilewati.";
+        }
+
+        return redirect()->back()->with('success', $msg)
+            ->with('import_skipped_reasons', $import->skippedReasons);
+    }
+
+    /**
+     * Download template CSV kosong untuk import partisipan.
+     */
+    public function downloadImportTemplate(Request $request)
+    {
+        $user = auth()->user();
+        $eventId = $request->query('event_id');
+        if ($user->role === 'admin') {
+            $eventId = $user->event_id;
+        } else {
+            $eventId = $eventId ?? 1; // Default to 1 if not provided
+        }
+
+        $coreFields = \App\Models\EventFormField::where('event_id', $eventId)
+            ->where('is_core', true)
+            ->where('enabled', true)
+            ->pluck('key')
+            ->toArray();
+
+        $customFields = \App\Models\EventFormField::where('event_id', $eventId)
             ->where('is_core', false)
-            ->orderBy('event_id')
+            ->where('enabled', true)
             ->orderBy('sort_order')
             ->get();
 
-        $callback = function() use ($participants, $customFields) {
-            $file = fopen('php://output', 'w');
-
-            // Add UTF-8 BOM for Excel compatibility
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-
-            // Write column headers
-            $header = ['ID', 'Nama Lengkap', 'NIK', 'Asal Kota', 'Email', 'No. WhatsApp', 'Kategori', 'Ukuran T-Shirt', 'Riwayat Penyakit', 'Kode Pesanan', 'Kode Tiket', 'Status Pembayaran', 'Status Check-in'];
-            foreach ($customFields as $field) {
-                $header[] = $field->label;
-            }
-            fputcsv($file, $header, ';');
-
-            foreach ($participants as $p) {
-                $paymentStatus = 'Pending';
-                if ($p->ticket && $p->ticket->order) {
-                    $paymentStatus = $p->ticket->order->payment_status;
-                }
-
-                $row = [
-                    $p->id,
-                    $p->displayName(),
-                    $p->nik ?? '-',
-                    $p->city ?? '-',
-                    $p->user->email ?? '-',
-                    $p->phone,
-                    $p->category,
-                    $p->jersey_size,
-                    $p->medical_history ?? '-',
-                    $p->ticket->order->order_code ?? '-',
-                    $p->ticket->ticket_code ?? '-',
-                    strtoupper($paymentStatus),
-                    strtoupper($p->ticket->status ?? 'pending')
-                ];
-
-                foreach ($customFields as $field) {
-                    // Peserta dari event lain tidak punya field ini — biarkan kosong.
-                    $row[] = $field->event_id === $p->event_id ? $p->customAnswer($field) : '';
-                }
-
-                fputcsv($file, $row, ';');
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ParticipantTemplateExport($coreFields, $customFields),
+            'template_import_partisipan.xlsx'
+        );
     }
 
     /**
@@ -399,8 +456,19 @@ class AdminController extends Controller
             ->withCount('tickets');
         $user = auth()->user();
 
+        // Event filter: admin biasa terkunci ke event-nya, super_admin bisa pilih
+        $events = collect();
+        $currentEventId = 'all';
+
         if ($user->role === 'admin') {
             $query->where('event_id', $user->event_id);
+        } else {
+            $events = \App\Models\Event::orderBy('id', 'desc')->get();
+            $currentEventId = $request->event_id ?? 'all';
+
+            if ($currentEventId !== 'all') {
+                $query->where('event_id', $currentEventId);
+            }
         }
 
         $currentStatus = $request->status ?? 'all';
@@ -440,7 +508,7 @@ class AdminController extends Controller
 
         $orders = $query->paginate(10)->withQueryString();
 
-        return view('admin.orders', compact('orders', 'currentStatus', 'currentSort'));
+        return view('admin.orders', compact('orders', 'currentStatus', 'currentSort', 'events', 'currentEventId'));
     }
 
     public function bulkDestroyOrder(Request $request)
@@ -734,6 +802,7 @@ class AdminController extends Controller
             'deskripsi'        => $request->deskripsi ?? '',
             'syarat_ketentuan' => $request->syarat_ketentuan ?? '',
             'is_closed'        => $request->has('is_closed') ? true : false,
+            'is_private'       => $request->has('is_private') ? true : false,
         ];
 
         \App\Http\Controllers\HomeController::saveEvents($events);
@@ -784,6 +853,7 @@ class AdminController extends Controller
                 $ev['deskripsi']        = $request->deskripsi ?? '';
                 $ev['syarat_ketentuan'] = $request->syarat_ketentuan ?? '';
                 $ev['is_closed']        = $request->has('is_closed') ? true : false;
+                $ev['is_private']       = $request->has('is_private') ? true : false;
                 
                 if ($request->hasFile('thumbnail')) {
                     $path = $request->file('thumbnail')->store('thumbnails', 'public');
@@ -1329,6 +1399,59 @@ class AdminController extends Controller
 
         return redirect()->route('admin.form-fields', ['event_id' => $event->id])
             ->with('success', 'Field "'.$request->label.'" berhasil ditambahkan ke formulir.');
+    }
+
+    public function bulkUpdateFormFields(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|exists:events,id',
+            'fields' => 'required|array',
+            'fields.*.label' => 'required|string|max:255',
+            'fields.*.placeholder' => 'nullable|string|max:255',
+            'fields.*.help_text' => 'nullable|string|max:255',
+            'fields.*.sort_order' => 'nullable|integer|min:0',
+        ]);
+
+        $eventId = $request->event_id;
+        $user = auth()->user();
+
+        if ($user->role === 'admin' && $eventId != $user->event_id) {
+            abort(403, 'Anda tidak berhak mengatur event ini.');
+        }
+
+        foreach ($request->fields as $id => $data) {
+            $field = \App\Models\EventFormField::where('event_id', $eventId)->find($id);
+            if (!$field) continue;
+
+            $updateData = [
+                'label' => $data['label'],
+                'required' => isset($data['required']),
+                'enabled' => isset($data['enabled']),
+            ];
+
+            if (array_key_exists('placeholder', $data)) {
+                $updateData['placeholder'] = $data['placeholder'];
+            }
+            
+            if (array_key_exists('help_text', $data)) {
+                $updateData['help_text'] = $data['help_text'];
+            }
+
+            if (isset($data['sort_order']) && $data['sort_order'] !== '') {
+                $updateData['sort_order'] = (int) $data['sort_order'];
+            }
+
+            if (!$field->is_core && isset($data['type'])) {
+                if (array_key_exists($data['type'], \App\Models\EventFormField::CUSTOM_TYPES)) {
+                    $updateData['type'] = $data['type'];
+                }
+            }
+
+            $field->update($updateData);
+        }
+
+        return redirect()->route('admin.form-fields', ['event_id' => $eventId])
+            ->with('success', 'Semua perubahan formulir berhasil disimpan.');
     }
 
     public function updateFormField(Request $request, $id)
