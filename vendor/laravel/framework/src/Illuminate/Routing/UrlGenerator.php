@@ -182,17 +182,9 @@ class UrlGenerator implements UrlGeneratorContract
      */
     public function previousPath($fallback = false)
     {
-        $previousPath = parse_url($this->previous($fallback), PHP_URL_PATH);
+        $previousPath = str_replace($this->to('/'), '', rtrim(preg_replace('/\?.*/', '', $this->previous($fallback)), '/'));
 
-        if (! is_string($previousPath) || $previousPath === '') {
-            return '/';
-        }
-
-        $basePath = parse_url($this->to('/'), PHP_URL_PATH) ?: '';
-
-        $previousPath = $basePath !== '/' ? preg_replace('#^'.preg_quote($basePath, '#').'#', '', $previousPath) : $previousPath;
-
-        return rtrim($previousPath, '/') ?: '/';
+        return $previousPath === '' ? '/' : $previousPath;
     }
 
     /**
@@ -459,7 +451,9 @@ class UrlGenerator implements UrlGeneratorContract
      */
     public function hasCorrectSignature(Request $request, $absolute = true, Closure|array $ignoreQuery = [])
     {
-        $url = $absolute ? $request->url() : '/'.$request->path();
+        $url = $absolute
+            ? rtrim($request->getSchemeAndHttpHost().$request->getBaseUrl().$request->getPathInfo(), '/')
+            : '/'.$request->path();
 
         $queryString = (new Collection(explode('&', (string) $request->server->get('QUERY_STRING'))))
             ->reject(function ($parameter) use ($ignoreQuery) {
@@ -489,10 +483,16 @@ class UrlGenerator implements UrlGeneratorContract
             return false;
         }
 
-        return array_any($keys, fn ($key) => hash_equals(
-            hash_hmac('sha256', $original, $key),
-            $signature
-        ));
+        foreach ($keys as $key) {
+            if (hash_equals(
+                hash_hmac('sha256', $original, $key),
+                $signature
+            )) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -504,10 +504,6 @@ class UrlGenerator implements UrlGeneratorContract
     public function signatureHasNotExpired(Request $request)
     {
         $expires = $request->query('expires');
-
-        if ($expires !== null && ! is_string($expires)) {
-            return false;
-        }
 
         return ! ($expires && Carbon::now()->getTimestamp() > $expires);
     }

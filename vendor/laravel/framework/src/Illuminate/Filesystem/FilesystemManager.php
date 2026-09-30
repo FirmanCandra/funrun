@@ -2,11 +2,11 @@
 
 namespace Illuminate\Filesystem;
 
+use Aws\Credentials\CredentialProvider;
 use Aws\S3\S3Client;
 use Closure;
 use Illuminate\Contracts\Filesystem\Factory as FactoryContract;
 use Illuminate\Support\Arr;
-use Illuminate\Support\RebindsCallbacksToSelf;
 use InvalidArgumentException;
 use League\Flysystem\AwsS3V3\AwsS3V3Adapter as S3Adapter;
 use League\Flysystem\AwsS3V3\PortableVisibilityConverter as AwsS3PortableVisibilityConverter;
@@ -21,8 +21,6 @@ use League\Flysystem\PhpseclibV3\SftpConnectionProvider;
 use League\Flysystem\ReadOnly\ReadOnlyFilesystemAdapter;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 use League\Flysystem\Visibility;
-use ReflectionException;
-use RuntimeException;
 
 use function Illuminate\Support\enum_value;
 
@@ -32,8 +30,6 @@ use function Illuminate\Support\enum_value;
  */
 class FilesystemManager implements FactoryContract
 {
-    use RebindsCallbacksToSelf;
-
     /**
      * The application instance.
      *
@@ -68,7 +64,7 @@ class FilesystemManager implements FactoryContract
     /**
      * Get a filesystem instance.
      *
-     * @param  \UnitEnum|string|null  $name
+     * @param  string|null  $name
      * @return \Illuminate\Contracts\Filesystem\Filesystem
      */
     public function drive($name = null)
@@ -271,12 +267,32 @@ class FilesystemManager implements FactoryContract
      *
      * @param  array  $config
      * @return array
+     *
+     * @throws \InvalidArgumentException
      */
     protected function formatS3Config(array $config)
     {
         $config += ['version' => 'latest'];
 
-        if (! empty($config['key']) && ! empty($config['secret'])) {
+        $credentials = $config['credentials'] ?? null;
+
+        $provider = is_array($credentials) ? ($credentials['provider'] ?? null) : $credentials;
+
+        if (is_string($provider)) {
+            $options = is_array($credentials) ? Arr::except($credentials, ['provider']) : [];
+
+            $provider = CredentialProvider::memoize(match ($provider) {
+                'ecs' => CredentialProvider::ecsCredentials($options),
+                'instance' => CredentialProvider::instanceProfile($options),
+                default => throw new InvalidArgumentException(
+                    "Invalid credential provider [{$provider}]."
+                ),
+            });
+        }
+
+        if ($provider) {
+            $config['credentials'] = $provider;
+        } elseif (! empty($config['key']) && ! empty($config['secret'])) {
             $config['credentials'] = Arr::only($config, ['key', 'secret']);
 
             if (! empty($config['token'])) {
@@ -437,19 +453,10 @@ class FilesystemManager implements FactoryContract
      *
      * @param  string  $driver
      * @param  \Closure  $callback
-     *
-     * @param-closure-this  $this  $callback
-     *
      * @return $this
      */
     public function extend($driver, Closure $callback)
     {
-        try {
-            $callback = $this->bindCallbackToSelf($callback) ?? throw new RuntimeException('Unable to bind custom driver callback');
-        } catch (ReflectionException $e) {
-            throw new RuntimeException('Unable to bind custom driver callback', previous: $e);
-        }
-
         $this->customCreators[$driver] = $callback;
 
         return $this;

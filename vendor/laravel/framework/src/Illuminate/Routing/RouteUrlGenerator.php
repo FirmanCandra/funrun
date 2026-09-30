@@ -7,6 +7,7 @@ use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Stringable;
 
 class RouteUrlGenerator
 {
@@ -233,7 +234,7 @@ class RouteUrlGenerator
         $offset = 0;
         $emptyParameters = array_filter($namedParameters, static fn ($val) => $val === '');
 
-        if ($requiredRouteParametersWithoutDefaultsOrNamedParameters !== [] &&
+        if (count($requiredRouteParametersWithoutDefaultsOrNamedParameters) !== 0 &&
             count($parameters) !== count($emptyParameters)) {
             // Find the index of the first required parameter...
             $offset = array_search($requiredRouteParametersWithoutDefaultsOrNamedParameters[0], array_keys($namedParameters));
@@ -250,7 +251,7 @@ class RouteUrlGenerator
             if ($offset < 0) {
                 $offset = 0;
             }
-        } elseif ($requiredRouteParametersWithoutDefaultsOrNamedParameters === [] && count($parameters) !== 0) {
+        } elseif (count($requiredRouteParametersWithoutDefaultsOrNamedParameters) === 0 && count($parameters) !== 0) {
             // Handle the case where all passed parameters are for parameters that have default values...
             $remainingCount = count($parameters);
 
@@ -341,7 +342,7 @@ class RouteUrlGenerator
 
             return (! isset($parameters[0]) && ! str_ends_with($match[0], '?}'))
                 ? $match[0]
-                : Arr::pull($parameters, 0);
+                : $this->encodeParameter(Arr::pull($parameters, 0));
         }, $path);
 
         return trim(preg_replace('/\{.*?\?\}/', '', $path), '/');
@@ -358,15 +359,28 @@ class RouteUrlGenerator
     {
         return preg_replace_callback('/\{(.*?)(\?)?\}/', function ($m) use (&$parameters) {
             if (isset($parameters[$m[1]]) && $parameters[$m[1]] !== '') {
-                return Arr::pull($parameters, $m[1]);
+                return $this->encodeParameter(Arr::pull($parameters, $m[1]));
             } elseif (isset($this->defaultParameters[$m[1]])) {
-                return $this->defaultParameters[$m[1]];
+                return $this->encodeParameter($this->defaultParameters[$m[1]]);
             } elseif (isset($parameters[$m[1]])) {
                 Arr::pull($parameters, $m[1]);
             }
 
             return $m[0];
         }, $path);
+    }
+
+    /**
+     * Encode a parameter value that is being substituted into a route URI.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    protected function encodeParameter($value)
+    {
+        return is_string($value) || $value instanceof Stringable
+            ? strtr((string) $value, ['%' => '%25', '?' => '%3F', '#' => '%23'])
+            : $value;
     }
 
     /**
@@ -401,7 +415,7 @@ class RouteUrlGenerator
         // First we will get all of the string parameters that are remaining after we
         // have replaced the route wildcards. We'll then build a query string from
         // these string parameters then use it as a starting point for the rest.
-        if ($parameters === []) {
+        if (count($parameters) === 0) {
             return '';
         }
 
