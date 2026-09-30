@@ -11,17 +11,17 @@
 @section('content')
 
 {{-- ===== COVER ===== --}}
-<section class="bg-white border-b border-line">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <nav class="flex items-center gap-2 text-sm text-ink-500 mb-6">
-            <a href="{{ route('home') }}" class="hover:text-ink-900 transition-colors">Beranda</a>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<section class="bg-white border-b border-line w-full overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 w-full overflow-hidden">
+        <nav class="flex items-center gap-2 text-sm text-ink-500 mb-6 min-w-0 w-full overflow-hidden">
+            <a href="{{ route('home') }}" class="shrink-0 hover:text-ink-900 transition-colors">Beranda</a>
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
             </svg>
-            <span class="text-ink-900 font-medium truncate">{{ $event['nama'] }}</span>
+            <span class="text-ink-900 font-medium truncate min-w-0 flex-1">{{ $event['nama'] }}</span>
         </nav>
 
-        <div class="rounded-card overflow-hidden animate-fade-in" style="box-shadow: var(--shadow-card);">
+        <div class="rounded-card overflow-hidden animate-fade-in w-full" style="box-shadow: var(--shadow-card);">
             @include('partials.event-image', [
                 'nama' => $event['nama'],
                 'thumbnail' => $event['thumbnail'] ?? null,
@@ -31,17 +31,15 @@
     </div>
 </section>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div class="grid lg:grid-cols-3 gap-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 w-full overflow-x-hidden">
+    <div class="grid lg:grid-cols-3 gap-6 lg:gap-10 w-full min-w-0">
 
         {{-- ===== KOLOM KIRI ===== --}}
-        <div class="lg:col-span-2 space-y-8">
+        <div class="lg:col-span-2 space-y-6 sm:space-y-8 w-full min-w-0">
 
-            <div class="animate-fade-up">
+            <div class="animate-fade-up w-full min-w-0">
                 <div class="flex flex-wrap items-center gap-2 mb-4">
-                    <span class="badge" style="background-color: var(--color-brand-50); color: var(--color-brand-700);">
-                        {{ ucfirst($event['kategori']) === 'Highlight' ? 'Event Pilihan' : 'Akan Datang' }}
-                    </span>
+                    <span class="badge" style="background-color: var(--color-brand-50); color: var(--color-brand-700);">{{ ($event['kategori'] ?? '') === 'highlight' ? 'Event Pilihan' : 'Akan Datang' }}</span>
                     @if($gratis)<span class="badge" style="background-color: #f0fdf4; color: #16a34a;">Gratis</span>@endif
                     @if($sudahTerdaftar)
                         <span class="badge bg-green-600 text-white">
@@ -53,35 +51,35 @@
                     @endif
                 </div>
 
-                <h1 class="text-3xl sm:text-4xl font-bold text-ink-900 leading-tight mb-6">{{ $event['nama'] }}</h1>
+                <h1 class="text-2xl sm:text-4xl font-bold text-ink-900 leading-tight mb-6 break-words">{{ $event['nama'] }}</h1>
 
                 {{-- Ringkasan waktu & tempat --}}
-                <div class="grid sm:grid-cols-2 gap-4">
-                    <div class="card p-5 flex items-start gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full min-w-0">
+                    <div class="card p-4 sm:p-6 flex flex-row items-center gap-3.5 text-left overflow-hidden min-w-0 w-full">
                         <span class="w-11 h-11 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
                             </svg>
                         </span>
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <p class="text-xs text-ink-500 mb-0.5">Tanggal & Waktu</p>
-                            <p class="font-semibold text-ink-900">{{ $event['tanggal'] }}</p>
-                            <p class="text-sm text-ink-500">{{ $event['waktu'] }} WIB</p>
+                            <p class="font-semibold text-ink-900 text-sm sm:text-base break-words">{{ $event['tanggal'] }}</p>
+                            <p class="text-xs sm:text-sm text-ink-500 break-words">{{ $event['waktu'] }} WIB</p>
                         </div>
                     </div>
 
-                    <div class="card p-5 flex items-start gap-4">
+                    <div class="card p-4 sm:p-6 flex flex-row items-center gap-3.5 text-left overflow-hidden min-w-0 w-full">
                         <span class="w-11 h-11 rounded-xl bg-accent-50 text-accent-600 flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                             </svg>
                         </span>
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <p class="text-xs text-ink-500 mb-0.5">Lokasi</p>
-                            <p class="font-semibold text-ink-900 truncate">{{ $event['lokasi'] }}</p>
+                            <p class="font-semibold text-ink-900 text-sm sm:text-base break-words">{{ $event['lokasi'] }}</p>
                             <a href="{{ $petaUrl }}" target="_blank" rel="noopener"
-                                class="text-sm text-brand-600 hover:text-brand-700 font-medium inline-flex items-center gap-1 mt-0.5">
+                                class="text-xs sm:text-sm text-brand-600 hover:text-brand-700 font-medium inline-flex items-center gap-1 mt-0.5">
                                 Buka di Google Maps
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18v4.5M18 6l-7.5 7.5M17 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h4" />
