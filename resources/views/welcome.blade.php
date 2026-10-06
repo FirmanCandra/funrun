@@ -139,12 +139,25 @@
     <div class="flex items-center justify-between mb-5">
         <div>
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/>
+                {{-- Loket-style Animated Section Icon (GIF-like vector motion) --}}
+                <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 relative flex items-center justify-center anim-trending-box" role="img" aria-label="Icon Trending">
+                    <svg class="w-full h-full drop-shadow-sm" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="trendBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#0050ff"/>
+                                <stop offset="100%" stop-color="#00c0fa"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="48" height="48" rx="14" fill="url(#trendBg)"/>
+                        <path d="M10 38H38M10 30H38M10 22H38" stroke="white" stroke-opacity="0.18" stroke-width="1.5" stroke-dasharray="2 3"/>
+                        <path d="M12 34L20 25L27 29L35 17" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <g class="anim-trending-arrow">
+                            <path d="M29 17H35V23" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </g>
+                        <circle cx="37" cy="11" r="2" fill="#fef08a" class="anim-sparkle"/>
+                        <circle cx="13" cy="18" r="1.5" fill="#ffffff" opacity="0.8" class="anim-sparkle" style="animation-delay: 0.6s;"/>
                     </svg>
-                </span>
+                </div>
                 <h2 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
                     Event yang Lagi Trending
                 </h2>
@@ -184,11 +197,6 @@
                                     'class' => 'poster-img'
                                 ])
                             @endif
-
-                            <span class="absolute top-2.5 left-2.5 bg-[#ea580c] text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 0 0-1.45-.385c-.345.23-.614.558-.822.88-.527.82-1.124 1.905-1.954 2.83-1.02 1.137-2.316 2.115-3.666 3.125C3.398 9.824 2.5 11.536 2.5 13.5 2.5 17.09 5.41 20 9 20s6.5-2.91 6.5-6.5c0-1.874-.82-3.486-1.978-4.707-.63-.663-1.32-1.332-1.93-2.071-.43-.52-.76-1.122-.98-1.823-.11-.351-.17-.714-.217-1.046Z" clip-rule="evenodd"/></svg>
-                                Trending #{{ $index + 1 }}
-                            </span>
 
                             @if($myEventIds->contains($event['id']))
                                 <span class="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
@@ -245,12 +253,28 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-xl bg-blue-50 text-[#0050ff] flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <rect width="18" height="18" x="3" y="4" rx="2"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/>
+                {{-- Loket-style Animated Section Icon (GIF-like vector motion) --}}
+                <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 relative flex items-center justify-center anim-calendar-box" role="img" aria-label="Icon Akan Datang">
+                    <svg class="w-full h-full drop-shadow-sm" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="calBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#4f46e5"/>
+                                <stop offset="100%" stop-color="#7c3aed"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="48" height="48" rx="14" fill="url(#calBg)"/>
+                        <rect x="11" y="14" width="26" height="24" rx="5" fill="white"/>
+                        <path d="M11 19C11 16.2386 13.2386 14 16 14H32C34.7614 14 37 16.2386 37 19V22H11V19Z" fill="#e0e7ff"/>
+                        <rect x="16" y="10" width="3" height="6" rx="1.5" fill="#facc15"/>
+                        <rect x="29" y="10" width="3" height="6" rx="1.5" fill="#facc15"/>
+                        <circle cx="17" cy="27" r="1.5" fill="#4f46e5"/>
+                        <circle cx="24" cy="27" r="1.5" fill="#4f46e5"/>
+                        <circle cx="31" cy="27" r="1.5" fill="#7c3aed"/>
+                        <circle cx="17" cy="33" r="1.5" fill="#4f46e5"/>
+                        <circle cx="24" cy="33" r="2.5" fill="#ef4444" class="anim-sparkle"/>
+                        <circle cx="31" cy="33" r="1.5" fill="#9ca3af"/>
                     </svg>
-                </span>
+                </div>
                 <h2 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
                     Event yang Akan Datang
                 </h2>
@@ -271,9 +295,6 @@
                         @else
                             @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'poster-img'])
                         @endif
-                        <span class="absolute top-2.5 left-2.5 bg-[#0050ff] text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">
-                            Akan Datang
-                        </span>
                     </div>
                     <div class="p-2 pt-3">
                         <span class="text-[11px] font-semibold text-[#0050ff] uppercase tracking-wider block truncate">
@@ -316,11 +337,23 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
+                {{-- Loket-style Animated Section Icon (GIF-like vector motion) --}}
+                <div class="w-8 h-8 sm:w-9 sm:h-9 shrink-0 relative flex items-center justify-center anim-trophy-box" role="img" aria-label="Icon Event Selesai">
+                    <svg class="w-full h-full drop-shadow-sm" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="trophyBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#d97706"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="48" height="48" rx="14" fill="url(#trophyBg)"/>
+                        <path d="M17 14H31V23C31 26.866 27.866 30 24 30C20.134 30 17 26.866 17 23V14Z" fill="white"/>
+                        <path d="M17 17H13C12.4477 17 12 17.4477 12 18V21C12 22.6569 13.3431 24 15 24H17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M31 17H35C35.5523 17 36 17.4477 36 18V21C36 22.6569 34.6569 24 33 24H31" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M24 30V34M19 36H29" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M36 11L37 13L39 14L37 15L36 17L35 15L33 14L35 13L36 11Z" fill="#fef08a" class="anim-sparkle"/>
                     </svg>
-                </span>
+                </div>
                 <h2 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
                     Event yang Sudah Berakhir
                 </h2>
@@ -341,10 +374,6 @@
                         @else
                             @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'poster-img'])
                         @endif
-                        <span class="absolute top-2.5 left-2.5 bg-slate-800/90 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                            <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                            Event Selesai
-                        </span>
                     </div>
                     <div class="p-2 pt-3">
                         <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block truncate">

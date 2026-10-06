@@ -141,18 +141,37 @@ php artisan view:cache
 
 ---
 
-## Setup .htaccess untuk Hostinger (jika root = public_html)
+## Setup .htaccess & index.php di Root (Wajib untuk Hostinger)
 
-Jika file Laravel ada di `public_html/` tapi Hostinger mengarah ke `public_html/` (bukan `public_html/public/`), buat file ini:
+Hostinger mengarahkan domain utama ke `~/domains/<domain>/public_html`.
+Karena seluruh file Laravel di-deploy langsung ke dalam folder `public_html/`, kita WAJIB memiliki:
 
-**File: `public_html/.htaccess`**
+1. **File: `.htaccess` di root proyek:**
 ```apache
 <IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
     RewriteEngine On
+
+    # Proteksi file & direktori sensitif
+    RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml) - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor)/ - [F,L,NC]
+
+    # Handle Front Controller
     RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^(.*)$ /public/$1 [L,QSA]
+    RewriteRule ^$ public/index.php [L]
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
 </IfModule>
 ```
+
+2. **File: `index.php` di root proyek:**
+Sebagai fallback front-controller jika mod_rewrite memanggil directory index root.
+
+Kedua file ini sudah disertakan di root repositori dan otomatis ter-deploy ke Hostinger.
 
 ---
 

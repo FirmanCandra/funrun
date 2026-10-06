@@ -18,11 +18,6 @@
     <a href="{{ route('event.show', $ev['id']) }}" class="event-thumb" style="display:block;position:relative;overflow:hidden;">
         @include('partials.event-image', ['nama' => $ev['nama'], 'thumbnail' => $ev['thumbnail'] ?? null])
 
-        {{-- Badge status --}}
-        <span style="position:absolute;top:12px;left:12px;background:rgba(255,255,255,0.95);color:#2a2a2a;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;backdrop-filter:blur(4px);">
-            {{ ucfirst($ev['kategori'] ?? 'Event') === 'Highlight' ? ' Pilihan' : ' Akan Datang' }}
-        </span>
-
         @if($sudahTerdaftar)
             <span style="position:absolute;top:12px;right:12px;background:#22c55e;color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:4px;">
                 <svg style="width:11px;height:11px;" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">

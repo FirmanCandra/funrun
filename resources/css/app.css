@@ -1203,4 +1203,82 @@
     border-color: var(--loket-blue);
 }
 
+/* ============================================================
+   LOKET-STYLE ANIMATED SECTION ICONS (GIF-LIKE MOTION)
+   ============================================================ */
+@keyframes loketTrendingGraph {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-2.5px) scale(1.05);
+    }
+}
+
+@keyframes loketArrowBounce {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(2px, -2px);
+    }
+}
+
+@keyframes loketSparkle {
+    0%, 100% {
+        transform: scale(0.7) rotate(0deg);
+        opacity: 0.35;
+    }
+    50% {
+        transform: scale(1.25) rotate(45deg);
+        opacity: 1;
+    }
+}
+
+@keyframes loketCalendarFlip {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    30% {
+        transform: translateY(-2px) rotate(-3deg);
+    }
+    70% {
+        transform: translateY(-2px) rotate(3deg);
+    }
+}
+
+@keyframes loketTrophyFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-3px) rotate(2.5deg);
+    }
+}
+
+.anim-trending-box {
+    animation: loketTrendingGraph 2.2s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.anim-trending-arrow {
+    animation: loketArrowBounce 1.5s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.anim-sparkle {
+    animation: loketSparkle 1.8s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.anim-calendar-box {
+    animation: loketCalendarFlip 2.8s ease-in-out infinite;
+    transform-origin: center;
+}
+
+.anim-trophy-box {
+    animation: loketTrophyFloat 2.6s ease-in-out infinite;
+    transform-origin: center;
+}
+
 
