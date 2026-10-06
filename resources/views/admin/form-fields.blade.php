@@ -24,32 +24,8 @@
     </div>
 @endif
 
-{{-- Konteks event --}}
-<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div>
-        <h3 class="font-bold text-lg text-slate-800">{{ $event->title }}</h3>
-        <p class="text-xs text-slate-500 mt-1">
-            Atur data apa saja yang harus diisi peserta saat membeli tiket event ini.
-            Perubahan langsung berlaku di halaman pembelian.
-        </p>
-    </div>
-
-    @if(auth()->user()->isSuperAdmin())
-        <form method="GET" action="{{ route('admin.form-fields') }}" class="flex items-center gap-2">
-            <label class="text-sm text-slate-600 whitespace-nowrap">Event:</label>
-            <select name="event_id" onchange="this.form.submit()"
-                class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @foreach($events as $ev)
-                    <option value="{{ $ev->id }}" {{ $ev->id === $event->id ? 'selected' : '' }}>{{ $ev->title }}</option>
-                @endforeach
-            </select>
-        </form>
-    @else
-        <span class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap">
-            Event yang Anda tangani
-        </span>
-    @endif
-</div>
+{{-- Konteks event & tab navigasi --}}
+@include('admin.partials.event-subnav', ['activeTab' => 'forms', 'event' => $event])
 
 {{-- Catatan: seluruh field boleh dimatikan, tapi empat di antaranya punya efek samping --}}
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">

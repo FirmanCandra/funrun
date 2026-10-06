@@ -20,22 +20,17 @@
 </div>
 @endif
 
-{{-- Breadcrumb back to events --}}
-<div class="mb-4">
-    <a href="{{ route('admin.events') }}" class="text-blue-600 hover:underline flex items-center gap-1 text-sm font-medium">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-        Kembali ke Daftar Event
-    </a>
-</div>
+{{-- Konteks event & tab navigasi --}}
+@include('admin.partials.event-subnav', ['activeTab' => 'categories', 'event' => $dbEvent])
 
 {{-- Header row --}}
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
     <div class="min-w-0">
-        <h2 class="text-xl font-bold text-slate-800">{{ $dbEvent->title }}</h2>
-        <p class="text-slate-500 text-xs mt-0.5">Kelola kategori run yang terdaftar untuk event ini.</p>
+        <h2 class="text-lg sm:text-xl font-bold text-slate-800">Daftar Kategori Tiket</h2>
+        <p class="text-slate-500 text-xs mt-0.5">Kelola jenis tiket, kode BIB, kuota, dan harga untuk event {{ $dbEvent->title }}.</p>
     </div>
     <button onclick="document.getElementById('modalAdd').classList.remove('hidden')"
-            class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm">
+            class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-sm shadow-xs">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
         Tambah Kategori
     </button>

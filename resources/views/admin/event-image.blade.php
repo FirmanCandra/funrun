@@ -17,32 +17,8 @@
     </div>
 @endif
 
-{{-- Konteks event --}}
-<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-6 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div class="min-w-0">
-        <h3 class="font-bold text-lg text-slate-800 truncate">{{ $event->title }}</h3>
-        <p class="text-xs text-slate-500 mt-1">
-            Gambar ini yang dilihat calon peserta di halaman depan, halaman detail event,
-            dan halaman pembelian tiket.
-        </p>
-    </div>
-
-    @if(auth()->user()->isSuperAdmin())
-        <form method="GET" action="{{ route('admin.event-image') }}" class="flex items-center gap-2 shrink-0">
-            <label class="text-sm text-slate-600 whitespace-nowrap">Event:</label>
-            <select name="event_id" onchange="this.form.submit()"
-                class="w-full md:w-auto border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @foreach($events as $ev)
-                    <option value="{{ $ev->id }}" {{ $ev->id === $event->id ? 'selected' : '' }}>{{ $ev->title }}</option>
-                @endforeach
-            </select>
-        </form>
-    @else
-        <span class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap self-start md:self-auto">
-            Event yang Anda tangani
-        </span>
-    @endif
-</div>
+{{-- Konteks event & tab navigasi --}}
+@include('admin.partials.event-subnav', ['activeTab' => 'image', 'event' => $event])
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 

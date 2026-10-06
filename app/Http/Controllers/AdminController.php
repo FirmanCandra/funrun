@@ -111,7 +111,32 @@ class AdminController extends Controller
 
         $pendingOrders = self::pendingOrdersCount($user);
 
-        return view('admin.dashboard', compact('totalParticipants', 'totalRevenue', 'ticketsSold', 'checkedIn', 'pendingOrders'));
+        // Data tambahan untuk overview dashboard admin
+        $eventsList = \App\Http\Controllers\HomeController::loadEvents();
+        $totalEvents = count($eventsList);
+        if ($user->role === 'admin' && $user->event_id) {
+            $filteredEvents = array_filter($eventsList, fn($ev) => ($ev['id'] ?? null) == $user->event_id);
+            $recentEvents = array_values($filteredEvents);
+        } else {
+            $recentEvents = array_slice($eventsList, 0, 4);
+        }
+
+        $recentOrdersQuery = \App\Models\Order::with(['user', 'event'])->latest();
+        if ($user->role === 'admin') {
+            $recentOrdersQuery->where('event_id', $user->event_id);
+        }
+        $recentOrders = $recentOrdersQuery->take(5)->get();
+
+        return view('admin.dashboard', compact(
+            'totalParticipants',
+            'totalRevenue',
+            'ticketsSold',
+            'checkedIn',
+            'pendingOrders',
+            'totalEvents',
+            'recentEvents',
+            'recentOrders'
+        ));
     }
 
     public function participants(Request $request)
