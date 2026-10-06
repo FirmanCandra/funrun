@@ -12,6 +12,54 @@
 
     // Event untuk Carousel Hero Banner (utamakan event trending)
     $bannerEvents = $trendingEvents->isNotEmpty() ? $trendingEvents : $allEvents->take(5);
+
+    // Helper untuk mengurai tanggal badge Loket Event2Go (contoh: "OKT \n 6 \n SEL")
+    $parseDateBadge = function($tanggalStr) {
+        $bulanMap = [
+            'januari' => ['code' => 'JAN', 'num' => 1],
+            'februari' => ['code' => 'FEB', 'num' => 2],
+            'maret' => ['code' => 'MAR', 'num' => 3],
+            'april' => ['code' => 'APR', 'num' => 4],
+            'mei' => ['code' => 'MEI', 'num' => 5],
+            'juni' => ['code' => 'JUN', 'num' => 6],
+            'juli' => ['code' => 'JUL', 'num' => 7],
+            'agustus' => ['code' => 'AGU', 'num' => 8],
+            'september' => ['code' => 'SEP', 'num' => 9],
+            'oktober' => ['code' => 'OKT', 'num' => 10],
+            'november' => ['code' => 'NOV', 'num' => 11],
+            'desember' => ['code' => 'DES', 'num' => 12]
+        ];
+        $hariMap = ['MIN', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'];
+        
+        $day = 1;
+        if (preg_match('/(\d{1,2})/', $tanggalStr, $m)) {
+            $day = (int)$m[1];
+        }
+        
+        $monthStr = 'OKT';
+        $monthNum = 10;
+        foreach ($bulanMap as $k => $v) {
+            if (mb_stripos($tanggalStr, $k) !== false) {
+                $monthStr = $v['code'];
+                $monthNum = $v['num'];
+                break;
+            }
+        }
+        
+        $year = 2026;
+        if (preg_match('/(\d{4})/', $tanggalStr, $m)) {
+            $year = (int)$m[1];
+        }
+        
+        $timestamp = mktime(0, 0, 0, $monthNum, $day, $year);
+        $dayName = $hariMap[date('w', $timestamp)];
+        
+        return [
+            'month' => $monthStr,
+            'day' => $day,
+            'day_name' => $dayName
+        ];
+    };
 @endphp
 
 @section('content')
@@ -165,7 +213,7 @@
     </div>
 
     {{-- Horizontal Scrollable Cards with Left/Right Navigation Buttons --}}
-    <div class="relative group">
+    <div class="relative">
         {{-- Tombol Geser Kiri --}}
         <button type="button" onclick="scrollSection('eventTrendingTrack', -320)" aria-label="Sebelumnya"
             class="hidden sm:flex absolute -left-3 sm:-left-5 top-[32%] -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-100 border border-gray-200 dark:border-slate-700 shadow-md hover:shadow-xl hover:scale-110 active:scale-95 items-center justify-center transition-all opacity-90 hover:opacity-100 hover:text-[#0050ff] dark:hover:text-blue-400">
@@ -176,7 +224,7 @@
         <div class="flex gap-5 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-4 px-1" id="eventTrendingTrack">
             @forelse($trendingEvents as $index => $event)
                 <div class="min-w-[260px] sm:min-w-[280px] md:min-w-[290px] max-w-[290px] shrink-0">
-                    <a href="{{ route('event.show', $event['id']) }}" class="block group text-decoration-none loket-event-card">
+                    <a href="{{ route('event.show', $event['id']) }}" class="block group/card text-decoration-none loket-event-card">
                         
                         {{-- Poster Image 16:9 with zoom effect --}}
                         <div class="poster-wrapper">
@@ -204,7 +252,7 @@
                                 {{ $event['kota'] ?? trim(last(explode(',', $event['lokasi'] ?? ''))) }}
                             </p>
 
-                            <h3 class="text-sm sm:text-[15px] font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1 leading-snug">
+                            <h3 class="text-sm sm:text-[15px] font-bold text-gray-900 dark:text-gray-100 group-hover/card:text-[#0050ff] dark:group-hover/card:text-blue-400 transition-colors line-clamp-1 mt-1 leading-snug">
                                 {{ $event['nama'] }}
                             </h3>
 
@@ -237,78 +285,159 @@
     </div>
 </section>
 
-{{-- ===== SECTION 2: EVENT YANG AKAN DATANG ===== --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-t border-gray-100 dark:border-slate-800">
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <div class="flex items-center gap-2.5">
-                {{-- Loket-style Animated Section Icon (Clean & Transparent Background) --}}
-                <div class="w-7 h-7 sm:w-8 sm:h-8 shrink-0 relative flex items-center justify-center anim-calendar-box" role="img" aria-label="Icon Akan Datang">
-                    <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="calCleanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#4f46e5"/>
-                                <stop offset="100%" stop-color="#8b5cf6"/>
-                            </linearGradient>
-                        </defs>
-                        <rect x="3.5" y="6.5" width="29" height="25" rx="6" stroke="url(#calCleanGrad)" stroke-width="2.75" fill="none"/>
-                        <path d="M3.5 13.5H32.5" stroke="url(#calCleanGrad)" stroke-width="2.5" stroke-linecap="round"/>
-                        <path d="M10.5 3V7.5M25.5 3V7.5" stroke="url(#calCleanGrad)" stroke-width="2.75" stroke-linecap="round"/>
-                        <circle cx="11" cy="19.5" r="1.5" fill="#6366f1"/>
-                        <circle cx="18" cy="19.5" r="1.5" fill="#6366f1"/>
-                        <circle cx="25" cy="19.5" r="1.5" fill="#6366f1"/>
-                        <circle cx="11" cy="25.5" r="1.5" fill="#6366f1"/>
-                        <circle cx="18" cy="25.5" r="2.25" fill="#ef4444" class="anim-sparkle"/>
-                        <circle cx="25" cy="25.5" r="1.5" fill="#8b5cf6"/>
-                    </svg>
-                </div>
-                <h2 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                    Event yang Akan Datang
-                </h2>
+{{-- ===== SECTION 2: EVENT2GO (EVENT YANG AKAN DATANG - SESUAI REFERENSI GAMBAR 1 & 2) ===== --}}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 border-t border-gray-100 dark:border-slate-800" id="upcoming-events">
+    <div class="flex flex-col lg:flex-row items-start gap-8 lg:gap-12">
+        
+        {{-- LEFT COLUMN: RETRO CYBER BANNER (HANYA MUNCUL DI DESKTOP lg:flex - SESUAI GAMBAR 1) --}}
+        <div class="hidden lg:flex lg:w-[350px] xl:w-[380px] shrink-0 sticky top-24 self-start">
+            <div class="w-full rounded-3xl overflow-hidden shadow-lg border border-gray-100 dark:border-slate-800/80 bg-[#0b1739] hover:shadow-2xl transition-all duration-300">
+                <img src="/images/event2go-retro-banner.svg" alt="Event 2 Go This Week" class="w-full h-auto block select-none" loading="lazy">
             </div>
-            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Jelajahi konser, festival, dan turnamen mendatang yang siap kamu hadiri
-            </p>
         </div>
-    </div>
 
-    {{-- Grid Cards (Persis seperti Gambar 3 - Bersih, Borderless) --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        @forelse($upcoming as $event)
-            <div>
-                <a href="{{ route('event.show', $event['id']) }}" class="block group text-decoration-none loket-event-card">
-                    <div class="poster-wrapper">
-                        @if(!empty($event['thumbnail']))
-                            <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="poster-img" loading="lazy">
-                        @else
-                            @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'poster-img'])
-                        @endif
+        {{-- RIGHT COLUMN: EVENT2GO HEADER, FILTER TABS & TIMELINE LIST (DESKTOP & MOBILE) --}}
+        <div class="flex-1 min-w-0 w-full">
+            
+            {{-- Header: [Icon Calendar] Event2Go -------------- Lebih Banyak Event > --}}
+            <div class="flex items-center justify-between pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 text-gray-800 dark:text-gray-100 flex items-center justify-center">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect width="18" height="18" x="3" y="4" rx="3"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/>
+                            <circle cx="8" cy="15" r="1" fill="currentColor"/>
+                            <circle cx="12" cy="15" r="1" fill="currentColor"/>
+                            <circle cx="16" cy="15" r="1" fill="currentColor"/>
+                        </svg>
                     </div>
-                    <div class="pt-2.5">
-                        <p class="text-xs font-normal text-gray-500 dark:text-gray-400 truncate">
-                            {{ $event['kota'] ?? trim(last(explode(',', $event['lokasi'] ?? ''))) }}
-                        </p>
-                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1 leading-snug">
-                            {{ $event['nama'] }}
-                        </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                            Oleh {{ $event['penyelenggara'] ?? 'SeTiket Official' }}
-                        </p>
-                        
-                        <div class="mt-3">
-                            <span class="text-xs text-gray-400 dark:text-gray-500 block font-normal leading-none mb-1">Mulai dari</span>
-                            <span class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white block">
-                                {{ (int)($event['harga'] ?? 0) === 0 ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
-                            </span>
-                        </div>
-                    </div>
+                    <h2 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                        Event2Go
+                    </h2>
+                </div>
+
+                <a href="{{ route('home') }}#upcoming-events" 
+                    class="text-xs sm:text-sm font-bold text-[#0050ff] dark:text-blue-400 hover:text-[#003ec8] flex items-center gap-1 transition-colors">
+                    <span>Lebih Banyak Event</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+                    </svg>
                 </a>
             </div>
-        @empty
-            <div class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
-                Belum ada event mendatang yang terdaftar.
+
+            {{-- Filter Pills: [📣 Populer] [🏆 Minggu Ini] --}}
+            <div class="flex items-center gap-2.5 mt-1 mb-6">
+                <button type="button" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-[#eff6ff] dark:bg-blue-950/60 text-[#0050ff] dark:text-blue-400 border border-[#0050ff]/30 shadow-2xs">
+                    <span>📣</span>
+                    <span>Populer</span>
+                </button>
+                <button type="button" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 transition-colors shadow-2xs">
+                    <span>🏆</span>
+                    <span>Minggu Ini</span>
+                </button>
             </div>
-        @endforelse
+
+            {{-- Timeline Container with Vertical Connecting Dashed Line --}}
+            <div class="relative w-full">
+                {{-- Vertical Dashed Line behind date badges --}}
+                <div class="absolute left-[24px] sm:left-[27px] top-6 bottom-10 w-0 border-l-2 border-dashed border-gray-200 dark:border-slate-700 pointer-events-none z-0"></div>
+
+                <div class="space-y-4 sm:space-y-3">
+                    @forelse($upcoming as $event)
+                        @php
+                            $badge = $parseDateBadge($event['tanggal'] ?? '');
+                        @endphp
+                        <div class="relative z-10">
+                            {{-- Hover active applies ONLY to this specific card (group/event) --}}
+                            <a href="{{ route('event.show', $event['id']) }}"
+                                class="group/event block text-decoration-none">
+                                
+                                {{-- 1. TAMPILAN DESKTOP (sm:flex) - PERSIS SEPERTI GAMBAR 1 --}}
+                                <div class="hidden sm:flex items-center justify-between gap-5 py-3.5 border-b border-dashed border-gray-100 dark:border-slate-800/80 transition-colors">
+                                    {{-- Kolom Kiri: Date Badge Box (OKT \n 6 \n SEL) --}}
+                                    <div class="w-14 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xs text-center shrink-0 transition-transform duration-200 group-hover/event:scale-105 group-hover/event:border-[#0050ff]/60">
+                                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider leading-none">
+                                            {{ $badge['month'] }}
+                                        </span>
+                                        <span class="block text-xl font-black text-gray-900 dark:text-white leading-tight mt-0.5">
+                                            {{ $badge['day'] }}
+                                        </span>
+                                        <span class="block text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider leading-none mt-0.5">
+                                            {{ $badge['day_name'] }}
+                                        </span>
+                                    </div>
+
+                                    {{-- Kolom Tengah: Judul & Lokasi Event --}}
+                                    <div class="flex-1 min-w-0 pr-4">
+                                        <h3 class="text-sm md:text-[15px] font-bold text-gray-900 dark:text-white group-hover/event:text-[#0050ff] dark:group-hover/event:text-blue-400 transition-colors line-clamp-1 leading-snug">
+                                            {{ $event['nama'] }}
+                                        </h3>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                                            {{ $event['tanggal'] }} • {{ $event['lokasi'] }}
+                                        </p>
+                                    </div>
+
+                                    {{-- Kolom Kanan: Compact 16:9 Thumbnail --}}
+                                    <div class="w-36 lg:w-40 aspect-[16/9] rounded-xl overflow-hidden shrink-0 shadow-xs border border-gray-100 dark:border-slate-700/80 bg-gray-100 dark:bg-slate-800">
+                                        @if(!empty($event['thumbnail']))
+                                            <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="w-full h-full object-cover transition-transform duration-300 group-hover/event:scale-105" loading="lazy">
+                                        @else
+                                            @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'w-full h-full object-cover'])
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- 2. TAMPILAN MOBILE (sm:hidden) - PERSIS SEPERTI GAMBAR 2 --}}
+                                <div class="flex sm:hidden items-start gap-3.5 py-2">
+                                    {{-- Kolom Kiri: Date Badge Box (OKT \n 6 \n SEL) --}}
+                                    <div class="w-12 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xs text-center shrink-0 transition-transform duration-200 group-hover/event:scale-105 group-hover/event:border-[#0050ff]/60">
+                                        <span class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none">
+                                            {{ $badge['month'] }}
+                                        </span>
+                                        <span class="block text-lg font-black text-gray-900 dark:text-white leading-tight mt-0.5">
+                                            {{ $badge['day'] }}
+                                        </span>
+                                        <span class="block text-[8px] font-bold text-gray-400 uppercase tracking-wider leading-none mt-0.5">
+                                            {{ $badge['day_name'] }}
+                                        </span>
+                                    </div>
+
+                                    {{-- Kolom Kanan: Container Card (Thumbnail Lebar di Atas, Judul & Info di Bawah) --}}
+                                    <div class="flex-1 min-w-0 bg-gray-50/70 dark:bg-slate-800/40 p-2.5 rounded-2xl border border-gray-100 dark:border-slate-700/60 shadow-xs transition-shadow duration-200 group-hover/event:shadow-md">
+                                        {{-- 16:9 Thumbnail di bagian atas --}}
+                                        <div class="w-full aspect-[16/9] rounded-xl overflow-hidden bg-gray-100 dark:bg-slate-800 mb-2.5">
+                                            @if(!empty($event['thumbnail']))
+                                                <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="w-full h-full object-cover transition-transform duration-300 group-hover/event:scale-105" loading="lazy">
+                                            @else
+                                                @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'w-full h-full object-cover'])
+                                            @endif
+                                        </div>
+
+                                        {{-- Judul Event (Biru khas Mobile) & Detail --}}
+                                        <h3 class="text-sm font-bold text-[#0050ff] dark:text-blue-400 group-hover/event:text-[#003ec8] transition-colors line-clamp-2 leading-snug">
+                                            {{ $event['nama'] }}
+                                        </h3>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                                            {{ $event['tanggal'] }}
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                            {{ $event['lokasi'] }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </a>
+                        </div>
+                    @empty
+                        <div class="w-full text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+                            Belum ada event mendatang saat ini.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+        </div>
+
     </div>
 </section>
 
@@ -347,8 +476,8 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($ended as $event)
             <div>
-                <a href="{{ route('event.show', $event['id']) }}" class="block group text-decoration-none loket-event-card opacity-90 hover:opacity-100 transition-all">
-                    <div class="poster-wrapper filter grayscale-[20%] group-hover:grayscale-0 transition-all">
+                <a href="{{ route('event.show', $event['id']) }}" class="block group/card text-decoration-none loket-event-card opacity-90 hover:opacity-100 transition-all">
+                    <div class="poster-wrapper filter grayscale-[20%] group-hover/card:grayscale-0 transition-all">
                         @if(!empty($event['thumbnail']))
                             <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="poster-img" loading="lazy">
                         @else
@@ -359,7 +488,7 @@
                         <p class="text-xs font-normal text-gray-500 dark:text-gray-400 truncate">
                             {{ $event['kota'] ?? trim(last(explode(',', $event['lokasi'] ?? ''))) }}
                         </p>
-                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-800 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1 leading-snug">
+                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-800 dark:text-gray-100 group-hover/card:text-[#0050ff] dark:group-hover/card:text-blue-400 transition-colors line-clamp-1 mt-1 leading-snug">
                             {{ $event['nama'] }}
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
