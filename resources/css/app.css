@@ -1297,5 +1297,53 @@
     box-shadow: 0 16px 32px -10px rgba(0, 80, 255, 0.2), 0 8px 16px -6px rgba(0, 0, 0, 0.5);
 }
 
+/* ============================================================
+   SAFARI & WEBKIT ENGINE OPTIMIZATIONS (iOS & macOS)
+   ============================================================ */
+/* 1. Fix Safari border-radius overflow clipping bug */
+.poster-wrapper,
+.loket-event-card,
+.carousel-slide {
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+/* 2. Fix Safari touch momentum scrolling */
+.no-scrollbar {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* 3. Prevent Safari iOS auto-zoom on input focus */
+@media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="search"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* 4. Fix Safari native button styling & tap highlight */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button, input[type="submit"], input[type="button"] {
+    -webkit-appearance: none;
+}
+
+
 
 

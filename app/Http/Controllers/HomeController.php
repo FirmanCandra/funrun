@@ -22,16 +22,17 @@ class HomeController extends Controller
     public static function loadEvents(): array
     {
         $path = self::getEventsPath();
-        if (! file_exists($path)) {
-            // Seed with default events on first run
+        $data = file_exists($path) ? json_decode(@file_get_contents($path), true) : null;
+
+        if (! is_array($data) || empty($data)) {
+            // Seed with default events on first run or when empty
             $defaults = self::defaultEvents();
-            file_put_contents($path, json_encode($defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            @file_put_contents($path, json_encode($defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
             return $defaults;
         }
-        $data = json_decode(file_get_contents($path), true);
 
-        return is_array($data) ? $data : [];
+        return $data;
     }
 
     public static function saveEvents(array $events): void
@@ -67,6 +68,15 @@ class HomeController extends Controller
 
     public function index()
     {
+        // Auto-seed database jika database event masih kosong (misal di fresh production deployment)
+        if (!app()->runningUnitTests() && \App\Models\Event::count() === 0 && class_exists(\Database\Seeders\RealisticEventsSeeder::class)) {
+            try {
+                (new \Database\Seeders\RealisticEventsSeeder())->run();
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
         $events = self::loadEvents();
         $q = trim(request('q', ''));
 

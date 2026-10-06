@@ -15,7 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Hanya jalankan AdminSeeder (Super Admin) untuk production
+        // Jalankan AdminSeeder (Super Admin) & RealisticEventsSeeder untuk event
         $this->call(AdminSeeder::class);
+        $this->call(RealisticEventsSeeder::class);
     }
 }

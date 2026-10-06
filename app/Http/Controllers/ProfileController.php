@@ -16,9 +16,33 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+        $ticketsCount = 0;
+        $ordersCount = 0;
+        $pendingOrdersCount = 0;
+        $recentTickets = collect();
+        $recentOrders = collect();
+
+        if ($user->isUser()) {
+            $ticketsQuery = \App\Models\Ticket::whereIn('status', ['valid', 'checked-in'])
+                ->whereHas('participant', fn ($q) => $q->where('user_id', $user->id));
+            $ticketsCount = $ticketsQuery->count();
+            $recentTickets = $ticketsQuery->with(['participant.event', 'order'])->latest()->take(3)->get();
+
+            $ordersQuery = \App\Models\Order::with(['event', 'tickets'])->where('user_id', $user->id);
+            $ordersCount = $ordersQuery->count();
+            $pendingOrdersCount = (clone $ordersQuery)->where('status', 'menunggu_verifikasi')->count();
+            $recentOrders = $ordersQuery->latest()->take(3)->get();
+        }
+
+        return view('profile.edit', compact(
+            'user',
+            'ticketsCount',
+            'ordersCount',
+            'pendingOrdersCount',
+            'recentTickets',
+            'recentOrders'
+        ));
     }
 
     /**

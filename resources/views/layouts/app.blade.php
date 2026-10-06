@@ -3,10 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SeTiket">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#ffffff" id="metaThemeColor">
     <meta name="description" content="SeTiket — Platform pemesanan tiket event & konser terpercaya di Indonesia. Temukan fun run, festival musik, seminar, dan pameran dengan mudah.">
     <title>@yield('title', 'SeTiket — Platform Beli Tiket Event & Konser Resmi')</title>
     <link rel="icon" type="image/webp" href="{{ asset('images/setiket.webp') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/setiket.webp') }}">
 
     {{-- Fonts: Plus Jakarta Sans & Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,8 +24,11 @@
 
     <script>
         // Init theme before render to prevent flash
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        const isDarkTheme = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDarkTheme) {
             document.documentElement.classList.add('dark');
+            const metaTheme = document.getElementById('metaThemeColor');
+            if (metaTheme) metaTheme.setAttribute('content', '#0b0f19');
         } else {
             document.documentElement.classList.remove('dark');
         }
@@ -48,8 +57,8 @@
                     </a>
                 </div>
 
-                {{-- Center: Search Bar (Loket Pill Search) --}}
-                <div class="flex-1 max-w-xl mx-2 sm:mx-6">
+                {{-- Center: Search Bar (Loket Pill Search - Hidden on mobile per request) --}}
+                <div class="hidden sm:block flex-1 max-w-xl mx-2 sm:mx-6">
                     <form action="{{ route('home') }}" method="GET" class="relative">
                         <input type="text" name="q" value="{{ request('q') }}"
                             placeholder="Cari event SOUNDCHECK, YE JAKARTA, MARATHON..."
@@ -348,12 +357,15 @@
     {{-- Script Helpers --}}
     <script>
         function toggleTheme() {
+            const metaTheme = document.getElementById('metaThemeColor');
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
                 localStorage.theme = 'light';
+                if (metaTheme) metaTheme.setAttribute('content', '#ffffff');
             } else {
                 document.documentElement.classList.add('dark');
                 localStorage.theme = 'dark';
+                if (metaTheme) metaTheme.setAttribute('content', '#0b0f19');
             }
         }
 

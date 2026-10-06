@@ -164,11 +164,11 @@
         </p>
     </div>
 
-    {{-- Horizontal Scrollable Cards with Left/Right Edge Navigation Buttons --}}
+    {{-- Horizontal Scrollable Cards with Left/Right Navigation Buttons --}}
     <div class="relative group">
         {{-- Tombol Geser Kiri --}}
         <button type="button" onclick="scrollSection('eventTrendingTrack', -320)" aria-label="Sebelumnya"
-            class="absolute -left-2 sm:-left-4 top-[36%] -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-100 border border-gray-200 dark:border-slate-700 shadow-md hover:shadow-xl hover:scale-110 active:scale-95 flex items-center justify-center transition-all opacity-95 hover:opacity-100 hover:text-[#0050ff] dark:hover:text-blue-400">
+            class="hidden sm:flex absolute -left-3 sm:-left-5 top-[32%] -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-100 border border-gray-200 dark:border-slate-700 shadow-md hover:shadow-xl hover:scale-110 active:scale-95 items-center justify-center transition-all opacity-90 hover:opacity-100 hover:text-[#0050ff] dark:hover:text-blue-400">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
         </button>
 
@@ -198,13 +198,13 @@
                             @endif
                         </div>
 
-                        {{-- Card Body (Loket exact typography) --}}
-                        <div class="pt-3">
-                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                        {{-- Card Body (Persis seperti Gambar 3 - Bersih, Elegan, Tanpa Border Garis) --}}
+                        <div class="pt-2.5">
+                            <p class="text-xs font-normal text-gray-500 dark:text-gray-400 truncate">
                                 {{ $event['kota'] ?? trim(last(explode(',', $event['lokasi'] ?? ''))) }}
                             </p>
 
-                            <h3 class="text-[15px] font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-0.5 leading-snug">
+                            <h3 class="text-sm sm:text-[15px] font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1 leading-snug">
                                 {{ $event['nama'] }}
                             </h3>
 
@@ -212,15 +212,10 @@
                                 Oleh {{ $event['penyelenggara'] ?? 'SeTiket Official' }}
                             </p>
 
-                            <div class="mt-3 pt-2 border-t border-gray-100 dark:border-slate-800 flex items-baseline justify-between">
-                                <div>
-                                    <span class="text-[11px] text-gray-400 dark:text-gray-400 block font-normal leading-tight">Mulai dari</span>
-                                    <span class="text-[15px] font-extrabold text-gray-900 dark:text-white">
-                                        {{ (int)($event['harga'] ?? 0) === 0 ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
-                                    </span>
-                                </div>
-                                <span class="text-xs font-bold text-[#0050ff] dark:text-blue-400 group-hover:translate-x-1 transition-transform">
-                                    Detail →
+                            <div class="mt-3">
+                                <span class="text-xs text-gray-400 dark:text-gray-500 block font-normal leading-none mb-1">Mulai dari</span>
+                                <span class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white block">
+                                    {{ (int)($event['harga'] ?? 0) === 0 ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
                                 </span>
                             </div>
                         </div>
@@ -236,7 +231,7 @@
 
         {{-- Tombol Geser Kanan --}}
         <button type="button" onclick="scrollSection('eventTrendingTrack', 320)" aria-label="Berikutnya"
-            class="absolute -right-2 sm:-right-4 top-[36%] -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-100 border border-gray-200 dark:border-slate-700 shadow-md hover:shadow-xl hover:scale-110 active:scale-95 flex items-center justify-center transition-all opacity-95 hover:opacity-100 hover:text-[#0050ff] dark:hover:text-blue-400">
+            class="hidden sm:flex absolute -right-3 sm:-right-5 top-[32%] -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-100 border border-gray-200 dark:border-slate-700 shadow-md hover:shadow-xl hover:scale-110 active:scale-95 items-center justify-center transition-all opacity-90 hover:opacity-100 hover:text-[#0050ff] dark:hover:text-blue-400">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
         </button>
     </div>
@@ -277,10 +272,11 @@
         </div>
     </div>
 
+    {{-- Grid Cards (Persis seperti Gambar 3 - Bersih, Borderless) --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         @forelse($upcoming as $event)
-            <div class="bg-white dark:bg-[#131d31] rounded-2xl border border-gray-100 dark:border-slate-800 p-2.5 shadow-sm hover:border-gray-200 dark:hover:border-slate-700 transition-all loket-event-card">
-                <a href="{{ route('event.show', $event['id']) }}" class="block group">
+            <div>
+                <a href="{{ route('event.show', $event['id']) }}" class="block group text-decoration-none loket-event-card">
                     <div class="poster-wrapper">
                         @if(!empty($event['thumbnail']))
                             <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="poster-img" loading="lazy">
@@ -288,30 +284,22 @@
                             @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'poster-img'])
                         @endif
                     </div>
-                    <div class="p-2 pt-3">
-                        <span class="text-[11px] font-semibold text-[#0050ff] dark:text-blue-400 uppercase tracking-wider block truncate">
-                            {{ $event['tag'] ?? 'Event Resmi' }}
-                        </span>
-                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1">
+                    <div class="pt-2.5">
+                        <p class="text-xs font-normal text-gray-500 dark:text-gray-400 truncate">
+                            {{ $event['kota'] ?? trim(last(explode(',', $event['lokasi'] ?? ''))) }}
+                        </p>
+                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1 leading-snug">
                             {{ $event['nama'] }}
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                            {{ $event['lokasi'] }}
-                        </p>
-                        <p class="text-xs text-gray-400 dark:text-gray-400 mt-0.5 flex items-center gap-1">
-                            <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                            {{ $event['tanggal'] }}
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                            Oleh {{ $event['penyelenggara'] ?? 'SeTiket Official' }}
                         </p>
                         
-                        <div class="mt-3 pt-2 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
-                            <div>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-400 block font-normal leading-tight">Mulai dari</span>
-                                <span class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white">
-                                    {{ (int)($event['harga'] ?? 0) === 0 ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
-                                </span>
-                            </div>
-                            <span class="btn-loket text-xs py-1.5 px-3">Beli Tiket</span>
+                        <div class="mt-3">
+                            <span class="text-xs text-gray-400 dark:text-gray-500 block font-normal leading-none mb-1">Mulai dari</span>
+                            <span class="text-sm sm:text-base font-extrabold text-gray-900 dark:text-white block">
+                                {{ (int)($event['harga'] ?? 0) === 0 ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
+                            </span>
                         </div>
                     </div>
                 </a>
@@ -355,10 +343,11 @@
         </div>
     </div>
 
+    {{-- Grid Cards (Persis seperti Gambar 3 - Bersih, Borderless) --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($ended as $event)
-            <div class="bg-white dark:bg-[#131d31] rounded-2xl border border-gray-200/80 dark:border-slate-800 p-2.5 shadow-xs loket-event-card opacity-90 hover:opacity-100 transition-all">
-                <a href="{{ route('event.show', $event['id']) }}" class="block group">
+            <div>
+                <a href="{{ route('event.show', $event['id']) }}" class="block group text-decoration-none loket-event-card opacity-90 hover:opacity-100 transition-all">
                     <div class="poster-wrapper filter grayscale-[20%] group-hover:grayscale-0 transition-all">
                         @if(!empty($event['thumbnail']))
                             <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="poster-img" loading="lazy">
@@ -366,31 +355,21 @@
                             @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'poster-img'])
                         @endif
                     </div>
-                    <div class="p-2 pt-3">
-                        <span class="text-[11px] font-semibold text-gray-400 dark:text-gray-400 uppercase tracking-wider block truncate">
-                            {{ $event['tag'] ?? 'Arsip Event' }}
-                        </span>
-                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-800 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1">
+                    <div class="pt-2.5">
+                        <p class="text-xs font-normal text-gray-500 dark:text-gray-400 truncate">
+                            {{ $event['kota'] ?? trim(last(explode(',', $event['lokasi'] ?? ''))) }}
+                        </p>
+                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-800 dark:text-gray-100 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 transition-colors line-clamp-1 mt-1 leading-snug">
                             {{ $event['nama'] }}
                         </h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                            {{ $event['lokasi'] }}
-                        </p>
-                        <p class="text-xs text-gray-400 dark:text-gray-400 mt-0.5 flex items-center gap-1">
-                            <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                            {{ $event['tanggal'] }}
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                            Oleh {{ $event['penyelenggara'] ?? 'SeTiket Official' }}
                         </p>
                         
-                        <div class="mt-3 pt-2 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
-                            <div>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-400 block font-normal leading-tight">Status</span>
-                                <span class="text-xs font-bold text-gray-500 dark:text-gray-400">
-                                    Penjualan Ditutup
-                                </span>
-                            </div>
-                            <span class="px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 group-hover:border-[#0050ff] dark:group-hover:border-blue-400 text-xs font-semibold transition-colors">
-                                Detail Event
+                        <div class="mt-3">
+                            <span class="text-xs text-gray-400 dark:text-gray-500 block font-normal leading-none mb-1">Status</span>
+                            <span class="text-sm sm:text-base font-bold text-gray-600 dark:text-gray-300 block">
+                                Penjualan Ditutup
                             </span>
                         </div>
                     </div>
