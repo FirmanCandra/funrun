@@ -124,8 +124,26 @@
         <p class="text-sm text-ink-500 mb-6">Satu bukti transfer berlaku untuk seluruh tiket dalam pesanan ini.</p>
 
         @if ($order->proof_of_payment)
-            <img src="{{ asset('storage/' . $order->proof_of_payment) }}" alt="Bukti pembayaran"
-                class="max-h-80 rounded-card border border-line mb-6">
+            @php $proofUrl = $order->proofUrl(); @endphp
+            <div class="mb-6 space-y-3">
+                <div class="relative inline-block max-w-full">
+                    <img src="{{ $proofUrl }}" alt="Bukti pembayaran"
+                        class="max-h-80 w-auto rounded-card border border-line shadow-xs object-contain bg-slate-50"
+                        loading="lazy"
+                        onerror="this.onerror=null; this.classList.add('hidden'); document.getElementById('proof-fallback-msg').classList.remove('hidden');">
+                    <div id="proof-fallback-msg" class="hidden p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
+                        <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>Gambar bukti transfer sedang disiapkan server. Klik tautan di bawah untuk melihat berkas atau unggah ulang bukti jika diperlukan.</span>
+                    </div>
+                </div>
+                <div>
+                    <a href="{{ $proofUrl }}" target="_blank" rel="noopener"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        <span>Buka Bukti Transfer di Tab Baru</span>
+                    </a>
+                </div>
+            </div>
         @else
             <p class="text-sm text-ink-500 mb-6">Belum ada bukti yang diunggah.</p>
         @endif

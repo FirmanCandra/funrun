@@ -299,41 +299,82 @@ class AdminController extends Controller
 
     public function scanner()
     {
-        return view('admin.scanner');
+        $user = auth()->user();
+        $query = \App\Models\Ticket::with(['participant.event'])
+            ->where('status', 'checked-in')
+            ->latest('updated_at');
+
+        if ($user && $user->role === 'admin' && $user->event_id) {
+            $query->whereHas('participant', function ($q) use ($user) {
+                $q->where('event_id', $user->event_id);
+            });
+        }
+
+        $recentCheckins = $query->take(5)->get();
+
+        return view('admin.scanner', compact('recentCheckins'));
     }
 
     public function scanTicket(Request $request)
     {
-        $code = $request->qr_code;
-        
-        // Cek berdasarkan qr_code atau ticket_code (untuk manual entry)
-        $ticket = \App\Models\Ticket::where('qr_code', $code)
-                                    ->orWhere('ticket_code', $code)
-                                    ->first();
+        $code = trim($request->input("qr_code", ""));
+
+        if (empty($code)) {
+            return response()->json(["success" => false, "message" => "Kode tiket atau QR code tidak boleh kosong."]);
+        }
+
+        // Cek jika qr_code berupa URL (misal: https://setiket.id/ticket/ST-1-5K-NR-0001)
+        if (preg_match("/ticket\/([A-Za-z0-9_\-]+)/i", $code, $matches)) {
+            $code = $matches[1];
+        }
+
+        // Cek berdasarkan qr_code, ticket_code langsung, atau uppercase
+        $ticket = \App\Models\Ticket::with(["participant.event"])
+            ->where("qr_code", $code)
+            ->orWhere("ticket_code", $code)
+            ->orWhere("ticket_code", strtoupper($code))
+            ->first();
 
         if (!$ticket) {
-            return response()->json(['success' => false, 'message' => 'Ticket not found!']);
+            return response()->json(["success" => false, "message" => "Tiket dengan kode \"" . $code . "\" tidak ditemukan!"]);
         }
 
         $user = auth()->user();
-        if ($user->role === 'admin' && $ticket->participant->event_id !== $user->event_id) {
-            return response()->json(['success' => false, 'message' => 'Tiket ini terdaftar pada event lain!']);
+        if ($user->role === "admin" && $ticket->participant->event_id !== $user->event_id) {
+            return response()->json(["success" => false, "message" => "Tiket ini terdaftar pada event lain dan di luar wewenang Anda!"]);
         }
 
-        if ($ticket->status === 'checked-in') {
-            return response()->json(['success' => false, 'message' => 'Ticket already checked in!']);
+        if ($ticket->status === "checked-in") {
+            $updatedAt = $ticket->updated_at ? $ticket->updated_at->format("d/m/Y H:i") : "sebelumnya";
+            return response()->json([
+                "success" => false,
+                "message" => "Tiket sudah pernah check-in (" . $updatedAt . ")! Tidak dapat digunakan ulang.",
+                "participant" => $ticket->participant->displayName(),
+                "ticket_code" => $ticket->ticket_code,
+            ]);
         }
 
-        if ($ticket->status !== 'valid') {
-            return response()->json(['success' => false, 'message' => 'Ticket is not valid or payment pending.']);
+        if ($ticket->status !== "valid") {
+            return response()->json([
+                "success" => false,
+                "message" => "Tiket belum valid atau pembayaran belum diverifikasi (status: " . $ticket->status . ")."
+            ]);
         }
 
-        $ticket->update(['status' => 'checked-in']);
+        $ticket->update(["status" => "checked-in"]);
+
+        $categoryName = $ticket->participant->category ?? ($ticket->ticket_category ?? "Tiket Masuk");
+        $bib = (!empty($ticket->participant->bib_number)) ? " | BIB: " . $ticket->participant->bib_number : ((!empty($ticket->bib_number)) ? " | BIB: " . $ticket->bib_number : "");
+        $eventTitle = $ticket->participant->event->title ?? "SeTiket Event";
 
         return response()->json([
-            'success' => true, 
-            'message' => 'Check-in successful!',
-            'participant' => $ticket->participant->displayName()
+            "success" => true,
+            "message" => "Check-in berhasil! Selamat datang.",
+            "participant" => $ticket->participant->displayName(),
+            "ticket_code" => $ticket->ticket_code,
+            "category" => $categoryName . $bib,
+            "event" => $eventTitle,
+            "checked_in_at" => now()->format('H:i'),
         ]);
     }
 

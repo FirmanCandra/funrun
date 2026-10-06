@@ -64,6 +64,23 @@ class Order extends Model
             .($this->payment_account_holder ? ' a.n. '.$this->payment_account_holder : ''));
     }
 
+    /**
+     * URL bukti transfer yang aman dari bug symlink dan double path prefix.
+     */
+    public function proofUrl(): ?string
+    {
+        if (empty($this->proof_of_payment)) {
+            return null;
+        }
+
+        $path = ltrim($this->proof_of_payment, '/');
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, strlen('storage/'));
+        }
+
+        return url('/storage/' . $path);
+    }
+
     public function verifier()
     {
         return $this->belongsTo(User::class, 'verified_by');

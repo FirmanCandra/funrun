@@ -153,7 +153,7 @@
                             <td class="px-6 py-4">
                                 @if($order->proof_of_payment)
                                     <button type="button"
-                                        onclick="openLightbox('{{ asset('storage/' . $order->proof_of_payment) }}')"
+                                        onclick="openLightbox('{{ $order->proofUrl() }}')"
                                         class="text-blue-600 hover:text-blue-800 underline text-xs font-medium focus:outline-none">
                                         Lihat Bukti
                                     </button>

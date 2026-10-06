@@ -105,13 +105,37 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-// Fallback route for storage files (helps on shared hosting or when storage link is missing)
+// Route handler for storage files (ensures uploaded proofs and thumbnails always load reliably even without symlink)
 Route::get('/storage/{path}', function ($path) {
-    $filePath = 'public/' . $path;
-    if (!\Illuminate\Support\Facades\Storage::exists($filePath)) {
-        abort(404);
+    $cleanPath = ltrim($path, '/');
+    if (str_starts_with($cleanPath, 'storage/')) {
+        $cleanPath = substr($cleanPath, strlen('storage/'));
     }
-    return response()->file(\Illuminate\Support\Facades\Storage::path($filePath));
+
+    // 1. Cek di disk 'public' (storage/app/public/)
+    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($cleanPath)) {
+        return response()->file(\Illuminate\Support\Facades\Storage::disk('public')->path($cleanPath));
+    }
+
+    // 2. Cek di public/storage/ jika direktori atau symlink ada
+    $directStorage = public_path('storage/' . $cleanPath);
+    if (file_exists($directStorage) && is_file($directStorage)) {
+        return response()->file($directStorage);
+    }
+
+    // 3. Cek di storage_path('app/public/' . $cleanPath)
+    $storageAppPublic = storage_path('app/public/' . $cleanPath);
+    if (file_exists($storageAppPublic) && is_file($storageAppPublic)) {
+        return response()->file($storageAppPublic);
+    }
+
+    // 4. Cek di public/ (misal asset statis)
+    $inPublic = public_path($cleanPath);
+    if (file_exists($inPublic) && is_file($inPublic)) {
+        return response()->file($inPublic);
+    }
+
+    abort(404);
 })->where('path', '.*');
 
 require __DIR__ . '/auth.php';
