@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'SeTiket — Platform Beli Tiket Konser & Event Terpercaya di Indonesia')
+@section('title', 'SeTiket | Platform Beli Tiket Konser & Event Terpercaya di Indonesia')
 
 @php
     $trendingEvents = collect($highlightEvents);

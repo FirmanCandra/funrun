@@ -7,12 +7,21 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SeTiket">
+    <meta name="application-name" content="SeTiket">
+    <meta name="msapplication-TileColor" content="#0050ff">
     <meta name="format-detection" content="telephone=no">
     <meta name="theme-color" content="#ffffff" id="metaThemeColor">
     <meta name="description" content="SeTiket — Platform pemesanan tiket event & konser terpercaya di Indonesia. Temukan fun run, festival musik, seminar, dan pameran dengan mudah.">
-    <title>@yield('title', 'SeTiket — Platform Beli Tiket Event & Konser Resmi')</title>
-    <link rel="icon" type="image/webp" href="{{ asset('images/setiket.webp') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/setiket.webp') }}">
+    <title>@yield('title', 'SeTiket | Platform Beli Tiket Konser & Event Terpercaya di Indonesia')</title>
+
+    {{-- Favicon & App Icons (Support Semua Browser: Chrome, Safari, Edge, Firefox, iOS & Android WebApp) --}}
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=2">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=2">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}?v=2">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}?v=2">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}?v=2">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=2">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=2">
 
     {{-- Fonts: Plus Jakarta Sans & Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
