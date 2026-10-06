@@ -1,429 +1,454 @@
 @extends('layouts.app')
 
-@section('title', 'SeTiket — Temukan & Pesan Tiket Event')
+@section('title', 'SeTiket — Platform Beli Tiket Konser & Event Terpercaya di Indonesia')
 
 @php
-    /**
-     * Susun daftar event sekali supaya kartu di seluruh halaman memakai bentuk
-     * data yang sama. Tidak ada query baru — semuanya dari variabel controller.
-     */
-    $allEvents = collect($highlightEvents)->concat($upcomingEvents);
+    $trendingEvents = collect($highlightEvents);
+    $upcoming = collect($upcomingEvents);
+    $ended = collect($endedEvents ?? []);
+    $allEvents = $trendingEvents->concat($upcoming)->concat($ended);
 
-    // Chip penyaring dari data yang benar-benar ada.
-    $kotaTeratas = $allEvents
-        ->map(fn ($e) => trim(last(explode(',', $e['lokasi'] ?? ''))))
-        ->filter()
-        ->countBy()
-        ->sortDesc()
-        ->keys()
-        ->take(4);
+    $q = request('q', '');
+
+    // Event untuk Carousel Hero Banner (utamakan event trending)
+    $bannerEvents = $trendingEvents->isNotEmpty() ? $trendingEvents : $allEvents->take(5);
 @endphp
 
 @section('content')
 
-{{-- ===== HERO / MAIN BANNER ===== --}}
-<div class="main-banner wow fadeIn" id="top" data-wow-duration="1s" data-wow-delay="0.5s">
-    <div class="container">
-        <div class="row align-items-center">
+{{-- ===== HERO BANNER CAROUSEL (LOKET STYLE) ===== --}}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-4">
+    <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border border-gray-100 bg-gray-900" id="heroCarousel">
+        
+        {{-- Carousel Slides Container --}}
+        <div class="relative h-[220px] sm:h-[380px] md:h-[440px] lg:h-[480px] overflow-hidden" id="carouselTrack">
+            @foreach($bannerEvents as $index => $bEvent)
+                <div class="carousel-slide absolute inset-0 transition-opacity duration-700 ease-in-out {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' }}"
+                    data-slide-index="{{ $index }}">
+                    
+                    {{-- Banner Image --}}
+                    @if(!empty($bEvent['thumbnail']))
+                        <img src="{{ $bEvent['thumbnail'] }}" alt="{{ $bEvent['nama'] }}" class="w-full h-full object-cover">
+                    @else
+                        @include('partials.event-image', [
+                            'nama' => $bEvent['nama'],
+                            'thumbnail' => null,
+                            'class' => 'w-full h-full object-cover'
+                        ])
+                    @endif
 
-            {{-- Kiri: teks + form pencarian --}}
-            <div class="col-lg-6">
-                <div class="left-content header-text wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.8s">
-                    <h6>Selamat Datang di SeTiket</h6>
-                    <h2>
-                        Temukan Event <em>Seru</em> &
-                        <span>Pesan Tiket</span> Sekarang
-                    </h2>
-                    <p>
-                        Platform pemesanan tiket fun run, festival, seminar, olahraga, dan pameran
-                        paling mudah. e-Ticket dengan QR Code langsung tersimpan di akun Anda.
-                    </p>
+                    {{-- Dark Overlay for readable text --}}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
-                    {{-- Form pencarian bergaya Space Dynamic --}}
-                    <form action="{{ route('home') }}" method="GET" class="banner-search-form">
-                        <svg style="width:18px;height:18px;color:rgba(255,255,255,0.8);flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
-                        </svg>
-                        <input type="text" name="q" value="{{ request('q') }}"
-                            placeholder="Cari nama event atau kota…" autocomplete="off">
-                        <button type="submit">
-                            <span class="hidden sm:inline">Cari Event</span>
-                            <span class="inline sm:hidden">Cari</span>
-                        </button>
-                    </form>
+                    {{-- Banner Content & Floating CTA Pill (Loket Style) --}}
+                    <div class="absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
+                        <div class="max-w-2xl text-white">
+                            <span class="inline-block px-3 py-1 bg-[#0050ff] text-white text-[11px] sm:text-xs font-bold rounded-full mb-2 tracking-wide uppercase">
+                                {{ ($bEvent['kategori'] ?? '') === 'highlight' ? 'Featured Event' : 'Akan Datang' }}
+                            </span>
+                            <h2 class="text-xl sm:text-3xl md:text-4xl font-black leading-tight drop-shadow-md">
+                                {{ $bEvent['nama'] }}
+                            </h2>
+                            <p class="text-xs sm:text-sm text-gray-200 mt-1.5 flex items-center gap-3 drop-shadow">
+                                <span class="inline-flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                                    {{ $bEvent['lokasi'] }}
+                                </span>
+                                <span>•</span>
+                                <span class="inline-flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                    {{ $bEvent['tanggal'] }}
+                                </span>
+                            </p>
+                        </div>
 
-                    {{-- Fitur highlights --}}
-                    <div class="banner-feature-pills">
-                        <span class="banner-pill">
-                            <span class="dot-green"></span>
-                            E-ticket dengan QR Code
-                        </span>
-                        <span class="banner-pill">
-                            <span class="dot-green"></span>
-                            Verifikasi panitia resmi
-                        </span>
-                        <span class="banner-pill">
-                            <span class="dot-green"></span>
-                            {{ $allEvents->count() }} event tersedia
-                        </span>
+                        {{-- Loket Floating Action Pill --}}
+                        <a href="{{ route('event.show', $bEvent['id']) }}"
+                            class="inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
+                            <span>Beli Tiketnya di Sini</span>
+                            <svg class="w-4 h-4 text-[#0050ff]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
-            </div>
-
-            {{-- Kanan: kartu event unggulan --}}
-            @php $sorot = $allEvents->first(); @endphp
-            <div class="col-lg-6">
-                <div class="right-image wow fadeInRight" data-wow-duration="1s" data-wow-delay="0.5s">
-                    @if($sorot)
-                        <a href="{{ route('event.show', $sorot['id']) }}"
-                            class="event-card-sd d-block" style="text-decoration:none;">
-                            <div class="event-thumb">
-                                @include('partials.event-image', [
-                                    'nama'      => $sorot['nama'],
-                                    'thumbnail' => $sorot['thumbnail'] ?? null,
-                                ])
-                                <span class="badge"
-                                    style="position:absolute;top:14px;left:14px;background:#ea580c;color:#fff;font-size:11px;">
-                                    Event Pilihan
-                                </span>
-                            </div>
-                            <div class="event-body">
-                                <h4>{{ $sorot['nama'] }}</h4>
-                                <div class="event-meta">
-                                    <span>
-                                        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                        </svg>
-                                        {{ $sorot['lokasi'] }}
-                                    </span>
-                                    <span>
-                                        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
-                                        </svg>
-                                        {{ $sorot['tanggal'] }}
-                                    </span>
-                                </div>
-                                <div class="event-footer">
-                                    <div>
-                                        <small style="font-size:11px;color:#6b7280;display:block;font-weight:500;">Mulai dari</small>
-                                        <span style="font-size:17px;font-weight:700;color:{{ (int)($sorot['harga']??0)===0 ? '#16a34a' : '#111827' }};">
-                                            {{ (int)($sorot['harga']??0)===0 ? 'Gratis' : 'Rp'.number_format($sorot['harga'],0,',','.') }}
-                                        </span>
-                                    </div>
-                                    <span class="btn-ticket-cta" style="font-size:13px;padding:9px 18px;">
-                                        Pesan Tiket
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
-                    @else
-                        <img src="{{ asset('vendor/space-dynamic/images/banner-right-image.png') }}" alt="SeTiket Events">
-                    @endif
-                </div>
-            </div>
-
+            @endforeach
         </div>
-    </div>
-</div>
 
-{{-- ===== SAPAAN PESERTA YANG SUDAH LOGIN ===== --}}
+        {{-- Carousel Arrows --}}
+        <button type="button" onclick="prevSlide()" aria-label="Slide sebelumnya"
+            class="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-9 sm:w-11 h-9 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm flex items-center justify-center transition-all">
+            <svg class="w-5 sm:w-6 h-5 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+            </svg>
+        </button>
+        <button type="button" onclick="nextSlide()" aria-label="Slide berikutnya"
+            class="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-9 sm:w-11 h-9 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm flex items-center justify-center transition-all">
+            <svg class="w-5 sm:w-6 h-5 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+            </svg>
+        </button>
+
+        {{-- Carousel Dots Indicator --}}
+        <div class="absolute bottom-3 left-4 sm:left-8 z-20 flex items-center gap-1.5" id="carouselDots">
+            @foreach($bannerEvents as $index => $bEvent)
+                <button type="button" onclick="goToSlide({{ $index }})" aria-label="Pilih Slide {{ $index + 1 }}"
+                    class="carousel-dot h-2 rounded-full transition-all duration-300 {{ $index === 0 ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80' }}"
+                    data-dot-index="{{ $index }}"></button>
+            @endforeach
+        </div>
+
+    </div>
+</section>
+
+{{-- ===== SAPAAN PENGGUNA TERDAFTAR ===== --}}
 @auth
     @if(auth()->user()->isUser() && ($myTicketCount > 0 || $myPendingOrders > 0))
-        <div class="container" style="margin-top:30px;">
-            <div class="greeting-card wow fadeIn d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3"
-                data-wow-duration="0.5s">
-                <div class="d-flex align-items-center gap-3">
-                    <div style="width:44px;height:44px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <svg style="width:22px;height:22px;color:#2563eb;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5Z" />
-                        </svg>
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-[#0050ff] text-white flex items-center justify-center shadow-md shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5Z"/></svg>
                     </div>
                     <div>
-                        <p style="font-weight:600;color:#111827;margin:0;">
+                        <h4 class="font-bold text-gray-900 text-sm sm:text-base">
                             Halo, {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}!
-                        </p>
-                        <p style="font-size:14px;color:#6b7280;margin:0;">
-                            @if($myTicketCount > 0){{ $myTicketCount }} tiket aktif.@endif
-                            @if($myPendingOrders > 0){{ $myPendingOrders }} pesanan menunggu verifikasi.@endif
+                        </h4>
+                        <p class="text-xs sm:text-sm text-gray-600">
+                            @if($myTicketCount > 0)
+                                Anda memiliki <span class="font-bold text-[#0050ff]">{{ $myTicketCount }} tiket aktif</span>.
+                            @endif
+                            @if($myPendingOrders > 0)
+                                <span class="font-medium text-amber-700">{{ $myPendingOrders }} pesanan menunggu verifikasi transfer</span>.
+                            @endif
                         </p>
                     </div>
                 </div>
-                <div class="d-flex gap-2">
-                    @if($myTicketCount > 0)
-                        <a href="{{ route('tickets') }}" class="btn-ticket-cta">Lihat Tiket Saya</a>
-                    @endif
-                    <a href="{{ route('dashboard') }}" class="btn-ticket-registered">Pesanan Saya</a>
+                <div class="flex items-center gap-2.5 shrink-0">
+                    <a href="{{ route('tickets') }}" class="px-4 py-2 rounded-xl bg-[#0050ff] hover:bg-[#0043d4] text-white text-xs sm:text-sm font-bold shadow-sm transition-colors">
+                        Lihat Tiket Saya →
+                    </a>
                 </div>
             </div>
-        </div>
+        </section>
     @endif
 @endauth
 
-
-
-{{-- ===== EVENT PILIHAN — Blog / Featured layout ===== --}}
-@if(!isset($q) || $q === '')
-<div id="blog" class="events-section" style="background:#fff;">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 wow fadeInDown" data-wow-duration="1s" data-wow-delay="0.25s">
-                <div class="section-heading">
-                    <h2>
-                        Event <em>Pilihan</em> yang Paling
-                        <span>Banyak Dicari</span>
-                    </h2>
-                    <p>Yang paling banyak dicari peserta bulan ini.</p>
-                </div>
+{{-- ===== SECTION 1: EVENT YANG LAGI TRENDING (LOKET STYLE SCROLLER) ===== --}}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="events">
+    <div class="flex items-center justify-between mb-5">
+        <div>
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-orange-50 text-[#ea580c] flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/>
+                    </svg>
+                </span>
+                <h2 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                    Event yang Lagi Trending
+                </h2>
             </div>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                Event terpopuler dan paling banyak dicari minggu ini
+            </p>
         </div>
-
-        <div id="featured" class="row g-4 mt-2">
-            @forelse($highlightEvents as $ev)
-                @include('partials.event-card', ['ev' => $ev, 'grup' => 'featured'])
-            @empty
-                <div class="col-12">
-                    <p style="color:#6b7280;text-align:center;padding:40px 0;">Belum ada event pilihan.</p>
-                </div>
-            @endforelse
+        
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="scrollSection('eventTrendingTrack', -320)" aria-label="Sebelumnya"
+                class="w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-[#0050ff] shadow-sm transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+            </button>
+            <button type="button" onclick="scrollSection('eventTrendingTrack', 320)" aria-label="Berikutnya"
+                class="w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-[#0050ff] shadow-sm transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+            </button>
         </div>
     </div>
-</div>
-@endif
 
-{{-- ===== EVENT MENDATANG — horizontal list ===== --}}
-<div id="events" class="events-section" style="background:#f8fafc;">
-    <div class="container">
-        <div class="section-heading mb-5 wow fadeInDown" data-wow-duration="1s" data-wow-delay="0.2s">
-            @if(!empty($q))
-                <h2>Hasil <em>Pencarian</em> untuk: <span>"{{ $q }}"</span></h2>
-                <p>
-                    Ditemukan {{ count($upcomingEvents) + count($highlightEvents) }} event.
-                    <a href="{{ route('home') }}" style="color:#2563eb;font-size:14px;font-weight:500;margin-left:8px;">← Tampilkan semua</a>
-                </p>
-            @else
-                <h2>Event <em>Akan</em> <span>Datang</span></h2>
-                <p>Jadwal terdekat yang masih membuka pendaftaran.</p>
-            @endif
-        </div>
+    {{-- Horizontal Scrollable Cards (Exact Loket Card Anatomy) --}}
+    <div class="relative">
+        <div class="flex gap-5 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-4" id="eventTrendingTrack">
+            @forelse($trendingEvents as $index => $event)
+                <div class="min-w-[260px] sm:min-w-[280px] md:min-w-[290px] max-w-[290px] shrink-0">
+                    <a href="{{ route('event.show', $event['id']) }}" class="block group text-decoration-none loket-event-card">
+                        
+                        {{-- Poster Image 16:9 with zoom effect --}}
+                        <div class="poster-wrapper">
+                            @if(!empty($event['thumbnail']))
+                                <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="poster-img" loading="lazy">
+                            @else
+                                @include('partials.event-image', [
+                                    'nama' => $event['nama'],
+                                    'thumbnail' => null,
+                                    'class' => 'poster-img'
+                                ])
+                            @endif
 
-        <div class="row g-4">
-            @forelse($upcomingEvents as $ev)
-                @php
-                    $sudahTerdaftar = $myEventIds->contains($ev['id']);
-                    $gratis = (int) ($ev['harga'] ?? 0) === 0;
-                    $kota = strtolower(trim(last(explode(',', $ev['lokasi'] ?? ''))));
-                @endphp
-                <div class="col-lg-6 wow fadeInUp"
-                    data-wow-duration="1s" data-wow-delay="{{ 0.2 + ($loop->index % 2) * 0.15 }}s">
-                    <article class="event-card-h event-card"
-                        data-search="{{ strtolower(($ev['nama']??'') . ' ' . ($ev['lokasi']??'')) }}"
-                        data-groups="upcoming{{ $gratis ? ' free' : '' }} kota:{{ $kota }}">
+                            <span class="absolute top-2.5 left-2.5 bg-[#ea580c] text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 0 0-1.45-.385c-.345.23-.614.558-.822.88-.527.82-1.124 1.905-1.954 2.83-1.02 1.137-2.316 2.115-3.666 3.125C3.398 9.824 2.5 11.536 2.5 13.5 2.5 17.09 5.41 20 9 20s6.5-2.91 6.5-6.5c0-1.874-.82-3.486-1.978-4.707-.63-.663-1.32-1.332-1.93-2.071-.43-.52-.76-1.122-.98-1.823-.11-.351-.17-.714-.217-1.046Z" clip-rule="evenodd"/></svg>
+                                Trending #{{ $index + 1 }}
+                            </span>
 
-                        <a href="{{ route('event.show', $ev['id']) }}" class="thumb">
-                            @include('partials.event-image', [
-                                'nama'      => $ev['nama'],
-                                'thumbnail' => $ev['thumbnail'] ?? null,
-                                'class'     => '',
-                            ])
-                            @if($sudahTerdaftar)
-                                <span class="badge" style="position:absolute;top:10px;left:10px;background:#22c55e;color:#fff;">
-                                    ✓ Terdaftar
+                            @if($myEventIds->contains($event['id']))
+                                <span class="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-sm">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                                    Terdaftar
                                 </span>
                             @endif
-                        </a>
+                        </div>
 
-                        <div class="body">
-                            <div class="d-flex gap-2 mb-2" style="flex-wrap:wrap;">
-                                <span class="badge" style="background:#eff6ff;color:#2563eb;">Akan Datang</span>
-                                @if($gratis)<span class="badge" style="background:#f0fdf4;color:#16a34a;">Gratis</span>@endif
-                            </div>
+                        {{-- Card Body (Loket exact typography) --}}
+                        <div class="pt-3">
+                            {{-- Kota / Lokasi (gray text) --}}
+                            <p class="text-xs font-medium text-gray-500 truncate">
+                                {{ $event['kota'] ?? trim(last(explode(',', $event['lokasi'] ?? ''))) }}
+                            </p>
 
-                            <h4 class="clamp-2">
-                                <a href="{{ route('event.show', $ev['id']) }}">{{ $ev['nama'] }}</a>
-                            </h4>
+                            {{-- Judul Event (bold dark text) --}}
+                            <h3 class="text-[15px] font-bold text-gray-900 group-hover:text-[#0050ff] transition-colors line-clamp-1 mt-0.5 leading-snug">
+                                {{ $event['nama'] }}
+                            </h3>
 
-                            <div class="meta mt-2">
-                                <span>
-                                    <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.7 16.7 13.4 21a2 2 0 0 1-2.8 0l-4.3-4.3a8 8 0 1 1 11.4 0Z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                    </svg>
-                                    {{ $ev['lokasi'] }}
-                                </span>
-                                <span>
-                                    <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z" />
-                                    </svg>
-                                    {{ $ev['tanggal'] }}
-                                </span>
-                            </div>
+                            {{-- Penyelenggara (gray text) --}}
+                            <p class="text-xs text-gray-500 mt-1 truncate">
+                                Oleh {{ $event['penyelenggara'] ?? 'SeTiket Official' }}
+                            </p>
 
-                            <div class="footer">
+                            {{-- Harga (Loket format) --}}
+                            <div class="mt-3 pt-2 border-t border-gray-100 flex items-baseline justify-between">
                                 <div>
-                                    <small style="font-size:11px;color:#6b7280;display:block;font-weight:500;">Mulai dari</small>
-                                    <span style="font-size:16px;font-weight:700;color:{{ $gratis ? '#16a34a' : '#111827' }};">
-                                        {{ $gratis ? 'Gratis' : 'Rp'.number_format($ev['harga'],0,',','.') }}
+                                    <span class="text-[11px] text-gray-400 block font-normal leading-tight">Mulai dari</span>
+                                    <span class="text-[15px] font-extrabold text-gray-900">
+                                        {{ (int)($event['harga'] ?? 0) === 0 ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
                                     </span>
                                 </div>
-                                <a href="{{ $sudahTerdaftar ? route('dashboard') : route('event.show', $ev['id']) }}"
-                                    class="{{ $sudahTerdaftar ? 'btn-ticket-registered' : 'btn-ticket-cta' }}">
-                                    @if($sudahTerdaftar)
-                                        Lihat Pesanan
-                                    @else
-                                        Pesan Tiket
-                                    @endif
-                                </a>
+                                <span class="text-xs font-bold text-[#0050ff] group-hover:translate-x-1 transition-transform">
+                                    Detail →
+                                </span>
                             </div>
                         </div>
-                    </article>
+
+                    </a>
                 </div>
             @empty
-                <div class="col-12" style="text-align:center;padding:60px 0;">
-                    @if(!empty($q))
-                        <svg style="width:56px;height:56px;color:#d1d5db;margin:0 auto 16px;display:block;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
-                        </svg>
-                        <p style="color:#374151;font-weight:600;font-size:16px;margin:0 0 8px;">Event tidak ditemukan</p>
-                        <p style="color:#6b7280;margin:0 0 20px;">Tidak ada event yang cocok dengan <strong>"{{ $q }}"</strong>.</p>
-                        <a href="{{ route('home') }}" class="btn-ticket-cta" style="text-decoration:none;">← Lihat Semua Event</a>
-                    @else
-                        <p style="color:#6b7280;">Belum ada event mendatang.</p>
-                    @endif
+                <div class="w-full text-center py-8 text-gray-500 text-sm">
+                    Tidak ada event trending saat ini.
                 </div>
             @endforelse
         </div>
-
-        <p id="searchEmpty" class="hidden text-center" style="color:#6b7280;padding:60px 0;display:none;">
-            Tidak ada event yang cocok dengan pencarian Anda.
-        </p>
     </div>
-</div>
+</section>
 
-{{-- ===== CTA — Contact-style section ===== --}}
-<div id="contact" class="cta-section wow fadeIn" data-wow-duration="1s" data-wow-delay="0.2s">
-    <div class="container">
-        <div class="row align-items-center">
-
-            <div class="col-lg-7 wow fadeInLeft" data-wow-duration="0.5s" data-wow-delay="0.25s">
-                <div class="section-heading">
-                    <h2 style="color:#fff;">
-                        Jangan Sampai <em style="color:#fde68a;">Kehabisan</em>
-                        <span style="color:#fed7aa;">Tiket</span> Favorit Anda
-                    </h2>
-                    <p>
-                        Kuota event biasanya habis jauh sebelum hari-H.
-                        Amankan tempat Anda sekarang — daftar hanya butuh beberapa menit.
-                    </p>
-                    <div class="cta-phone">
-                        <h4>
-                            Butuh bantuan? Hubungi kami:
-                            <span>
-                                <span class="phone-icon">
-                                    <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2 6.5C2 14.5 9.5 22 17.5 22c.66 0 1.3-.05 1.93-.13A1 1 0 0 0 20 21v-3.28a1 1 0 0 0-.75-.97l-3.28-.82a1 1 0 0 0-1.04.38l-.97 1.4a15.06 15.06 0 0 1-6.67-6.67l1.4-.97a1 1 0 0 0 .38-1.04l-.82-3.28A1 1 0 0 0 7.28 5H4a2 2 0 0 0-2 1.5Z"/>
-                                    </svg>
-                                </span>
-                                <a href="https://wa.me/6289681201941" target="_blank" rel="noopener"
-                                    style="color:#fde68a;font-size:15px;font-weight:500;">+62 896-8120-1941</a>
-                            </span>
-                        </h4>
-                    </div>
-                </div>
+{{-- ===== SECTION 2: EVENT YANG AKAN DATANG ===== --}}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-t border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-blue-50 text-[#0050ff] flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect width="18" height="18" x="3" y="4" rx="2"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/>
+                    </svg>
+                </span>
+                <h2 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                    Event yang Akan Datang
+                </h2>
             </div>
-
-            <div class="col-lg-5 mt-5 mt-lg-0 wow fadeInRight" data-wow-duration="0.5s" data-wow-delay="0.25s">
-                <div style="background:#fff;border-radius:20px;padding:48px 36px;position:relative;">
-                    <h3 style="font-size:22px;font-weight:700;color:#2a2a2a;margin-bottom:20px;">
-                        Mulai Sekarang
-                    </h3>
-                    <p style="color:#6b7280;font-size:14px;margin-bottom:28px;">
-                        Bergabunglah dengan ribuan peserta yang sudah memesan tiket melalui SeTiket.
-                    </p>
-                    <div style="display:flex;flex-direction:column;gap:12px;">
-                        <a href="{{ route('home') }}#events" class="btn-ticket-cta" style="width:100%;padding:13px 24px;font-size:15px;">
-                            Jelajahi Semua Event
-                        </a>
-                        @guest
-                            <a href="{{ route('register') }}" class="btn-ticket-registered" style="width:100%;padding:12px 24px;font-size:14px;border:1.5px solid #2563eb;color:#2563eb;background:#eff6ff;">
-                                Buat Akun Gratis
-                            </a>
-                        @endguest
-                    </div>
-                </div>
-            </div>
-
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                Jelajahi konser, festival, dan turnamen mendatang yang siap kamu hadiri
+            </p>
         </div>
     </div>
-</div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        @forelse($upcoming as $event)
+            <div class="bg-white rounded-2xl border border-gray-100 p-2.5 shadow-sm loket-event-card">
+                <a href="{{ route('event.show', $event['id']) }}" class="block group">
+                    <div class="poster-wrapper">
+                        @if(!empty($event['thumbnail']))
+                            <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="poster-img" loading="lazy">
+                        @else
+                            @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'poster-img'])
+                        @endif
+                        <span class="absolute top-2.5 left-2.5 bg-[#0050ff] text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider shadow-sm">
+                            Akan Datang
+                        </span>
+                    </div>
+                    <div class="p-2 pt-3">
+                        <span class="text-[11px] font-semibold text-[#0050ff] uppercase tracking-wider block truncate">
+                            {{ $event['tag'] ?? 'Event Resmi' }}
+                        </span>
+                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-900 group-hover:text-[#0050ff] transition-colors line-clamp-1 mt-1">
+                            {{ $event['nama'] }}
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1 truncate flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                            {{ $event['lokasi'] }}
+                        </p>
+                        <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                            <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                            {{ $event['tanggal'] }}
+                        </p>
+                        
+                        <div class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-gray-400 block font-normal leading-tight">Mulai dari</span>
+                                <span class="text-sm sm:text-base font-extrabold text-gray-900">
+                                    {{ (int)($event['harga'] ?? 0) === 0 ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
+                                </span>
+                            </div>
+                            <span class="btn-loket text-xs py-1.5 px-3">Beli Tiket</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        @empty
+            <div class="col-span-full text-center py-8 text-gray-500 text-sm">
+                Belum ada event mendatang yang terdaftar.
+            </div>
+        @endforelse
+    </div>
+</section>
+
+{{-- ===== SECTION 3: EVENT YANG SUDAH BERAKHIR ===== --}}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-t border-gray-100">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/>
+                    </svg>
+                </span>
+                <h2 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
+                    Event yang Sudah Berakhir
+                </h2>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                Koleksi event legendaris yang sukses terselenggara bersama SeTiket
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @forelse($ended as $event)
+            <div class="bg-white rounded-2xl border border-gray-200/80 p-2.5 shadow-xs loket-event-card opacity-90 hover:opacity-100 transition-opacity">
+                <a href="{{ route('event.show', $event['id']) }}" class="block group">
+                    <div class="poster-wrapper filter grayscale-[20%] group-hover:grayscale-0 transition-all">
+                        @if(!empty($event['thumbnail']))
+                            <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="poster-img" loading="lazy">
+                        @else
+                            @include('partials.event-image', ['nama' => $event['nama'], 'thumbnail' => null, 'class' => 'poster-img'])
+                        @endif
+                        <span class="absolute top-2.5 left-2.5 bg-slate-800/90 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                            <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                            Event Selesai
+                        </span>
+                    </div>
+                    <div class="p-2 pt-3">
+                        <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider block truncate">
+                            {{ $event['tag'] ?? 'Arsip Event' }}
+                        </span>
+                        <h3 class="text-sm sm:text-[15px] font-bold text-gray-800 group-hover:text-[#0050ff] transition-colors line-clamp-1 mt-1">
+                            {{ $event['nama'] }}
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1 truncate flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                            {{ $event['lokasi'] }}
+                        </p>
+                        <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                            <svg class="w-3 h-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                            {{ $event['tanggal'] }}
+                        </p>
+                        
+                        <div class="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] text-gray-400 block font-normal leading-tight">Status</span>
+                                <span class="text-xs font-bold text-gray-500">
+                                    Penjualan Ditutup
+                                </span>
+                            </div>
+                            <span class="px-3 py-1.5 rounded-xl border border-gray-200 text-gray-600 group-hover:text-[#0050ff] group-hover:border-[#0050ff] text-xs font-semibold transition-colors">
+                                Detail Event
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        @empty
+            <div class="col-span-full text-center py-8 text-gray-500 text-sm">
+                Belum ada arsip event selesai.
+            </div>
+        @endforelse
+    </div>
+</section>
+
+@endsection
 
 @push('scripts')
 <script>
-    // ---- Filter kartu event ----
-    (function () {
-        const chips = document.querySelectorAll('.filter-chip');
-        const cards = document.querySelectorAll('.event-card');
-        const empty = document.getElementById('searchEmpty');
-        if (!chips.length) return;
+    // ===== HERO CAROUSEL CONTROLS =====
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+    let autoSlideInterval = null;
 
-        chips.forEach(chip => chip.addEventListener('click', function () {
-            const key = this.dataset.filter;
-            chips.forEach(c => c.classList.toggle('is-active', c === this));
+    function updateSlide(index) {
+        if (!slides.length) return;
+        currentSlide = (index + slides.length) % slides.length;
 
-            let visible = 0;
-            cards.forEach(card => {
-                const groups = (card.dataset.groups || '').split(' ');
-                const match = key === 'all' || groups.includes(key);
-                card.closest('[class*="col"]').style.display = match ? '' : 'none';
-                if (match) visible++;
-            });
-
-            if (empty) empty.style.display = (visible === 0) ? 'block' : 'none';
-            document.getElementById('featured')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }));
-    })();
-
-    // ---- Pencarian dari navbar ----
-    (function () {
-        const inputs = [document.getElementById('navbarSearch'), document.getElementById('navbarSearchMobile')].filter(Boolean);
-        if (!inputs.length) return;
-
-        function filter(query) {
-            const q = query.toLowerCase().trim();
-            let visible = 0;
-            document.querySelectorAll('.event-card').forEach(card => {
-                const haystack = (card.getAttribute('data-search') || '').toLowerCase();
-                const match = haystack.includes(q);
-                const col = card.closest('[class*="col"]');
-                if (col) col.style.display = match ? '' : 'none';
-                if (match) visible++;
-            });
-            const empty = document.getElementById('searchEmpty');
-            if (empty) empty.style.display = (visible === 0 && q !== '') ? 'block' : 'none';
-        }
-
-        inputs.forEach(input => {
-            input.addEventListener('input', function (e) {
-                if (document.querySelector('.event-card')) {
-                    filter(e.target.value);
-                    inputs.forEach(other => { if (other !== e.target) other.value = e.target.value; });
-                }
-            });
-            input.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter' && !document.querySelector('.event-card')) {
-                    window.location.href = '{{ route('home') }}?q=' + encodeURIComponent(this.value);
-                }
-            });
+        slides.forEach((slide, i) => {
+            if (i === currentSlide) {
+                slide.classList.remove('opacity-0', 'z-0', 'pointer-events-none');
+                slide.classList.add('opacity-100', 'z-10');
+            } else {
+                slide.classList.remove('opacity-100', 'z-10');
+                slide.classList.add('opacity-0', 'z-0', 'pointer-events-none');
+            }
         });
 
-        const q = new URLSearchParams(window.location.search).get('q');
-        if (q && document.querySelector('.event-card')) {
-            inputs.forEach(i => { i.value = q; });
-            filter(q);
-            document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' });
+        dots.forEach((dot, i) => {
+            if (i === currentSlide) {
+                dot.classList.remove('w-2', 'bg-white/50');
+                dot.classList.add('w-6', 'bg-white');
+            } else {
+                dot.classList.remove('w-6', 'bg-white');
+                dot.classList.add('w-2', 'bg-white/50');
+            }
+        });
+    }
+
+    function nextSlide() {
+        updateSlide(currentSlide + 1);
+        resetAutoSlide();
+    }
+
+    function prevSlide() {
+        updateSlide(currentSlide - 1);
+        resetAutoSlide();
+    }
+
+    function goToSlide(index) {
+        updateSlide(index);
+        resetAutoSlide();
+    }
+
+    function resetAutoSlide() {
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(nextSlide, 5000);
+    }
+
+    if (slides.length > 1) {
+        autoSlideInterval = setInterval(nextSlide, 5000);
+    }
+
+    // ===== HORIZONTAL SCROLLER =====
+    function scrollSection(trackId, amount) {
+        const track = document.getElementById(trackId);
+        if (track) {
+            track.scrollBy({ left: amount, behavior: 'smooth' });
         }
-    })();
+    }
 </script>
 @endpush
-
-@endsection

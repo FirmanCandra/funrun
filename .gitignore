@@ -3,6 +3,9 @@
 .env
 .env.backup
 .env.production
+.agents/rules/production-hosting.md
+.agents/rules/*secret*
+.agents/rules/*credential*
 .phpactor.json
 .phpunit.result.cache
 /.codex

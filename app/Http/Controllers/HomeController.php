@@ -44,128 +44,25 @@ class HomeController extends Controller
 
     public static function defaultEvents(): array
     {
-        return [
-            [
-                'id' => 1,
-                'nama' => 'VOLT RHYTHM 2026',
-                'lokasi' => 'Lapangan Yonif Mekanis, Jakarta',
-                'tanggal' => '25 Juli 2026',
-                'harga' => 100000,
-                'thumbnail' => '',
-                'kategori' => 'upcoming',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 2,
-                'nama' => 'STEP UP FEST 2026',
-                'lokasi' => 'Gambir Expo – Kemayoran',
-                'tanggal' => '25-26 Juli 2026',
-                'harga' => 145000,
-                'thumbnail' => '',
-                'kategori' => 'upcoming',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 3,
-                'nama' => 'KELUYURUN',
-                'lokasi' => 'SMAN 2 Jember',
-                'tanggal' => '26 Juli 2026',
-                'harga' => 105000,
-                'thumbnail' => '',
-                'kategori' => 'upcoming',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 4,
-                'nama' => 'SOERATS 2026',
-                'lokasi' => 'Kampus Bendan SCU',
-                'tanggal' => '26-28 September 2026',
-                'harga' => 55000,
-                'thumbnail' => '',
-                'kategori' => 'upcoming',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 5,
-                'nama' => 'THE PARADE PROJECT',
-                'lokasi' => 'Kabupaten Kendal',
-                'tanggal' => '3 Oktober 2026',
-                'harga' => 85000,
-                'thumbnail' => '',
-                'kategori' => 'upcoming',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 6,
-                'nama' => 'DIANA RIA FESTIVAL',
-                'lokasi' => 'Pekalongan, Jawa Tengah',
-                'tanggal' => '15 Agustus 2026',
-                'harga' => 90000,
-                'thumbnail' => '',
-                'kategori' => 'upcoming',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 7,
-                'nama' => 'INVESTOSIR RUN 2026',
-                'lokasi' => 'Semarang',
-                'tanggal' => '13-15 Agustus 2026',
-                'harga' => 0,
-                'thumbnail' => '',
-                'kategori' => 'upcoming',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 8,
-                'nama' => 'ENERGY COLOR RUN',
-                'lokasi' => 'Lapangan Pemuda',
-                'tanggal' => '2 Juli 2026',
-                'harga' => 80000,
-                'thumbnail' => '',
-                'kategori' => 'upcoming',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 9,
-                'nama' => 'JAMNAS 7 TLCI',
-                'lokasi' => 'Spekta Merbabu, Kab. Semarang',
-                'tanggal' => '9 Juli 2027',
-                'harga' => 150000,
-                'thumbnail' => '',
-                'kategori' => 'highlight',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 10,
-                'nama' => 'JEMBER 10K',
-                'lokasi' => 'Jember, Jawa Timur',
-                'tanggal' => '19 Juli 2026',
-                'harga' => 250000,
-                'thumbnail' => '',
-                'kategori' => 'highlight',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 11,
-                'nama' => 'KAIJERUN 2026',
-                'lokasi' => 'Universitas Jember',
-                'tanggal' => '5 Juli 2026',
-                'harga' => 150000,
-                'thumbnail' => '',
-                'kategori' => 'highlight',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-            [
-                'id' => 12,
-                'nama' => 'RUPIAH BOROBUDUR RUN',
-                'lokasi' => 'Kawasan Candi Borobudur',
-                'tanggal' => '5 Juli 2026',
-                'harga' => 175000,
-                'thumbnail' => '',
-                'kategori' => 'highlight',
-                'urlBeli' => 'https://wa.me/6289681201941',
-            ],
-        ];
+        if (app()->runningUnitTests()) {
+            return [
+                ['id' => 1, 'nama' => 'VOLT RHYTHM 2026', 'lokasi' => 'Lapangan Yonif Mekanis, Jakarta', 'tanggal' => '25 Juli 2026', 'harga' => 100000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
+                ['id' => 2, 'nama' => 'STEP UP FEST 2026', 'lokasi' => 'Gambir Expo – Kemayoran', 'tanggal' => '25-26 Juli 2026', 'harga' => 145000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
+                ['id' => 3, 'nama' => 'KELUYURUN', 'lokasi' => 'SMAN 2 Jember', 'tanggal' => '26 Juli 2026', 'harga' => 105000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
+                ['id' => 4, 'nama' => 'SOERATS 2026', 'lokasi' => 'Kampus Bendan SCU', 'tanggal' => '26-28 September 2026', 'harga' => 55000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
+            ];
+        }
+
+        if (class_exists(\Database\Seeders\RealisticEventsSeeder::class)) {
+            $data = \Database\Seeders\RealisticEventsSeeder::getEventsData();
+            return array_map(function ($ev) {
+                $ev['urlBeli'] = 'https://wa.me/6289681201941';
+                unset($ev['categories']);
+                return $ev;
+            }, $data);
+        }
+
+        return [];
     }
 
     public function index()
@@ -182,21 +79,22 @@ class HomeController extends Controller
                     mb_stripos($e['lokasi'] ?? '', $q) !== false
             ));
 
-            // Tampilkan hasil pencarian di kedua slot agar tidak tersembunyi
-            $upcomingEvents  = array_values(array_filter($filtered, fn ($e) => ($e['kategori'] ?? '') !== 'highlight'));
             $highlightEvents = array_values(array_filter($filtered, fn ($e) => ($e['kategori'] ?? '') === 'highlight'));
+            $upcomingEvents  = array_values(array_filter($filtered, fn ($e) => ($e['kategori'] ?? '') === 'upcoming'));
+            $endedEvents     = array_values(array_filter($filtered, fn ($e) => ($e['kategori'] ?? '') === 'ended'));
 
-            // Jika tidak ada yang masuk highlight, masukkan semua hasil ke upcoming
-            if (empty($highlightEvents) && empty($upcomingEvents)) {
+            // Jika tidak ada pembagian khusus, masukkan semua hasil ke upcoming
+            if (empty($highlightEvents) && empty($upcomingEvents) && empty($endedEvents)) {
                 $upcomingEvents  = $filtered;
             }
         } else {
-            $upcomingEvents  = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'upcoming'));
             $highlightEvents = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'highlight'));
+            $upcomingEvents  = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'upcoming'));
+            $endedEvents     = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'ended'));
         }
 
         return view('welcome', array_merge(
-            compact('upcomingEvents', 'highlightEvents', 'q'),
+            compact('upcomingEvents', 'highlightEvents', 'endedEvents', 'q'),
             self::participantContext()
         ));
     }
@@ -253,8 +151,17 @@ class HomeController extends Controller
             $event['syarat_ketentuan'] = "1. Tiket yang sah dibeli secara resmi melalui platform ti.tix.com.\n2. Setiap pembelian bersifat final (non-refundable) kecuali terjadi pembatalan acara oleh pihak penyelenggara.\n3. E-Ticket yang didapat wajib ditunjukkan saat memasuki area acara untuk dipindai (check-in).\n4. Penyelenggara berhak menolak masuk bagi pemegang tiket yang tidak dapat menunjukkan bukti tiket atau jika kode tiket telah dipindai sebelumnya.\n5. Segala bentuk pelanggaran hukum di area acara akan ditindak tegas sesuai peraturan yang berlaku.\n6. Perubahan jadwal atau lokasi acara akan diumumkan secara resmi melalui saluran media sosial pihak penyelenggara.";
         }
 
+        // Fetch ticket categories
+        $categories = \App\Models\EventCategory::where('event_id', (int) $id)->get();
+        if ($categories->isEmpty()) {
+            $categories = collect([
+                (object) ['id' => 1, 'name' => 'Regular Entry', 'code' => 'REG', 'price' => (int)($event['harga'] ?? 100000)],
+                (object) ['id' => 2, 'name' => 'VIP Access Pass', 'code' => 'VIP', 'price' => (int)(($event['harga'] ?? 100000) * 1.5)],
+            ]);
+        }
+
         return view('event-detail', array_merge(
-            compact('event'),
+            compact('event', 'categories'),
             self::participantContext()
         ));
     }

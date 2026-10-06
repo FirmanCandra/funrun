@@ -242,7 +242,9 @@
 
                     <div class="pt-4 border-t border-line space-y-2 text-xs text-ink-500">
                         <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-[10px]">✓</div>
+                            <div class="w-4 h-4 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-[10px]">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                            </div>
                             <span class="text-ink-900 font-medium">Langkah 1: Isi Data Peserta</span>
                         </div>
                         <div class="flex items-center gap-2" id="stepIndicator2">

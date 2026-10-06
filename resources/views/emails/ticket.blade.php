@@ -14,7 +14,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h2>🎉 Payment Verified! 🎉</h2>
+            <h2 style="color: #0f172a; margin: 0 0 8px 0; font-size: 24px; font-weight: 800;">Payment Verified</h2>
             <p>Your registration for <strong>{{ $ticket->participant->event->title ?? 'SeTiket' }}</strong> is officially confirmed.</p>
         </div>
         

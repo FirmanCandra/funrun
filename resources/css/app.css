@@ -1102,3 +1102,105 @@
     }
 }
 
+/* ============================================================
+   LOKET.COM DESIGN SYSTEM EXTENSIONS
+   ============================================================ */
+
+:root {
+    --loket-blue: #0050ff;
+    --loket-blue-hover: #0043d4;
+    --loket-blue-light: #ebf1ff;
+    --loket-orange: #ff543e;
+    --loket-orange-light: #fff2f0;
+    --loket-dark: #111827;
+    --loket-gray-text: #6b7280;
+    --loket-gray-bg: #f8fafc;
+    --loket-gray-border: #e5e7eb;
+}
+
+/* Hide scrollbar for clean horizontal scrolling */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Loket Card Hover */
+.loket-event-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.loket-event-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px -10px rgba(0, 80, 255, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.06);
+}
+.loket-event-card:hover .poster-img {
+    transform: scale(1.04);
+}
+
+.poster-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 14px;
+    aspect-ratio: 16 / 9;
+    background-color: #f1f5f9;
+}
+.poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+/* Loket Ticker Marquee */
+@keyframes marquee-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.loket-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-scroll 32s linear infinite;
+}
+.loket-marquee-track:hover {
+    animation-play-state: paused;
+}
+
+/* Loket Primary Button */
+.btn-loket {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--loket-blue);
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 14.5px;
+    padding: 11px 22px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0, 80, 255, 0.28);
+}
+.btn-loket:hover {
+    background-color: var(--loket-blue-hover);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 80, 255, 0.36);
+}
+
+/* Category Filter Pill */
+.cat-filter-pill {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.cat-filter-pill:hover,
+.cat-filter-pill.active {
+    background-color: var(--loket-blue);
+    color: #ffffff;
+    border-color: var(--loket-blue);
+}
+
+
