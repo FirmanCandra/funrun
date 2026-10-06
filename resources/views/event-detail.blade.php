@@ -3,11 +3,13 @@
 @section('title', $event['nama'] . ' — Beli Tiket Resmi di SeTiket')
 
 @php
+    $canonicalSlug = $event['slug'] ?? \Illuminate\Support\Str::slug($event['nama']);
+    $canonicalUrl = route('event.show', ['identifier' => $canonicalSlug]);
+    $currentUrl = $canonicalUrl;
     $sudahTerdaftar = $myEventIds->contains($event['id']);
     $gratis = (int) ($event['harga'] ?? 0) === 0;
     $petaUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($event['lokasi'] ?? '');
-    $currentUrl = request()->fullUrl();
-    $shareText = rawurlencode('Yuk nonton ' . $event['nama'] . ' di SeTiket! Beli tiket resminya di sini: ' . $currentUrl);
+    $shareText = rawurlencode('Yuk nonton ' . $event['nama'] . ' di SeTiket! Beli tiket resminya di sini: ' . $canonicalUrl);
 @endphp
 
 @section('content')
@@ -430,9 +432,11 @@
         }
     }
 
-    // Salin link event
+    // Salin link event dengan URL slug rapi (misal: setiket.id/event/nama-event)
     function copyEventLink() {
-        navigator.clipboard.writeText(window.location.href).then(() => {
+        const urlToCopy = '{{ $canonicalUrl }}' || window.location.href;
+        
+        const showToast = () => {
             const toast = document.getElementById('copyToast');
             if (toast) {
                 toast.classList.remove('hidden');
@@ -440,7 +444,32 @@
                     toast.classList.add('hidden');
                 }, 2500);
             }
-        });
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(urlToCopy).then(showToast).catch(() => {
+                fallbackCopy(urlToCopy, showToast);
+            });
+        } else {
+            fallbackCopy(urlToCopy, showToast);
+        }
+    }
+
+    function fallbackCopy(text, callback) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        temp.style.position = 'fixed';
+        temp.style.opacity = '0';
+        document.body.appendChild(temp);
+        temp.focus();
+        temp.select();
+        try {
+            document.execCommand('copy');
+            if (callback) callback();
+        } catch (e) {
+            console.error('Fallback copy failed', e);
+        }
+        document.body.removeChild(temp);
     }
 </script>
 @endpush

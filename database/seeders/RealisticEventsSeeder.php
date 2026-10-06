@@ -317,6 +317,9 @@ class RealisticEventsSeeder extends Seeder
             unset($copy['kota']);
             unset($copy['organizer_badge']);
             $copy['urlBeli'] = 'https://wa.me/6289681201941';
+            if (empty($copy['slug']) && !empty($copy['nama'])) {
+                $copy['slug'] = \Illuminate\Support\Str::slug($copy['nama']);
+            }
             return $copy;
         }, $eventsData);
 

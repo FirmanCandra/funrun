@@ -748,8 +748,15 @@ class AdminController extends Controller
         }
 
         $newEventId = $maxId + 1;
+        $slug = \Illuminate\Support\Str::slug($request->nama);
+        $existingSlugs = array_filter(array_column($events, 'slug'));
+        if (in_array($slug, $existingSlugs)) {
+            $slug .= '-' . $newEventId;
+        }
+
         $events[] = [
             'id'               => $newEventId,
+            'slug'             => $slug,
             'nama'             => $request->nama,
             'lokasi'           => $request->lokasi,
             'tanggal'          => $request->tanggal,
@@ -798,9 +805,18 @@ class AdminController extends Controller
         $events = \App\Http\Controllers\HomeController::loadEvents();
         $found = false;
 
+        $newSlug = \Illuminate\Support\Str::slug($request->nama);
+        foreach ($events as $other) {
+            if ($other['id'] != $id && ($other['slug'] ?? '') === $newSlug) {
+                $newSlug .= '-' . $id;
+                break;
+            }
+        }
+
         foreach ($events as &$ev) {
             if ($ev['id'] == $id) {
                 $ev['nama']             = $request->nama;
+                $ev['slug']             = $newSlug;
                 $ev['lokasi']           = $request->lokasi;
                 $ev['tanggal']          = $request->tanggal;
                 $ev['harga']            = (int) $request->harga;

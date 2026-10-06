@@ -212,7 +212,7 @@
                     <div class="mt-5 pt-3 border-t border-slate-100 flex items-center gap-2">
                         {{-- Tombol Utama: KELOLA EVENT (Jadikan satu disitu!) --}}
                         <button type="button" 
-                            onclick="openKelolaHub({{ $ev['id'] }}, @js($ev['nama']), @js($ev['thumbnail'] ?? ''), @js($ev['tanggal']), @js($ev['lokasi']), {{ $ev['harga'] }}, @js($ev['kategori']), @js($ev['urlBeli'] ?? ''), @js($ev['waktu'] ?? ''), @js($ev['deskripsi'] ?? ''), @js($ev['syarat_ketentuan'] ?? ''))"
+                            onclick="openKelolaHub({{ $ev['id'] }}, @js($ev['nama']), @js($ev['thumbnail'] ?? ''), @js($ev['tanggal']), @js($ev['lokasi']), {{ $ev['harga'] }}, @js($ev['kategori']), @js($ev['urlBeli'] ?? ''), @js($ev['waktu'] ?? ''), @js($ev['deskripsi'] ?? ''), @js($ev['syarat_ketentuan'] ?? ''), @js($ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'])))"
                             class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-all shadow-xs flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -325,7 +325,7 @@
                             <td class="px-5 py-4 text-right pr-6">
                                 <div class="flex items-center justify-end gap-1.5">
                                     <button type="button" 
-                                        onclick="openKelolaHub({{ $ev['id'] }}, @js($ev['nama']), @js($ev['thumbnail'] ?? ''), @js($ev['tanggal']), @js($ev['lokasi']), {{ $ev['harga'] }}, @js($ev['kategori']), @js($ev['urlBeli'] ?? ''), @js($ev['waktu'] ?? ''), @js($ev['deskripsi'] ?? ''), @js($ev['syarat_ketentuan'] ?? ''))"
+                                        onclick="openKelolaHub({{ $ev['id'] }}, @js($ev['nama']), @js($ev['thumbnail'] ?? ''), @js($ev['tanggal']), @js($ev['lokasi']), {{ $ev['harga'] }}, @js($ev['kategori']), @js($ev['urlBeli'] ?? ''), @js($ev['waktu'] ?? ''), @js($ev['deskripsi'] ?? ''), @js($ev['syarat_ketentuan'] ?? ''), @js($ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'])))"
                                         class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -480,14 +480,21 @@
                     </a>
                 </div>
 
-                {{-- 5. Tombol Edit Detail Lengkap --}}
-                <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                {{-- 5. Footer Actions: Lihat Halaman Publik & Ubah Data --}}
+                <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                    <a id="hub_link_public" href="#" target="_blank" rel="noopener"
+                        class="w-full sm:flex-1 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 font-bold py-3 px-4 rounded-2xl text-xs transition-colors flex items-center justify-center gap-2 shadow-xs">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        <span>Lihat Halaman Publik</span>
+                    </a>
                     <button type="button" id="btnHubTriggerEdit"
-                        class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-2xl text-xs transition-colors flex items-center justify-center gap-2">
+                        class="w-full sm:flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-2xl text-xs transition-colors flex items-center justify-center gap-2">
                         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                        Ubah Informasi Dasar Event (Nama, Lokasi, Waktu, Deskripsi)
+                        <span>Ubah Informasi Dasar</span>
                     </button>
                 </div>
             </div>
@@ -650,7 +657,7 @@
         }
 
         // Open Kelola Event Hub Modal
-        function openKelolaHub(id, nama, thumbnail, tanggal, lokasi, harga, kategori, urlBeli, waktu, deskripsi, syarat_ketentuan) {
+        function openKelolaHub(id, nama, thumbnail, tanggal, lokasi, harga, kategori, urlBeli, waktu, deskripsi, syarat_ketentuan, slug) {
             document.getElementById('hub_title').textContent = nama;
             document.getElementById('hub_meta').textContent = tanggal + ' • ' + lokasi;
 
@@ -667,6 +674,7 @@
             document.getElementById('hub_link_categories').href = '/admin/events/' + id + '/categories';
             document.getElementById('hub_link_payment').href = '/admin/payment-accounts?event_id=' + id;
             document.getElementById('hub_link_forms').href = '/admin/form-fields?event_id=' + id;
+            document.getElementById('hub_link_public').href = '/event/' + (slug || id);
 
             // Trigger edit button inside hub
             document.getElementById('btnHubTriggerEdit').onclick = function() {

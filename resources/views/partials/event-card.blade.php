@@ -15,7 +15,7 @@
     data-search="{{ strtolower(($ev['nama'] ?? '') . ' ' . ($ev['lokasi'] ?? '')) }}"
     data-groups="{{ $grup }}{{ $gratis ? ' free' : '' }} kota:{{ $kota }}">
 
-    <a href="{{ route('event.show', $ev['id']) }}" class="event-thumb" style="display:block;position:relative;overflow:hidden;">
+    <a href="{{ route('event.show', $ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'])) }}" class="event-thumb" style="display:block;position:relative;overflow:hidden;">
         @include('partials.event-image', ['nama' => $ev['nama'], 'thumbnail' => $ev['thumbnail'] ?? null])
 
         @if($sudahTerdaftar)
@@ -36,7 +36,7 @@
 
     <div class="event-body">
         <h4>
-            <a href="{{ route('event.show', $ev['id']) }}">{{ $ev['nama'] }}</a>
+            <a href="{{ route('event.show', $ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'])) }}">{{ $ev['nama'] }}</a>
         </h4>
 
         <div class="event-meta">
@@ -62,7 +62,7 @@
                     {{ $gratis ? 'Gratis' : 'Rp' . number_format($ev['harga'], 0, ',', '.') }}
                 </span>
             </div>
-            <a href="{{ $sudahTerdaftar ? route('dashboard') : route('event.show', $ev['id']) }}"
+            <a href="{{ $sudahTerdaftar ? route('dashboard') : route('event.show', $ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'])) }}"
                 class="{{ $sudahTerdaftar ? 'btn-ticket-registered' : 'btn-ticket-cta' }}">
                 @if($sudahTerdaftar)
                     Lihat Pesanan

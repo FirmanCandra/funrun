@@ -32,11 +32,27 @@ class HomeController extends Controller
             return $defaults;
         }
 
+        // Pastikan setiap event memiliki properti slug
+        foreach ($data as &$event) {
+            if (empty($event['slug']) && !empty($event['nama'])) {
+                $event['slug'] = \Illuminate\Support\Str::slug($event['nama']);
+            }
+        }
+        unset($event);
+
         return $data;
     }
 
     public static function saveEvents(array $events): void
     {
+        // Pastikan slug terisi sebelum disimpan
+        foreach ($events as &$ev) {
+            if (empty($ev['slug']) && !empty($ev['nama'])) {
+                $ev['slug'] = \Illuminate\Support\Str::slug($ev['nama']);
+            }
+        }
+        unset($ev);
+
         file_put_contents(
             self::getEventsPath(),
             json_encode(array_values($events), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
@@ -47,10 +63,10 @@ class HomeController extends Controller
     {
         if (app()->runningUnitTests()) {
             return [
-                ['id' => 1, 'nama' => 'VOLT RHYTHM 2026', 'lokasi' => 'Lapangan Yonif Mekanis, Jakarta', 'tanggal' => '25 Juli 2026', 'harga' => 100000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
-                ['id' => 2, 'nama' => 'STEP UP FEST 2026', 'lokasi' => 'Gambir Expo – Kemayoran', 'tanggal' => '25-26 Juli 2026', 'harga' => 145000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
-                ['id' => 3, 'nama' => 'KELUYURUN', 'lokasi' => 'SMAN 2 Jember', 'tanggal' => '26 Juli 2026', 'harga' => 105000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
-                ['id' => 4, 'nama' => 'SOERATS 2026', 'lokasi' => 'Kampus Bendan SCU', 'tanggal' => '26-28 September 2026', 'harga' => 55000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
+                ['id' => 1, 'slug' => 'volt-rhythm-2026', 'nama' => 'VOLT RHYTHM 2026', 'lokasi' => 'Lapangan Yonif Mekanis, Jakarta', 'tanggal' => '25 Juli 2026', 'harga' => 100000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
+                ['id' => 2, 'slug' => 'step-up-fest-2026', 'nama' => 'STEP UP FEST 2026', 'lokasi' => 'Gambir Expo – Kemayoran', 'tanggal' => '25-26 Juli 2026', 'harga' => 145000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
+                ['id' => 3, 'slug' => 'keluyurun', 'nama' => 'KELUYURUN', 'lokasi' => 'SMAN 2 Jember', 'tanggal' => '26 Juli 2026', 'harga' => 105000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
+                ['id' => 4, 'slug' => 'soerats-2026', 'nama' => 'SOERATS 2026', 'lokasi' => 'Kampus Bendan SCU', 'tanggal' => '26-28 September 2026', 'harga' => 55000, 'thumbnail' => '', 'kategori' => 'upcoming', 'urlBeli' => 'https://wa.me/6289681201941'],
             ];
         }
 
@@ -58,12 +74,61 @@ class HomeController extends Controller
             $data = \Database\Seeders\RealisticEventsSeeder::getEventsData();
             return array_map(function ($ev) {
                 $ev['urlBeli'] = 'https://wa.me/6289681201941';
+                if (empty($ev['slug']) && !empty($ev['nama'])) {
+                    $ev['slug'] = \Illuminate\Support\Str::slug($ev['nama']);
+                }
                 unset($ev['categories']);
                 return $ev;
             }, $data);
         }
 
         return [];
+    }
+
+    /**
+     * Cari event berdasarkan identifier (bisa berupa slug rapi, variasi slug, atau ID numerik).
+     */
+    public static function findEventByIdentifier(array $events, string $identifier): ?array
+    {
+        $identifier = trim($identifier);
+
+        // 1. Pencocokan langsung dengan slug
+        foreach ($events as $ev) {
+            $slug = $ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'] ?? '');
+            if ($slug === $identifier) {
+                return $ev;
+            }
+        }
+
+        // 2. Pencocokan ternormalisasi (huruf kecil, slugified)
+        $normalizedId = \Illuminate\Support\Str::slug($identifier);
+        foreach ($events as $ev) {
+            $slug = $ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'] ?? '');
+            if ($slug === $normalizedId) {
+                return $ev;
+            }
+        }
+
+        // 3. Pencocokan santai tanpa tanda hubung (misal: vol-1 vs vol1)
+        $cleanTarget = str_replace('-', '', $normalizedId);
+        foreach ($events as $ev) {
+            $slug = $ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'] ?? '');
+            if (str_replace('-', '', $slug) === $cleanTarget) {
+                return $ev;
+            }
+        }
+
+        // 4. Pencocokan ID numerik (legacy URLs, misal: /event/1)
+        if (is_numeric($identifier)) {
+            $intId = (int) $identifier;
+            foreach ($events as $ev) {
+                if ((int) ($ev['id'] ?? 0) === $intId) {
+                    return $ev;
+                }
+            }
+        }
+
+        return null;
     }
 
     public function index()
@@ -141,13 +206,21 @@ class HomeController extends Controller
         ];
     }
 
-    public function showEvent($id)
+    public function showEvent($identifier)
     {
         $events = self::loadEvents();
-        $event = collect($events)->firstWhere('id', (int) $id);
+        $event = self::findEventByIdentifier($events, (string) $identifier);
 
         if (! $event) {
             abort(404);
+        }
+
+        $canonicalSlug = $event['slug'] ?? \Illuminate\Support\Str::slug($event['nama'] ?? '');
+
+        // Jika diakses menggunakan ID angka (misal /event/1) atau variasi penulisan slug,
+        // redirect 301 (Permanent Redirect) ke URL canonical slug agar tautan browser & bagikan selalu rapi
+        if ($identifier !== $canonicalSlug) {
+            return redirect()->route('event.show', ['identifier' => $canonicalSlug], 301);
         }
 
         // Apply fallbacks
@@ -158,11 +231,11 @@ class HomeController extends Controller
             $event['deskripsi'] = 'Event '.$event['nama'].' hadir sebagai salah satu acara paling dinamis dan ditunggu-tunggu tahun ini! Diselenggarakan di '.$event['lokasi'].", event ini berkomitmen untuk menyatukan komunitas melalui perpaduan energi, kreativitas, dan kolaborasi.\n\nJangan lewatkan momen seru dan panggung hiburan megah yang dirancang untuk memberikan pengalaman terbaik bagi Anda dan rekan-rekan. Dapatkan tiket Anda sekarang juga sebelum kehabisan!";
         }
         if (empty($event['syarat_ketentuan'])) {
-            $event['syarat_ketentuan'] = "1. Tiket yang sah dibeli secara resmi melalui platform ti.tix.com.\n2. Setiap pembelian bersifat final (non-refundable) kecuali terjadi pembatalan acara oleh pihak penyelenggara.\n3. E-Ticket yang didapat wajib ditunjukkan saat memasuki area acara untuk dipindai (check-in).\n4. Penyelenggara berhak menolak masuk bagi pemegang tiket yang tidak dapat menunjukkan bukti tiket atau jika kode tiket telah dipindai sebelumnya.\n5. Segala bentuk pelanggaran hukum di area acara akan ditindak tegas sesuai peraturan yang berlaku.\n6. Perubahan jadwal atau lokasi acara akan diumumkan secara resmi melalui saluran media sosial pihak penyelenggara.";
+            $event['syarat_ketentuan'] = "1. Tiket yang sah dibeli secara resmi melalui platform SeTiket.\n2. Setiap pembelian bersifat final (non-refundable) kecuali terjadi pembatalan acara oleh pihak penyelenggara.\n3. E-Ticket yang didapat wajib ditunjukkan saat memasuki area acara untuk dipindai (check-in).\n4. Penyelenggara berhak menolak masuk bagi pemegang tiket yang tidak dapat menunjukkan bukti tiket atau jika kode tiket telah dipindai sebelumnya.\n5. Segala bentuk pelanggaran hukum di area acara akan ditindak tegas sesuai peraturan yang berlaku.\n6. Perubahan jadwal atau lokasi acara akan diumumkan secara resmi melalui saluran media sosial pihak penyelenggara.";
         }
 
         // Fetch ticket categories
-        $categories = \App\Models\EventCategory::where('event_id', (int) $id)->get();
+        $categories = \App\Models\EventCategory::where('event_id', (int) $event['id'])->get();
         if ($categories->isEmpty()) {
             $categories = collect([
                 (object) ['id' => 1, 'name' => 'Regular Entry', 'code' => 'REG', 'price' => (int)($event['harga'] ?? 100000)],

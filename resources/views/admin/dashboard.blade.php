@@ -95,6 +95,14 @@
                 </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
+                <a href="{{ route('event.show', $selectedEvent['slug'] ?? \Illuminate\Support\Str::slug($selectedEvent['nama'])) }}" target="_blank"
+                   class="text-xs font-bold text-slate-700 hover:text-blue-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                   title="Lihat halaman publik event ini">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Lihat Publik
+                </a>
                 <a href="{{ route('admin.event-image', ['event_id' => $selectedEvent['id']]) }}"
                    class="text-xs font-bold text-blue-700 hover:text-blue-800 bg-white border border-blue-200 px-3 py-1.5 rounded-lg transition-colors">
                     Kelola Pengaturan Event Ini →

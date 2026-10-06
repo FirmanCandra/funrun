@@ -11,7 +11,7 @@ use App\Http\Controllers\ProfileController;
 
 // Landing Page
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/event/{id}', [HomeController::class, 'showEvent'])->name('event.show');
+Route::get('/event/{identifier}', [HomeController::class, 'showEvent'])->name('event.show');
 
 // Alur Pembelian Tiket — wajib login sebagai peserta, supaya setiap pesanan
 // terikat ke akun pembeli dan bisa dilacak lewat /dashboard.

@@ -89,7 +89,7 @@
                     <div class="hidden sm:block absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
                     {{-- Mobile clickable link: seluruh banner poster di mobile langsung bisa diklik --}}
-                    <a href="{{ route('event.show', $bEvent['id']) }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $bEvent['nama'] }}"></a>
+                    <a href="{{ route('event.show', $bEvent['slug'] ?? \Illuminate\Support\Str::slug($bEvent['nama'])) }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $bEvent['nama'] }}"></a>
 
                     {{-- Banner Content & Floating CTA Pill (Desktop Only - di mobile di-hidden agar poster bersih) --}}
                     <div class="hidden sm:flex absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex-col sm:flex-row items-start sm:items-end justify-between gap-3 z-10 pointer-events-none">
@@ -114,7 +114,7 @@
                         </div>
 
                         {{-- Loket Floating Action Pill --}}
-                        <a href="{{ route('event.show', $bEvent['id']) }}"
+                        <a href="{{ route('event.show', $bEvent['slug'] ?? \Illuminate\Support\Str::slug($bEvent['nama'])) }}"
                             class="pointer-events-auto inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
                             <span>Beli Tiketnya di Sini</span>
                             <svg class="w-4 h-4 text-[#0050ff]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -227,7 +227,7 @@
         <div class="flex gap-5 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-4 px-1" id="eventTrendingTrack">
             @forelse($trendingEvents as $index => $event)
                 <div class="min-w-[260px] sm:min-w-[280px] md:min-w-[290px] max-w-[290px] shrink-0">
-                    <a href="{{ route('event.show', $event['id']) }}" class="block group/card text-decoration-none loket-event-card">
+                    <a href="{{ route('event.show', $event['slug'] ?? \Illuminate\Support\Str::slug($event['nama'])) }}" class="block group/card text-decoration-none loket-event-card">
                         
                         {{-- Poster Image 16:9 with zoom effect --}}
                         <div class="poster-wrapper">
@@ -345,7 +345,7 @@
                         @endphp
                         <div class="relative z-10">
                             {{-- Hover active applies ONLY to this specific card (group/event) --}}
-                            <a href="{{ route('event.show', $event['id']) }}"
+                            <a href="{{ route('event.show', $event['slug'] ?? \Illuminate\Support\Str::slug($event['nama'])) }}"
                                 class="group/event block text-decoration-none">
                                 
                                 {{-- 1. TAMPILAN DESKTOP (sm:flex) - PERSIS SEPERTI GAMBAR 1 --}}
@@ -485,7 +485,7 @@
         <div class="flex gap-5 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-4 px-1" id="eventEndedTrack">
             @forelse($ended as $event)
                 <div class="min-w-[260px] sm:min-w-[280px] md:min-w-[290px] max-w-[290px] shrink-0">
-                    <a href="{{ route('event.show', $event['id']) }}" class="block group/card text-decoration-none loket-event-card opacity-90 hover:opacity-100 transition-all">
+                    <a href="{{ route('event.show', $event['slug'] ?? \Illuminate\Support\Str::slug($event['nama'])) }}" class="block group/card text-decoration-none loket-event-card opacity-90 hover:opacity-100 transition-all">
                         <div class="poster-wrapper filter grayscale-[25%] group-hover/card:grayscale-0 transition-all">
                             @if(!empty($event['thumbnail']))
                                 <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="poster-img" loading="lazy">

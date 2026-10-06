@@ -25,7 +25,7 @@ class RegistrationController extends Controller
     {
         $eventId = $request->query('event_id', 1);
         $events = HomeController::loadEvents();
-        $event = collect($events)->firstWhere('id', (int) $eventId);
+        $event = HomeController::findEventByIdentifier($events, (string) $eventId);
 
         if (! $event) {
             // Fallback to first event or default
