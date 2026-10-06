@@ -16,122 +16,46 @@
     {{-- App CSS & JS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <script>
+        // Init theme before render to prevent flash
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #ffffff;
-            color: #111827;
         }
     </style>
 
     @stack('styles')
 </head>
 
-<body class="min-h-screen flex flex-col bg-white text-gray-900 antialiased">
+<body class="min-h-screen flex flex-col bg-white dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 antialiased transition-colors duration-200">
 
     {{-- ===== NAVBAR LOKET STYLE ===== --}}
-    <header class="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)]" style="position: -webkit-sticky; position: sticky; top: 0; z-index: 50;">
+    <header class="sticky top-0 z-50 bg-white dark:bg-[#0f172a] border-b border-gray-100 dark:border-slate-800/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.35)] transition-colors duration-200" style="position: -webkit-sticky; position: sticky; top: 0; z-index: 50;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-[72px] gap-2 sm:gap-4">
 
-                {{-- Left: Logo + Kategori Dropdown --}}
+                {{-- Left: Logo --}}
                 <div class="flex items-center gap-3 sm:gap-6 shrink-0">
                     <a href="{{ route('home') }}" class="flex items-center gap-2 group">
                         <img src="{{ asset('images/setiketbg.webp') }}" alt="SeTiket Logo" class="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" onerror="this.src='{{ asset('images/setiket.webp') }}'">
                     </a>
-
-                    {{-- Kategori Button (Loket ⊞ Kategori) --}}
-                    <div class="relative" id="categoryMenuContainer">
-                        <button type="button" id="categoryBtn" onclick="toggleCategoryMenu(event)"
-                            class="hidden md:inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-gray-700 hover:text-[#0050ff] rounded-xl hover:bg-blue-50/60 transition-colors">
-                            <svg class="w-4 h-4 text-[#0050ff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect width="7" height="7" x="3" y="3" rx="1.5"/>
-                                <rect width="7" height="7" x="14" y="3" rx="1.5"/>
-                                <rect width="7" height="7" x="14" y="14" rx="1.5"/>
-                                <rect width="7" height="7" x="3" y="14" rx="1.5"/>
-                            </svg>
-                            <span>Kategori</span>
-                            <svg class="w-3.5 h-3.5 text-gray-400 transition-transform duration-200" id="categoryChevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
-                            </svg>
-                        </button>
-
-                        {{-- Kategori Dropdown Mega Menu (Menggunakan SVG Icons) --}}
-                        <div id="categoryDropdown" class="hidden absolute left-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-50">
-                            <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 py-2">Jelajahi Kategori</div>
-                            
-                            {{-- Musik --}}
-                            <a href="{{ route('home') }}?cat=musik#events" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-gray-700 hover:text-[#0050ff] text-sm font-medium transition-colors">
-                                <span class="w-8 h-8 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 19 8-2V4L9 6v13Zm0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm8-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                                </span>
-                                <div>
-                                    <div class="font-semibold text-gray-900 leading-tight">Musik & Konser</div>
-                                    <div class="text-xs text-gray-400">Live show, festival & gigs</div>
-                                </div>
-                            </a>
-
-                            {{-- Olahraga --}}
-                            <a href="{{ route('home') }}?cat=olahraga#events" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-gray-700 hover:text-[#0050ff] text-sm font-medium transition-colors">
-                                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7Z"/></svg>
-                                </span>
-                                <div>
-                                    <div class="font-semibold text-gray-900 leading-tight">Olahraga & Fun Run</div>
-                                    <div class="text-xs text-gray-400">Marathon, 5K, 10K & race</div>
-                                </div>
-                            </a>
-
-                            {{-- Festival --}}
-                            <a href="{{ route('home') }}?cat=festival#events" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-gray-700 hover:text-[#0050ff] text-sm font-medium transition-colors">
-                                <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M4 21V10l8-7 8 7v11M12 3v18M8 21v-7a4 4 0 0 1 8 0v7"/></svg>
-                                </span>
-                                <div>
-                                    <div class="font-semibold text-gray-900 leading-tight">Festival & Pameran</div>
-                                    <div class="text-xs text-gray-400">Kuliner, expo & art fair</div>
-                                </div>
-                            </a>
-
-                            {{-- Komedi --}}
-                            <a href="{{ route('home') }}?cat=comedy#events" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-gray-700 hover:text-[#0050ff] text-sm font-medium transition-colors">
-                                <span class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Zm7 8v2a7 7 0 0 1-14 0v-2M12 19v3m-4 0h8"/></svg>
-                                </span>
-                                <div>
-                                    <div class="font-semibold text-gray-900 leading-tight">Stand Up Comedy</div>
-                                    <div class="text-xs text-gray-400">Special show & panggung tawa</div>
-                                </div>
-                            </a>
-
-                            {{-- Workshop --}}
-                            <a href="{{ route('home') }}?cat=workshop#events" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50/70 text-gray-700 hover:text-[#0050ff] text-sm font-medium transition-colors">
-                                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 18h6m-5 3h4m1-11a5 5 0 1 0-8 4c.67.67 1 1.5 1 2.5h6c0-1 .33-1.83 1-2.5a4.98 4.98 0 0 0 1-4Z"/></svg>
-                                </span>
-                                <div>
-                                    <div class="font-semibold text-gray-900 leading-tight">Workshop & Seminar</div>
-                                    <div class="text-xs text-gray-400">Tech conference & masterclass</div>
-                                </div>
-                            </a>
-
-                            <div class="border-t border-gray-100 mt-1 pt-1">
-                                <a href="{{ route('home') }}#events" class="block text-center text-xs font-semibold text-[#0050ff] py-2 hover:underline">
-                                    Lihat Semua Kategori →
-                                </a>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 {{-- Center: Search Bar (Loket Pill Search) --}}
-                <div class="flex-1 max-w-xl mx-1 sm:mx-4">
+                <div class="flex-1 max-w-xl mx-2 sm:mx-6">
                     <form action="{{ route('home') }}" method="GET" class="relative">
                         <input type="text" name="q" value="{{ request('q') }}"
                             placeholder="Cari event SOUNDCHECK, YE JAKARTA, MARATHON..."
-                            class="w-full bg-[#f3f5f8] hover:bg-[#ebedf2] focus:bg-white border border-transparent focus:border-[#0050ff] rounded-full py-2.5 pl-4 sm:pl-5 pr-11 text-xs sm:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-3 focus:ring-[#0050ff]/15 transition-all">
+                            class="w-full bg-[#f3f5f8] dark:bg-slate-800 hover:bg-[#ebedf2] dark:hover:bg-slate-700/70 focus:bg-white dark:focus:bg-slate-800 border border-transparent dark:border-slate-700 focus:border-[#0050ff] rounded-full py-2.5 pl-4 sm:pl-5 pr-11 text-xs sm:text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-[#0050ff]/15 transition-all">
                         <button type="submit" aria-label="Cari"
-                            class="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-[#0050ff] hover:bg-white transition-colors">
+                            class="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-[#0050ff] dark:hover:text-blue-400 hover:bg-white dark:hover:bg-slate-700 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z"/>
                             </svg>
@@ -139,15 +63,21 @@
                     </form>
                 </div>
 
-                {{-- Right: Language + User Auth (NOTE: 'Kerjasama dengan Kami' IS OMITTED AS REQUESTED) --}}
-                <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-                    {{-- Language selector --}}
-                    <div class="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-200/60">
-                        <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2a14.5 14.5 0 0 0 0 20M12 2a14.5 14.5 0 0 1 0 20M2 12h20"/>
+                {{-- Right: Theme Toggle + User Auth --}}
+                <div class="flex items-center gap-2 sm:gap-3.5 shrink-0">
+                    {{-- Theme Toggle Button (Dark / Light Mode) --}}
+                    <button type="button" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Ganti Mode Tema"
+                        class="p-2 sm:p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-amber-400 hover:text-amber-500 dark:hover:text-amber-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all focus:outline-none shadow-2xs">
+                        {{-- Sun icon (visible in dark mode) --}}
+                        <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m14.14-14.14l-1.41 1.41"/>
                         </svg>
-                        <span>ID</span>
-                    </div>
+                        {{-- Moon icon (visible in light mode) --}}
+                        <svg class="w-4 h-4 block dark:hidden text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
+                        </svg>
+                    </button>
 
                     @auth
                         @if(auth()->user()->isUser())
@@ -182,34 +112,34 @@
                             </button>
 
                             {{-- Dropdown Profile (Menggunakan SVG Icons) --}}
-                            <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 p-2 z-50">
-                                <div class="px-3 py-2 border-b border-gray-100 mb-1">
-                                    <p class="text-xs font-bold text-gray-900 truncate">{{ auth()->user()->name }}</p>
-                                    <p class="text-[11px] text-gray-500 truncate">{{ auth()->user()->email }}</p>
+                            <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-[#1e293b] rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-2 z-50">
+                                <div class="px-3 py-2 border-b border-gray-100 dark:border-slate-700 mb-1">
+                                    <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ auth()->user()->name }}</p>
+                                    <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate">{{ auth()->user()->email }}</p>
                                 </div>
                                 @if(auth()->user()->isUser())
-                                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:bg-blue-50/70 hover:text-[#0050ff] transition-colors">
+                                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-blue-50/70 dark:hover:bg-slate-700 hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
                                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/></svg>
                                         <span>Pesanan Saya</span>
                                     </a>
-                                    <a href="{{ route('tickets') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:bg-blue-50/70 hover:text-[#0050ff] transition-colors">
+                                    <a href="{{ route('tickets') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-blue-50/70 dark:hover:bg-slate-700 hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
                                         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5Z"/></svg>
                                         <span>Tiket Saya</span>
                                     </a>
                                 @else
-                                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:bg-blue-50/70 hover:text-[#0050ff] transition-colors">
+                                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-blue-50/70 dark:hover:bg-slate-700 hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
                                         <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                                         <span>Panel Pengelola</span>
                                     </a>
                                 @endif
-                                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:bg-blue-50/70 hover:text-[#0050ff] transition-colors">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-blue-50/70 dark:hover:bg-slate-700 hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
+                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                     <span>Pengaturan Akun</span>
                                 </a>
-                                <div class="border-t border-gray-100 my-1"></div>
+                                <div class="border-t border-gray-100 dark:border-slate-700 my-1"></div>
                                 <form action="{{ route('logout') }}" method="POST" class="m-0">
                                     @csrf
-                                    <button type="submit" class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                                    <button type="submit" class="w-full text-left flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors">
                                         <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                                         <span>Keluar</span>
                                     </button>
@@ -218,8 +148,8 @@
                         </div>
                     @else
                         {{-- Guest: Loket Masuk / Akun button --}}
-                        <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-gray-700 hover:text-[#0050ff] rounded-xl hover:bg-gray-50 transition-colors">
-                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <a href="{{ route('login') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 hover:text-[#0050ff] dark:hover:text-blue-400 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                             </svg>
                             <span>Masuk</span>
@@ -232,7 +162,7 @@
 
                     {{-- Mobile menu button --}}
                     <button type="button" id="mobileMenuBtn" onclick="toggleMobileMenu()"
-                        class="md:hidden p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none" aria-label="Menu">
+                        class="md:hidden p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 focus:outline-none" aria-label="Menu">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
@@ -243,29 +173,36 @@
         </div>
 
         {{-- Mobile dropdown menu --}}
-        <div id="mobileMenu" class="hidden md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-3">
-            <div class="font-bold text-xs text-gray-400 uppercase tracking-wider">Kategori Populer</div>
+        <div id="mobileMenu" class="hidden md:hidden border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-[#0f172a] px-4 py-4 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-slate-800">
+                <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Mode Tampilan</span>
+                <button type="button" onclick="toggleTheme()" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-amber-400 flex items-center gap-1.5">
+                    <span class="dark:hidden">🌙 Gelap</span>
+                    <span class="hidden dark:inline">☀️ Terang</span>
+                </button>
+            </div>
+            <div class="font-bold text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">Kategori Populer</div>
             <div class="grid grid-cols-2 gap-2 text-xs">
-                <a href="{{ route('home') }}?cat=musik#events" class="p-2.5 rounded-xl bg-gray-50 font-semibold text-gray-700 flex items-center gap-2">
+                <a href="{{ route('home') }}?cat=musik#events" class="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800/80 font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 hover:text-[#0050ff]">
                     <svg class="w-3.5 h-3.5 text-pink-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9 19 8-2V4L9 6v13Zm0 0a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm8-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
                     <span>Musik</span>
                 </a>
-                <a href="{{ route('home') }}?cat=olahraga#events" class="p-2.5 rounded-xl bg-gray-50 font-semibold text-gray-700 flex items-center gap-2">
+                <a href="{{ route('home') }}?cat=olahraga#events" class="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800/80 font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 hover:text-[#0050ff]">
                     <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7Z"/></svg>
                     <span>Olahraga</span>
                 </a>
-                <a href="{{ route('home') }}?cat=festival#events" class="p-2.5 rounded-xl bg-gray-50 font-semibold text-gray-700 flex items-center gap-2">
+                <a href="{{ route('home') }}?cat=festival#events" class="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800/80 font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 hover:text-[#0050ff]">
                     <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M4 21V10l8-7 8 7v11M12 3v18M8 21v-7a4 4 0 0 1 8 0v7"/></svg>
                     <span>Festival</span>
                 </a>
-                <a href="{{ route('home') }}?cat=comedy#events" class="p-2.5 rounded-xl bg-gray-50 font-semibold text-gray-700 flex items-center gap-2">
+                <a href="{{ route('home') }}?cat=comedy#events" class="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800/80 font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 hover:text-[#0050ff]">
                     <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Zm7 8v2a7 7 0 0 1-14 0v-2M12 19v3m-4 0h8"/></svg>
                     <span>Komedi</span>
                 </a>
             </div>
             @guest
-                <div class="pt-2 border-t border-gray-100 flex gap-2">
-                    <a href="{{ route('login') }}" class="flex-1 text-center py-2.5 text-xs font-bold text-gray-700 bg-gray-100 rounded-xl">Masuk</a>
+                <div class="pt-2 border-t border-gray-100 dark:border-slate-800 flex gap-2">
+                    <a href="{{ route('login') }}" class="flex-1 text-center py-2.5 text-xs font-bold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-slate-800 rounded-xl">Masuk</a>
                     <a href="{{ route('register') }}" class="flex-1 text-center py-2.5 text-xs font-bold text-white bg-[#0050ff] rounded-xl">Daftar</a>
                 </div>
             @endguest
@@ -410,28 +347,20 @@
 
     {{-- Script Helpers --}}
     <script>
-        function toggleCategoryMenu(e) {
-            e.stopPropagation();
-            const dd = document.getElementById('categoryDropdown');
-            const ch = document.getElementById('categoryChevron');
-            if (dd) {
-                dd.classList.toggle('hidden');
-                if (ch) ch.classList.toggle('rotate-180');
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
             }
-            const pd = document.getElementById('profileDropdown');
-            if (pd && !pd.classList.contains('hidden')) pd.classList.add('hidden');
         }
 
         function toggleProfileMenu(e) {
             e.stopPropagation();
             const pd = document.getElementById('profileDropdown');
             if (pd) pd.classList.toggle('hidden');
-            const dd = document.getElementById('categoryDropdown');
-            if (dd && !dd.classList.contains('hidden')) {
-                dd.classList.add('hidden');
-                const ch = document.getElementById('categoryChevron');
-                if (ch) ch.classList.remove('rotate-180');
-            }
         }
 
         function toggleMobileMenu() {
@@ -440,16 +369,6 @@
         }
 
         document.addEventListener('click', function(e) {
-            const catDD = document.getElementById('categoryDropdown');
-            const catBtn = document.getElementById('categoryBtn');
-            const catCh = document.getElementById('categoryChevron');
-            if (catDD && !catDD.classList.contains('hidden')) {
-                if (!catDD.contains(e.target) && (!catBtn || !catBtn.contains(e.target))) {
-                    catDD.classList.add('hidden');
-                    if (catCh) catCh.classList.remove('rotate-180');
-                }
-            }
-
             const profDD = document.getElementById('profileDropdown');
             const profBtn = document.getElementById('profileTrigger');
             if (profDD && !profDD.classList.contains('hidden')) {
@@ -461,10 +380,10 @@
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                const catDD = document.getElementById('categoryDropdown');
-                if (catDD) catDD.classList.add('hidden');
                 const profDD = document.getElementById('profileDropdown');
                 if (profDD) profDD.classList.add('hidden');
+                const mm = document.getElementById('mobileMenu');
+                if (mm && !mm.classList.contains('hidden')) mm.classList.add('hidden');
             }
         });
     </script>
