@@ -30,7 +30,7 @@
 <body class="min-h-screen flex flex-col bg-white text-gray-900 antialiased">
 
     {{-- ===== NAVBAR LOKET STYLE ===== --}}
-    <header class="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
+    <header class="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.03)]" style="position: -webkit-sticky; position: sticky; top: 0; z-index: 50;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-[72px] gap-2 sm:gap-4">
 
