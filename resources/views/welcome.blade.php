@@ -65,11 +65,11 @@
 @section('content')
 
 {{-- ===== HERO BANNER CAROUSEL (LOKET STYLE) ===== --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-4">
-    <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg border border-gray-100 bg-gray-900" id="heroCarousel">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-7 pb-3 sm:pb-4">
+    <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-md sm:shadow-lg border border-gray-100 dark:border-slate-800 bg-gray-900" id="heroCarousel">
         
         {{-- Carousel Slides Container --}}
-        <div class="relative h-[220px] sm:h-[380px] md:h-[440px] lg:h-[480px] overflow-hidden" id="carouselTrack">
+        <div class="relative h-[200px] sm:h-[380px] md:h-[440px] lg:h-[480px] overflow-hidden" id="carouselTrack">
             @foreach($bannerEvents as $index => $bEvent)
                 <div class="carousel-slide absolute inset-0 transition-opacity duration-700 ease-in-out {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' }}"
                     data-slide-index="{{ $index }}">
@@ -85,12 +85,15 @@
                         ])
                     @endif
 
-                    {{-- Dark Overlay for readable text --}}
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
+                    {{-- Dark Overlay for readable text - Desktop only --}}
+                    <div class="hidden sm:block absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
-                    {{-- Banner Content & Floating CTA Pill (Loket Style) --}}
-                    <div class="absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
-                        <div class="max-w-2xl text-white">
+                    {{-- Mobile clickable link: seluruh banner poster di mobile langsung bisa diklik --}}
+                    <a href="{{ route('event.show', $bEvent['id']) }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $bEvent['nama'] }}"></a>
+
+                    {{-- Banner Content & Floating CTA Pill (Desktop Only - di mobile di-hidden agar poster bersih) --}}
+                    <div class="hidden sm:flex absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex-col sm:flex-row items-start sm:items-end justify-between gap-3 z-10 pointer-events-none">
+                        <div class="max-w-2xl text-white pointer-events-auto">
                             <span class="inline-block px-3 py-1 bg-[#0050ff] text-white text-[11px] sm:text-xs font-bold rounded-full mb-2 tracking-wide uppercase">
                                 {{ ($bEvent['kategori'] ?? '') === 'highlight' ? 'Featured Event' : 'Akan Datang' }}
                             </span>
@@ -112,7 +115,7 @@
 
                         {{-- Loket Floating Action Pill --}}
                         <a href="{{ route('event.show', $bEvent['id']) }}"
-                            class="inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
+                            class="pointer-events-auto inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
                             <span>Beli Tiketnya di Sini</span>
                             <svg class="w-4 h-4 text-[#0050ff]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/>
@@ -125,20 +128,20 @@
 
         {{-- Carousel Arrows --}}
         <button type="button" onclick="prevSlide()" aria-label="Slide sebelumnya"
-            class="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-9 sm:w-11 h-9 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm flex items-center justify-center transition-all">
-            <svg class="w-5 sm:w-6 h-5 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            class="absolute left-2.5 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-11 h-8 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm flex items-center justify-center transition-all">
+            <svg class="w-4 sm:w-6 h-4 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
             </svg>
         </button>
         <button type="button" onclick="nextSlide()" aria-label="Slide berikutnya"
-            class="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-9 sm:w-11 h-9 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm flex items-center justify-center transition-all">
-            <svg class="w-5 sm:w-6 h-5 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            class="absolute right-2.5 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-11 h-8 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm flex items-center justify-center transition-all">
+            <svg class="w-4 sm:w-6 h-4 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
             </svg>
         </button>
 
         {{-- Carousel Dots Indicator --}}
-        <div class="absolute bottom-3 left-4 sm:left-8 z-20 flex items-center gap-1.5" id="carouselDots">
+        <div class="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 sm:left-8 sm:translate-x-0 z-20 flex items-center gap-1.5" id="carouselDots">
             @foreach($bannerEvents as $index => $bEvent)
                 <button type="button" onclick="goToSlide({{ $index }})" aria-label="Pilih Slide {{ $index + 1 }}"
                     class="carousel-dot h-2 rounded-full transition-all duration-300 {{ $index === 0 ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80' }}"
