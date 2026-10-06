@@ -31,7 +31,7 @@ class ProfileController extends Controller
 
             $ordersQuery = \App\Models\Order::with(['event', 'tickets'])->where('user_id', $user->id);
             $ordersCount = $ordersQuery->count();
-            $pendingOrdersCount = (clone $ordersQuery)->where('status', 'menunggu_verifikasi')->count();
+            $pendingOrdersCount = (clone $ordersQuery)->where('payment_status', \App\Models\Order::STATUS_WAITING)->count();
             $recentOrders = $ordersQuery->latest()->take(3)->get();
         }
 

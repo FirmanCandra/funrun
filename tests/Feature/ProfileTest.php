@@ -21,6 +21,34 @@ class ProfileTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_profile_page_displays_order_and_ticket_stats_correctly(): void
+    {
+        $user = User::factory()->create();
+        $event = \App\Models\Event::create([
+            'title' => 'Test Event',
+            'date' => '2026-10-10',
+            'location' => 'Jakarta',
+            'quota' => 100,
+        ]);
+
+        \App\Models\Order::create([
+            'order_code' => \App\Models\Order::generateCode(),
+            'user_id' => $user->id,
+            'event_id' => $event->id,
+            'total_amount' => 150000,
+            'payment_method' => 'BCA',
+            'payment_status' => \App\Models\Order::STATUS_WAITING,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->get('/profile');
+
+        $response->assertOk();
+        $response->assertSee('Pesanan');
+        $response->assertSee('(1 proses verifikasi)');
+    }
+
     public function test_profile_information_can_be_updated(): void
     {
         $user = User::factory()->create();
