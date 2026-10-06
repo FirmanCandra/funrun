@@ -88,44 +88,64 @@ class AdminController extends Controller
         return $query->count();
     }
 
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = auth()->user();
+        $eventsList = \App\Http\Controllers\HomeController::loadEvents();
+        $totalEvents = count($eventsList);
+
         if ($user->role === 'admin') {
-            $eventId = $user->event_id;
-            $totalParticipants = \App\Models\Participant::where('event_id', $eventId)->count();
-            $totalRevenue = \App\Models\Order::where('event_id', $eventId)
+            $selectedEventId = (int) $user->event_id;
+        } else {
+            $rawEventId = $request->query('event_id');
+            $selectedEventId = ($rawEventId && $rawEventId !== 'all') ? (int) $rawEventId : null;
+        }
+
+        $selectedEvent = null;
+        if ($selectedEventId) {
+            $selectedEvent = collect($eventsList)->firstWhere('id', $selectedEventId);
+            if (!$selectedEvent) {
+                $dbEv = \App\Models\Event::find($selectedEventId);
+                if ($dbEv) {
+                    $selectedEvent = [
+                        'id' => $dbEv->id,
+                        'nama' => $dbEv->title,
+                        'lokasi' => $dbEv->location,
+                        'tanggal' => $dbEv->date,
+                        'thumbnail' => '',
+                        'harga' => 0
+                    ];
+                }
+            }
+        }
+
+        if ($selectedEventId) {
+            $totalParticipants = \App\Models\Participant::where('event_id', $selectedEventId)->count();
+            $totalRevenue = \App\Models\Order::where('event_id', $selectedEventId)
                 ->where('payment_status', \App\Models\Order::STATUS_PAID)->sum('total_amount');
-            $ticketsSold = \App\Models\Ticket::whereHas('participant', function($q) use ($eventId) {
-                $q->where('event_id', $eventId);
+            $ticketsSold = \App\Models\Ticket::whereHas('participant', function($q) use ($selectedEventId) {
+                $q->where('event_id', $selectedEventId);
             })->where('status', 'valid')->count();
-            $checkedIn = \App\Models\Ticket::whereHas('participant', function($q) use ($eventId) {
-                $q->where('event_id', $eventId);
+            $checkedIn = \App\Models\Ticket::whereHas('participant', function($q) use ($selectedEventId) {
+                $q->where('event_id', $selectedEventId);
             })->where('status', 'checked-in')->count();
+            $pendingOrders = \App\Models\Order::where('event_id', $selectedEventId)
+                ->where('payment_status', \App\Models\Order::STATUS_WAITING)->count();
+
+            $recentEvents = $selectedEvent ? [$selectedEvent] : [];
+            $recentOrders = \App\Models\Order::with(['user', 'event'])
+                ->where('event_id', $selectedEventId)
+                ->latest()->take(5)->get();
         } else {
             $totalParticipants = \App\Models\Participant::count();
             $totalRevenue = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_PAID)->sum('total_amount');
             $ticketsSold = \App\Models\Ticket::where('status', 'valid')->count();
             $checkedIn = \App\Models\Ticket::where('status', 'checked-in')->count();
-        }
+            $pendingOrders = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_WAITING)->count();
 
-        $pendingOrders = self::pendingOrdersCount($user);
-
-        // Data tambahan untuk overview dashboard admin
-        $eventsList = \App\Http\Controllers\HomeController::loadEvents();
-        $totalEvents = count($eventsList);
-        if ($user->role === 'admin' && $user->event_id) {
-            $filteredEvents = array_filter($eventsList, fn($ev) => ($ev['id'] ?? null) == $user->event_id);
-            $recentEvents = array_values($filteredEvents);
-        } else {
             $recentEvents = array_slice($eventsList, 0, 4);
+            $recentOrders = \App\Models\Order::with(['user', 'event'])->latest()->take(5)->get();
         }
-
-        $recentOrdersQuery = \App\Models\Order::with(['user', 'event'])->latest();
-        if ($user->role === 'admin') {
-            $recentOrdersQuery->where('event_id', $user->event_id);
-        }
-        $recentOrders = $recentOrdersQuery->take(5)->get();
 
         return view('admin.dashboard', compact(
             'totalParticipants',
@@ -135,7 +155,10 @@ class AdminController extends Controller
             'pendingOrders',
             'totalEvents',
             'recentEvents',
-            'recentOrders'
+            'recentOrders',
+            'eventsList',
+            'selectedEventId',
+            'selectedEvent'
         ));
     }
 
