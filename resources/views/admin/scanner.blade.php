@@ -382,18 +382,52 @@ document.addEventListener('DOMContentLoaded', function() {
                     `;
                     statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200';
                 }
-            }, 1200);
+            }, 2400);
+        });
+    }
+
+    // Helper to ensure html5-qrcode library is ready (supports dynamic load fallback from CDN)
+    function ensureScannerLibrary() {
+        if (typeof Html5Qrcode !== 'undefined') {
+            return Promise.resolve(true);
+        }
+
+        return new Promise((resolve) => {
+            const cdns = [
+                'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js'
+            ];
+            let idx = 0;
+
+            function tryLoad() {
+                if (idx >= cdns.length) {
+                    resolve(typeof Html5Qrcode !== 'undefined');
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = cdns[idx++];
+                script.onload = () => {
+                    resolve(typeof Html5Qrcode !== 'undefined');
+                };
+                script.onerror = () => tryLoad();
+                document.head.appendChild(script);
+            }
+
+            tryLoad();
         });
     }
 
     // Populate camera select
-    function loadCameras() {
-        if (!window.Html5Qrcode) {
-            console.error('Html5Qrcode library not loaded.');
+    async function loadCameras() {
+        const isLoaded = await ensureScannerLibrary();
+        if (!isLoaded) {
+            console.warn('Html5Qrcode library not loaded.');
+            cameraSelect.innerHTML = '<option value="">Pilih Kamera (Library Memuat...)</option>';
             return;
         }
 
-        Html5Qrcode.getCameras().then(devices => {
+        try {
+            const devices = await Html5Qrcode.getCameras();
             cameraSelect.innerHTML = '';
             if (devices && devices.length) {
                 let defaultIndex = 0;
@@ -416,22 +450,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 opt.text = "Gunakan Kamera Belakang Default";
                 cameraSelect.appendChild(opt);
             }
-        }).catch(err => {
+        } catch (err) {
             console.warn('Unable to enumerate cameras:', err);
             cameraSelect.innerHTML = '<option value="">Kamera Otomatis (Default)</option>';
-        });
+        }
     }
 
     // Initialize Html5Qrcode instance
     function initScannerInstance() {
+        if (typeof Html5Qrcode === 'undefined') {
+            throw new Error('Html5Qrcode library not loaded.');
+        }
         if (!html5QrCode) {
             html5QrCode = new Html5Qrcode(readerDivId);
         }
+        return html5QrCode;
     }
 
     // Start video scanning
-    function startCamera() {
-        initScannerInstance();
+    async function startCamera() {
+        statusBadge.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            Menyiapkan Kamera...
+        `;
+        statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200';
+
+        const isLoaded = await ensureScannerLibrary();
+        if (!isLoaded) {
+            statusBadge.innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                Library Gagal Dimuat
+            `;
+            statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200';
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Library Kamera Gagal Dimuat',
+                text: 'Browser tidak dapat memuat modul pemindai QR. Periksa koneksi internet atau gunakan opsi "Foto / Unggah QR".',
+                confirmButtonText: 'Gunakan Unggah Foto',
+                showCancelButton: true,
+                cancelButtonText: 'Tutup',
+                confirmButtonColor: '#2563eb'
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    fileInput.click();
+                }
+            });
+            return;
+        }
+
+        try {
+            initScannerInstance();
+        } catch (err) {
+            console.error('Scanner init error:', err);
+            return;
+        }
 
         const selectedCameraId = cameraSelect.value;
         const cameraConfig = selectedCameraId 
@@ -442,7 +515,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fps: 15,
             qrbox: function(viewfinderWidth, viewfinderHeight) {
                 const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                const qrEdge = Math.floor(minEdge * 0.72);
+                const qrEdge = Math.max(Math.floor(minEdge * 0.72), 150);
                 return { width: qrEdge, height: qrEdge };
             },
             aspectRatio: 1.0
@@ -456,16 +529,15 @@ document.addEventListener('DOMContentLoaded', function() {
             Menghubungkan Kamera...
         `;
 
-        html5QrCode.start(
-            cameraConfig,
-            qrConfig,
-            (decodedText) => {
-                processQR(decodedText);
-            },
-            (errorMessage) => {
-                // Ignored - frame parsing error
-            }
-        ).then(() => {
+        function handleScanSuccess(decodedText) {
+            processQR(decodedText);
+        }
+
+        function handleScanError() {
+            // Ignored - frame parsing error
+        }
+
+        function onStarted() {
             isScanning = true;
             btnToggleLabel.textContent = 'Matikan Kamera';
             btnToggle.classList.remove('bg-slate-800', 'hover:bg-slate-900');
@@ -476,37 +548,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 Scanning Aktif
             `;
             statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200';
-        }).catch(err => {
-            console.error('Camera start failed:', err);
-            isScanning = false;
-            if (placeholder) placeholder.classList.remove('hidden');
-            if (scannerHud) scannerHud.classList.add('hidden');
 
-            statusBadge.innerHTML = `
-                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                Kamera Gagal
-            `;
-            statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200';
+            // Refresh camera dropdown with permission-unlocked labels
+            loadCameras();
+        }
 
-            let msg = 'Tidak dapat mengakses kamera. Pastikan Anda telah memberikan izin akses kamera di peramban.';
-            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-                msg = 'Browser memblokir kamera langsung pada koneksi HTTP. Silakan gunakan tombol "Foto / Unggah QR Tiket" atau gunakan HTTPS.';
-            }
+        // Try primary config
+        html5QrCode.start(cameraConfig, qrConfig, handleScanSuccess, handleScanError)
+            .then(onStarted)
+            .catch(async (err) => {
+                console.warn('Initial camera start failed:', err);
 
-            Swal.fire({
-                icon: 'warning',
-                title: 'Akses Kamera Terkendala',
-                text: msg,
-                confirmButtonText: 'Gunakan Unggah Foto',
-                showCancelButton: true,
-                cancelButtonText: 'Tutup',
-                confirmButtonColor: '#2563eb'
-            }).then((res) => {
-                if (res.isConfirmed) {
-                    fileInput.click();
+                // If environment failed on laptops/devices with single webcam, fallback to user camera
+                if (!selectedCameraId) {
+                    try {
+                        await html5QrCode.start({ facingMode: "user" }, qrConfig, handleScanSuccess, handleScanError);
+                        onStarted();
+                        return;
+                    } catch (fallbackErr) {
+                        console.warn('Fallback facingMode:user also failed:', fallbackErr);
+                    }
                 }
+
+                console.error('Camera start completely failed:', err);
+                isScanning = false;
+                if (placeholder) placeholder.classList.remove('hidden');
+                if (scannerHud) scannerHud.classList.add('hidden');
+
+                statusBadge.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                    Kamera Gagal
+                `;
+                statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200';
+
+                let msg = 'Tidak dapat mengakses kamera. Pastikan Anda telah memberikan izin akses kamera di peramban.';
+                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    msg = 'Browser memblokir kamera langsung pada koneksi HTTP (bukan HTTPS). Gunakan tombol "Foto / Unggah QR Tiket" atau jalankan lewat HTTPS.';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Akses Kamera Terkendala',
+                    text: msg,
+                    confirmButtonText: 'Gunakan Unggah Foto',
+                    showCancelButton: true,
+                    cancelButtonText: 'Tutup',
+                    confirmButtonColor: '#2563eb'
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        fileInput.click();
+                    }
+                });
             });
-        });
     }
 
     // Stop video scanning
@@ -562,11 +655,29 @@ document.addEventListener('DOMContentLoaded', function() {
         fileInput.click();
     });
 
-    fileInput.addEventListener('change', (e) => {
+    fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        initScannerInstance();
+        const isLoaded = await ensureScannerLibrary();
+        if (!isLoaded) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Library Kamera Gagal Dimuat',
+                text: 'Modul pemindai gagal dimuat. Periksa koneksi internet.',
+                confirmButtonColor: '#2563eb'
+            });
+            fileInput.value = '';
+            return;
+        }
+
+        try {
+            initScannerInstance();
+        } catch (err) {
+            console.error('Init error:', err);
+            fileInput.value = '';
+            return;
+        }
 
         Swal.fire({
             title: 'Membaca Foto QR...',

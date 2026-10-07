@@ -8,7 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="{{ asset('vendor/html5-qrcode.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/html5-qrcode.min.js') }}" type="text/javascript" onerror="this.onerror=null;this.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'"></script>
+    <script>
+        if (typeof Html5Qrcode === 'undefined') {
+            document.write('<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>');
+        }
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
