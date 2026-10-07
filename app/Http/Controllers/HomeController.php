@@ -133,10 +133,10 @@ class HomeController extends Controller
 
     public function index()
     {
-        // Auto-seed database jika database event masih kosong (misal di fresh production deployment)
-        if (!app()->runningUnitTests() && \App\Models\Event::count() === 0 && class_exists(\Database\Seeders\RealisticEventsSeeder::class)) {
+        // Auto-seed database & restore data Masta Unimus & Explore The Moment jika belum lengkap
+        if (!app()->runningUnitTests()) {
             try {
-                (new \Database\Seeders\RealisticEventsSeeder())->run();
+                \App\Services\RestoreService::ensureRestored();
             } catch (\Throwable $e) {
                 report($e);
             }

@@ -102,6 +102,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/admins/bulk-delete', [AdminController::class, 'bulkDestroyAdmin'])->name('admins.bulk-destroy');
         Route::put('/admins/{id}', [AdminController::class, 'updateAdmin'])->name('admins.update');
         Route::delete('/admins/{id}', [AdminController::class, 'destroyAdmin'])->name('admins.destroy');
+
+        // Restore Database Dump
+        Route::post('/restore-dump', [AdminController::class, 'restoreDump'])->name('restore-dump');
     });
 });
 
@@ -133,6 +136,12 @@ Route::get('/storage/{path}', function ($path) {
     $inPublic = public_path($cleanPath);
     if (file_exists($inPublic) && is_file($inPublic)) {
         return response()->file($inPublic);
+    }
+
+    // 5. Cek di public/images/
+    $inPublicImages = public_path('images/' . $cleanPath);
+    if (file_exists($inPublicImages) && is_file($inPublicImages)) {
+        return response()->file($inPublicImages);
     }
 
     abort(404);

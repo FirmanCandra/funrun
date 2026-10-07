@@ -11,7 +11,7 @@ class AdminController extends Controller
     {
         // Only run sync if database table events exists, to avoid issues during migration
         try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('events')) {
+            if (! app()->runningUnitTests() && \Illuminate\Support\Facades\Schema::hasTable('events')) {
                 self::syncEventsToDatabase();
             }
         } catch (\Throwable $e) {
@@ -1465,5 +1465,15 @@ class AdminController extends Controller
 
         return redirect()->route('admin.form-fields', ['event_id' => $eventId])
             ->with('success', 'Field "'.$label.'" dihapus. Jawaban peserta yang sudah terlanjur masuk tetap tersimpan.');
+    }
+
+    public function restoreDump(Request $request)
+    {
+        $this->checkSuperAdmin();
+        $ok = \App\Services\RestoreService::runRestore();
+        if ($ok) {
+            return redirect()->back()->with('success', 'Data event dan transaksi Masta Unimus & Explore The Moment berhasil direstore!');
+        }
+        return redirect()->back()->with('error', 'Gagal merestore database. Cek file log sistem.');
     }
 }
