@@ -56,7 +56,7 @@ class RealisticEventsSeeder extends Seeder
                 'kota' => 'Kab. Semarang',
                 'tanggal' => '20-21 September 2026',
                 'harga' => 150000,
-                'thumbnail' => '/storage/thumbnails/SLp0TElrgpTJIjR4bUOzmHaw3rbC9qTFDZO4NoDX.png',
+                'thumbnail' => '/images/thumbnails/SLp0TElrgpTJIjR4bUOzmHaw3rbC9qTFDZO4NoDX.png',
                 'kategori' => 'ended',
                 'tag' => 'Music • Community • Experience',
                 'penyelenggara' => 'SeTiket Official',
