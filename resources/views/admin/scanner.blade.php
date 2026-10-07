@@ -86,15 +86,25 @@
                 <div class="flex flex-col sm:flex-row items-center gap-2">
                     <div class="relative flex-1 w-full">
                         <select id="camera-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-700 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none pr-8">
-                            <option value="">Memuat daftar kamera...</option>
+                            <option value="environment" selected>📷 Kamera Belakang (Utama)</option>
+                            <option value="user">🤳 Kamera Depan (Selfie)</option>
                         </select>
                     </div>
-                    <button type="button" id="btn-toggle-camera" class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        <span id="btn-toggle-label">Nyalakan Kamera</span>
-                    </button>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button type="button" id="btn-switch-camera" title="Balik Kamera Depan / Belakang" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 transition-all">
+                            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span id="btn-switch-label">Balik (🔄)</span>
+                        </button>
+                        <button type="button" id="btn-toggle-camera" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span id="btn-toggle-label">Nyalakan Kamera</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Secondary Option: Take Photo / File Upload (Guaranteed fallback on HTTP/iOS/Android) -->
@@ -203,6 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cameraSelect = document.getElementById('camera-select');
     const btnToggle = document.getElementById('btn-toggle-camera');
     const btnToggleLabel = document.getElementById('btn-toggle-label');
+    const btnSwitchCamera = document.getElementById('btn-switch-camera');
     const btnStartCamera = document.getElementById('btn-start-camera');
     const placeholder = document.getElementById('camera-placeholder');
     const scannerHud = document.getElementById('scanner-hud');
@@ -217,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let html5QrCode = null;
     let isScanning = false;
     let isProcessing = false;
+    let isSwitchingCamera = false;
     let audioCtx = null;
 
     // Check secure context
@@ -417,42 +429,58 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Explicitly release any active video streams to prevent hardware lock (NotReadableError)
+    function cleanupVideoTracks() {
+        try {
+            const readerElem = document.getElementById(readerDivId);
+            if (readerElem) {
+                const videos = readerElem.querySelectorAll('video');
+                videos.forEach(v => {
+                    if (v.srcObject && v.srcObject.getTracks) {
+                        v.srcObject.getTracks().forEach(track => {
+                            try { track.stop(); } catch (e) {}
+                        });
+                    }
+                    v.srcObject = null;
+                });
+            }
+        } catch (e) {
+            console.warn('cleanupVideoTracks error:', e);
+        }
+    }
+
     // Populate camera select
     async function loadCameras() {
         const isLoaded = await ensureScannerLibrary();
         if (!isLoaded) {
             console.warn('Html5Qrcode library not loaded.');
-            cameraSelect.innerHTML = '<option value="">Pilih Kamera (Library Memuat...)</option>';
             return;
         }
 
         try {
             const devices = await Html5Qrcode.getCameras();
-            cameraSelect.innerHTML = '';
-            if (devices && devices.length) {
-                let defaultIndex = 0;
-                devices.forEach((camera, index) => {
-                    const opt = document.createElement('option');
-                    opt.value = camera.id;
-                    opt.text = camera.label || `Kamera ${index + 1}`;
-                    cameraSelect.appendChild(opt);
+            const currentVal = cameraSelect.value || 'environment';
 
-                    // Prefer back/rear camera for scanning tickets
-                    const lbl = (camera.label || '').toLowerCase();
-                    if (lbl.includes('back') || lbl.includes('rear') || lbl.includes('belakang') || lbl.includes('environment')) {
-                        defaultIndex = index;
-                    }
-                });
-                cameraSelect.selectedIndex = defaultIndex;
-            } else {
-                const opt = document.createElement('option');
-                opt.value = "";
-                opt.text = "Gunakan Kamera Belakang Default";
-                cameraSelect.appendChild(opt);
+            let html = `
+                <option value="environment" ${currentVal === 'environment' ? 'selected' : ''}>📷 Kamera Belakang (Utama)</option>
+                <option value="user" ${currentVal === 'user' ? 'selected' : ''}>🤳 Kamera Depan (Selfie)</option>
+            `;
+
+            if (devices && devices.length > 0) {
+                const labeledDevices = devices.filter(d => d.label && d.label.trim() !== '');
+                if (labeledDevices.length > 0) {
+                    html += `<optgroup label="Pilihan Spesifik Perangkat">`;
+                    labeledDevices.forEach((dev) => {
+                        const isSel = currentVal === dev.id ? 'selected' : '';
+                        html += `<option value="${dev.id}" ${isSel}>${dev.label}</option>`;
+                    });
+                    html += `</optgroup>`;
+                }
             }
+
+            cameraSelect.innerHTML = html;
         } catch (err) {
             console.warn('Unable to enumerate cameras:', err);
-            cameraSelect.innerHTML = '<option value="">Kamera Otomatis (Default)</option>';
         }
     }
 
@@ -462,13 +490,53 @@ document.addEventListener('DOMContentLoaded', function() {
             throw new Error('Html5Qrcode library not loaded.');
         }
         if (!html5QrCode) {
-            html5QrCode = new Html5Qrcode(readerDivId);
+            html5QrCode = new Html5Qrcode(readerDivId, {
+                verbose: false,
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            });
         }
         return html5QrCode;
     }
 
+    // Stop video scanning cleanly
+    async function stopCamera() {
+        if (!html5QrCode) return;
+        if (!isScanning) return;
+
+        try {
+            await html5QrCode.stop();
+        } catch (err) {
+            console.warn('html5QrCode.stop() error:', err);
+        } finally {
+            isScanning = false;
+            cleanupVideoTracks();
+
+            btnToggleLabel.textContent = 'Nyalakan Kamera';
+            btnToggle.classList.remove('bg-rose-600', 'hover:bg-rose-700');
+            btnToggle.classList.add('bg-slate-800', 'hover:bg-slate-900');
+
+            if (scannerHud) scannerHud.classList.add('hidden');
+            if (placeholder) placeholder.classList.remove('hidden');
+
+            statusBadge.innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                Kamera Nonaktif
+            `;
+            statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200';
+        }
+
+        // Hardware cool-off buffer so mobile camera hardware releases the lock
+        await new Promise(r => setTimeout(r, 350));
+    }
+
     // Start video scanning
     async function startCamera() {
+        if (isScanning) {
+            await stopCamera();
+        }
+
         statusBadge.innerHTML = `
             <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
             Menyiapkan Kamera...
@@ -499,6 +567,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        cleanupVideoTracks();
+
         try {
             initScannerInstance();
         } catch (err) {
@@ -506,19 +576,22 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const selectedCameraId = cameraSelect.value;
-        const cameraConfig = selectedCameraId 
-            ? selectedCameraId 
-            : { facingMode: "environment" };
+        const selectedVal = cameraSelect.value || "environment";
+        let primaryConfig;
+        if (selectedVal === "environment" || selectedVal === "user") {
+            primaryConfig = { facingMode: selectedVal };
+        } else {
+            primaryConfig = selectedVal; // specific deviceId
+        }
 
+        // Clean qrConfig without forced aspectRatio to prevent NotReadableError on mobile
         const qrConfig = {
             fps: 15,
             qrbox: function(viewfinderWidth, viewfinderHeight) {
                 const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
                 const qrEdge = Math.max(Math.floor(minEdge * 0.72), 150);
                 return { width: qrEdge, height: qrEdge };
-            },
-            aspectRatio: 1.0
+            }
         };
 
         if (placeholder) placeholder.classList.add('hidden');
@@ -553,100 +626,152 @@ document.addEventListener('DOMContentLoaded', function() {
             loadCameras();
         }
 
-        // Try primary config
-        html5QrCode.start(cameraConfig, qrConfig, handleScanSuccess, handleScanError)
-            .then(onStarted)
-            .catch(async (err) => {
-                console.warn('Initial camera start failed:', err);
+        async function tryStart(cfg) {
+            return html5QrCode.start(cfg, qrConfig, handleScanSuccess, handleScanError);
+        }
 
-                // If environment failed on laptops/devices with single webcam, fallback to user camera
-                if (!selectedCameraId) {
-                    try {
-                        await html5QrCode.start({ facingMode: "user" }, qrConfig, handleScanSuccess, handleScanError);
-                        onStarted();
-                        return;
-                    } catch (fallbackErr) {
-                        console.warn('Fallback facingMode:user also failed:', fallbackErr);
-                    }
+        try {
+            // Attempt 1: Target camera configuration
+            await tryStart(primaryConfig);
+            onStarted();
+            return;
+        } catch (err1) {
+            console.warn('Initial camera start failed:', err1);
+            cleanupVideoTracks();
+            await new Promise(r => setTimeout(r, 250));
+
+            // Attempt 2: Fallback to opposite facingMode
+            try {
+                const altMode = (selectedVal === 'user') ? 'environment' : 'user';
+                await tryStart({ facingMode: altMode });
+                cameraSelect.value = altMode;
+                onStarted();
+                return;
+            } catch (err2) {
+                console.warn('Alternative facingMode failed:', err2);
+                cleanupVideoTracks();
+                await new Promise(r => setTimeout(r, 250));
+
+                // Attempt 3: Fallback without facingMode constraint
+                try {
+                    await tryStart({ facingMode: "environment" });
+                    onStarted();
+                    return;
+                } catch (err3) {
+                    console.error('All camera start attempts failed:', err3);
                 }
+            }
+        }
 
-                console.error('Camera start completely failed:', err);
-                isScanning = false;
-                if (placeholder) placeholder.classList.remove('hidden');
-                if (scannerHud) scannerHud.classList.add('hidden');
+        // All attempts failed
+        isScanning = false;
+        cleanupVideoTracks();
+        if (placeholder) placeholder.classList.remove('hidden');
+        if (scannerHud) scannerHud.classList.add('hidden');
 
-                statusBadge.innerHTML = `
-                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                    Kamera Gagal
-                `;
-                statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200';
+        statusBadge.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            Kamera Gagal
+        `;
+        statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200';
 
-                let msg = 'Tidak dapat mengakses kamera. Pastikan Anda telah memberikan izin akses kamera di peramban.';
-                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-                    msg = 'Browser memblokir kamera langsung pada koneksi HTTP (bukan HTTPS). Gunakan tombol "Foto / Unggah QR Tiket" atau jalankan lewat HTTPS.';
-                }
+        let msg = 'Tidak dapat mengakses kamera. Pastikan browser diberikan izin kamera di setelan ponsel dan tidak ada aplikasi lain yang sedang menggunakan kamera.';
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            msg = 'Browser memblokir kamera langsung pada koneksi HTTP (bukan HTTPS). Gunakan tombol "Foto / Unggah QR Tiket" atau aktifkan HTTPS di server.';
+        }
 
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Akses Kamera Terkendala',
-                    text: msg,
-                    confirmButtonText: 'Gunakan Unggah Foto',
-                    showCancelButton: true,
-                    cancelButtonText: 'Tutup',
-                    confirmButtonColor: '#2563eb'
-                }).then((res) => {
-                    if (res.isConfirmed) {
-                        fileInput.click();
-                    }
-                });
-            });
-    }
-
-    // Stop video scanning
-    function stopCamera() {
-        if (!html5QrCode || !isScanning) return;
-
-        html5QrCode.stop().then(() => {
-            isScanning = false;
-            btnToggleLabel.textContent = 'Nyalakan Kamera';
-            btnToggle.classList.remove('bg-rose-600', 'hover:bg-rose-700');
-            btnToggle.classList.add('bg-slate-800', 'hover:bg-slate-900');
-
-            if (scannerHud) scannerHud.classList.add('hidden');
-            if (placeholder) placeholder.classList.remove('hidden');
-
-            statusBadge.innerHTML = `
-                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
-                Kamera Nonaktif
-            `;
-            statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200';
-        }).catch(err => {
-            console.warn('Stop camera error:', err);
+        Swal.fire({
+            icon: 'warning',
+            title: 'Kamera Tidak Dapat Dibuka',
+            text: msg,
+            confirmButtonText: 'Gunakan Unggah Foto',
+            showCancelButton: true,
+            cancelButtonText: 'Tutup',
+            confirmButtonColor: '#2563eb'
+        }).then((res) => {
+            if (res.isConfirmed) {
+                fileInput.click();
+            }
         });
     }
 
     // Toggle button handler
-    btnToggle.addEventListener('click', () => {
+    btnToggle.addEventListener('click', async () => {
+        if (isSwitchingCamera) return;
         if (isScanning) {
-            stopCamera();
+            await stopCamera();
         } else {
-            startCamera();
+            await startCamera();
         }
     });
 
     if (btnStartCamera) {
-        btnStartCamera.addEventListener('click', () => {
-            startCamera();
+        btnStartCamera.addEventListener('click', async () => {
+            if (isSwitchingCamera) return;
+            await startCamera();
+        });
+    }
+
+    // Flip Camera button handler (Front <-> Back toggle)
+    if (btnSwitchCamera) {
+        btnSwitchCamera.addEventListener('click', async () => {
+            if (isSwitchingCamera) return;
+            isSwitchingCamera = true;
+            btnSwitchCamera.disabled = true;
+            btnToggle.disabled = true;
+
+            const nextMode = (cameraSelect.value === 'user') ? 'environment' : 'user';
+            cameraSelect.value = nextMode;
+
+            if (isScanning) {
+                statusBadge.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    Beralih Kamera...
+                `;
+                statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200';
+
+                try {
+                    await stopCamera();
+                    await startCamera();
+                } catch (e) {
+                    console.error('Flip camera error:', e);
+                } finally {
+                    isSwitchingCamera = false;
+                    btnSwitchCamera.disabled = false;
+                    btnToggle.disabled = false;
+                }
+            } else {
+                isSwitchingCamera = false;
+                btnSwitchCamera.disabled = false;
+                btnToggle.disabled = false;
+            }
         });
     }
 
     // Change camera dropdown
-    cameraSelect.addEventListener('change', () => {
+    cameraSelect.addEventListener('change', async () => {
+        if (isSwitchingCamera) return;
         if (isScanning) {
-            stopCamera();
-            setTimeout(() => {
-                startCamera();
-            }, 300);
+            isSwitchingCamera = true;
+            btnToggle.disabled = true;
+            if (btnSwitchCamera) btnSwitchCamera.disabled = true;
+
+            statusBadge.innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                Mengganti Kamera...
+            `;
+            statusBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200';
+
+            try {
+                await stopCamera();
+                await startCamera();
+            } catch (e) {
+                console.error('Change camera error:', e);
+            } finally {
+                isSwitchingCamera = false;
+                btnToggle.disabled = false;
+                if (btnSwitchCamera) btnSwitchCamera.disabled = false;
+            }
         }
     });
 
