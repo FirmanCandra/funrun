@@ -20,27 +20,13 @@ class RestoreService
     public static function ensureRestored(bool $force = false): bool
     {
         try {
-            // Pastikan events.json juga sudah sinkron
-            $events = HomeController::loadEvents();
-            $event1Valid = false;
-            $event2Valid = false;
-            foreach ($events as $ev) {
-                if (($ev['id'] ?? 0) === 1 && str_contains(strtolower($ev['nama'] ?? ''), 'masta')) {
-                    $event1Valid = true;
-                }
-                if (($ev['id'] ?? 0) === 2 && str_contains(strtolower($ev['nama'] ?? ''), 'explore')) {
-                    $event2Valid = true;
-                }
-            }
-            if (!$event1Valid || !$event2Valid) {
-                if (class_exists(\Database\Seeders\RealisticEventsSeeder::class)) {
-                    (new \Database\Seeders\RealisticEventsSeeder())->syncEventsJsonOnly();
-                }
+            // Rekonstruksi peserta & tiket jika pesanan sudah ada tapi tabel peserta/tiket kosong
+            if (\App\Models\Order::where('event_id', 1)->count() > 0 && \App\Models\Participant::where('event_id', 1)->count() === 0) {
+                self::reconstructParticipantsAndTickets();
             }
 
             $isAlreadyRestored = Order::where('event_id', 1)->count() >= 1000
-                && Event::where('id', 1)->where('title', 'like', '%Masta%')->exists()
-                && Event::where('id', 2)->where('title', 'like', '%EXPLORE%')->exists();
+                && Event::where('id', 1)->where('title', 'like', '%Masta%')->exists();
 
             if ($isAlreadyRestored && !$force) {
                 return true;
@@ -188,7 +174,79 @@ class RestoreService
             (new \Database\Seeders\RealisticEventsSeeder())->syncEventsJsonOnly();
         }
 
+        // Rekonstruksi participants dan tickets untuk seluruh paid orders yang belum memiliki tiket
+        self::reconstructParticipantsAndTickets();
+
         Log::info('RestoreService: Data dump Masta Unimus & Explore The Moment berhasil direstore.');
         return true;
+    }
+
+    /**
+     * Rekonstruksi data Participant dan Ticket dari seluruh pesanan lunas
+     * yang kehilangan referensinya akibat dump SQL sebelumnya.
+     */
+    public static function reconstructParticipantsAndTickets(): int
+    {
+        $orders = Order::where('payment_status', Order::STATUS_PAID)
+            ->whereDoesntHave('tickets')
+            ->with('user')
+            ->get();
+
+        if ($orders->isEmpty()) {
+            return 0;
+        }
+
+        $priceCategoryMap = [
+            99999 => 'Paket Lengkap',
+            87000 => 'T-Shirt Only',
+            8000 => 'Keycahin Only',
+            6000 => 'Handfan Only',
+            95000 => 'T-Shirt+Keychain',
+            93000 => 'T-Shirt+Handfan',
+            14000 => 'Keychain+Handfan',
+            174000 => 'T-Shirt Only (2x)',
+            199998 => 'Paket Lengkap (2x)',
+            182000 => 'Paket Koleksi Khusus',
+            16000 => 'Keychain (2x)',
+            12000 => 'Handfan (2x)',
+        ];
+
+        $count = 0;
+        $now = now();
+
+        foreach ($orders as $order) {
+            $user = $order->user;
+            $amount = (int) $order->total_amount;
+            $categoryName = $priceCategoryMap[$amount] ?? 'Merchandise Resmi';
+
+            $participant = \App\Models\Participant::create([
+                'user_id' => $order->user_id,
+                'event_id' => $order->event_id,
+                'fullname' => $user ? $user->name : 'Peserta #' . $order->user_id,
+                'phone' => '08' . (10000000 + ($order->id % 89999999)),
+                'category' => $categoryName,
+                'created_at' => $order->created_at ?: $now,
+                'updated_at' => $order->updated_at ?: $now,
+            ]);
+
+            // Untuk event yang sudah berakhir (15 September 2026), beri status checked-in (96%) dan valid (4%)
+            $isCheckedIn = ($order->id % 25 !== 0);
+            $ticketStatus = $isCheckedIn ? 'checked-in' : 'valid';
+
+            \App\Models\Ticket::create([
+                'participant_id' => $participant->id,
+                'order_id' => $order->id,
+                'ticket_code' => 'TKT-MST-' . str_pad($order->id, 5, '0', STR_PAD_LEFT),
+                'qr_code' => 'MST-' . ($order->order_code ?: $order->id),
+                'status' => $ticketStatus,
+                'created_at' => $order->created_at ?: $now,
+                'updated_at' => $isCheckedIn ? ($order->created_at ? $order->created_at->copy()->addHours(rand(1, 24)) : $now) : $now,
+            ]);
+
+            $count++;
+        }
+
+        Log::info("RestoreService: {$count} participants dan tickets berhasil direkonstruksi.");
+        return $count;
     }
 }

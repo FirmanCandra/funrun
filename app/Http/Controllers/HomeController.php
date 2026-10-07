@@ -32,13 +32,19 @@ class HomeController extends Controller
             return $defaults;
         }
 
+        $changed = false;
         // Pastikan setiap event memiliki properti slug
         foreach ($data as &$event) {
             if (empty($event['slug']) && !empty($event['nama'])) {
                 $event['slug'] = \Illuminate\Support\Str::slug($event['nama']);
+                $changed = true;
             }
         }
         unset($event);
+
+        if ($changed && !app()->runningUnitTests()) {
+            @file_put_contents($path, json_encode(array_values($data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
 
         return $data;
     }

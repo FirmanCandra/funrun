@@ -132,6 +132,10 @@
                             <span class="bg-emerald-600 text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs">
                                 Upcoming
                             </span>
+                        @elseif(($ev['kategori'] ?? '') === 'ended')
+                            <span class="bg-slate-700 text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs">
+                                Berakhir
+                            </span>
                         @else
                             <span class="bg-amber-500 text-white text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shadow-xs">
                                 Highlight
@@ -318,6 +322,8 @@
                             <td class="px-5 py-4">
                                 @if(($ev['kategori'] ?? '') === 'upcoming')
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700">Upcoming</span>
+                                @elseif(($ev['kategori'] ?? '') === 'ended')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700">Berakhir</span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700">Highlight</span>
                                 @endif
@@ -593,6 +599,7 @@
                         class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white">
                         <option value="upcoming">Upcoming Events</option>
                         <option value="highlight">Highlight Events</option>
+                        <option value="ended">Event Berakhir (Ended)</option>
                     </select>
                 </div>
                 <div>

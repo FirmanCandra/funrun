@@ -29,6 +29,7 @@
             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white">
         <option value="upcoming">Upcoming Events</option>
         <option value="highlight">Highlight Events</option>
+        <option value="ended">Event Berakhir (Ended)</option>
     </select>
 </div>
 <div>

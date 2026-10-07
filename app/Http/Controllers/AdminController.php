@@ -125,7 +125,7 @@ class AdminController extends Controller
                 ->where('payment_status', \App\Models\Order::STATUS_PAID)->sum('total_amount');
             $ticketsSold = \App\Models\Ticket::whereHas('participant', function($q) use ($selectedEventId) {
                 $q->where('event_id', $selectedEventId);
-            })->where('status', 'valid')->count();
+            })->whereIn('status', ['valid', 'checked-in'])->count();
             $checkedIn = \App\Models\Ticket::whereHas('participant', function($q) use ($selectedEventId) {
                 $q->where('event_id', $selectedEventId);
             })->where('status', 'checked-in')->count();
@@ -139,7 +139,7 @@ class AdminController extends Controller
         } else {
             $totalParticipants = \App\Models\Participant::count();
             $totalRevenue = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_PAID)->sum('total_amount');
-            $ticketsSold = \App\Models\Ticket::where('status', 'valid')->count();
+            $ticketsSold = \App\Models\Ticket::whereIn('status', ['valid', 'checked-in'])->count();
             $checkedIn = \App\Models\Ticket::where('status', 'checked-in')->count();
             $pendingOrders = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_WAITING)->count();
 
@@ -763,6 +763,32 @@ class AdminController extends Controller
         return view('admin.events', compact('events'));
     }
 
+    public static function storeThumbnailFile(\Illuminate\Http\UploadedFile $file): string
+    {
+        $extension = $file->getClientOriginalExtension() ?: 'png';
+        $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $extension;
+
+        // 1. Simpan ke Storage disk public (kompatibel penuh dengan Storage::fake dan unit test)
+        \Illuminate\Support\Facades\Storage::disk('public')->putFileAs('thumbnails', $file, $filename);
+
+        // 2. Jika bukan unit test, salin juga ke public/images/thumbnails dan public/storage/thumbnails
+        if (!app()->runningUnitTests()) {
+            $destImages = public_path('images/thumbnails');
+            if (!file_exists($destImages)) {
+                @mkdir($destImages, 0755, true);
+            }
+            @copy(storage_path('app/public/thumbnails/' . $filename), $destImages . '/' . $filename);
+
+            $destPublicStorage = public_path('storage/thumbnails');
+            if (!file_exists($destPublicStorage)) {
+                @mkdir($destPublicStorage, 0755, true);
+            }
+            @copy(storage_path('app/public/thumbnails/' . $filename), $destPublicStorage . '/' . $filename);
+        }
+
+        return '/storage/thumbnails/' . $filename;
+    }
+
     public function storeEvent(Request $request)
     {
         $this->checkSuperAdmin();
@@ -771,7 +797,7 @@ class AdminController extends Controller
             'lokasi'           => 'required|string|max:255',
             'tanggal'          => 'required|string|max:100',
             'harga'            => 'required|integer|min:0',
-            'kategori'         => 'required|in:upcoming,highlight',
+            'kategori'         => 'required|in:upcoming,highlight,ended',
             'urlBeli'          => 'nullable|string|max:500',
             'thumbnail'        => 'nullable|image|mimes:jpeg,png,webp|max:1024',
             'waktu'            => 'nullable|string|max:100',
@@ -784,8 +810,7 @@ class AdminController extends Controller
 
         $thumbnailPath = '';
         if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('thumbnails', 'public');
-            $thumbnailPath = '/storage/' . $path;
+            $thumbnailPath = self::storeThumbnailFile($request->file('thumbnail'));
         }
 
         $newEventId = $maxId + 1;
@@ -835,7 +860,7 @@ class AdminController extends Controller
             'lokasi'           => 'required|string|max:255',
             'tanggal'          => 'required|string|max:100',
             'harga'            => 'required|integer|min:0',
-            'kategori'         => 'required|in:upcoming,highlight',
+            'kategori'         => 'required|in:upcoming,highlight,ended',
             'urlBeli'          => 'nullable|string|max:500',
             'thumbnail'        => 'nullable|image|mimes:jpeg,png,webp|max:1024',
             'waktu'            => 'nullable|string|max:100',
@@ -868,8 +893,7 @@ class AdminController extends Controller
                 $ev['syarat_ketentuan'] = $request->syarat_ketentuan ?? '';
                 
                 if ($request->hasFile('thumbnail')) {
-                    $path = $request->file('thumbnail')->store('thumbnails', 'public');
-                    $ev['thumbnail'] = '/storage/' . $path;
+                    $ev['thumbnail'] = self::storeThumbnailFile($request->file('thumbnail'));
                 }
                 $found = true;
                 break;
@@ -898,35 +922,97 @@ class AdminController extends Controller
     public function destroyEvent($id)
     {
         $this->checkSuperAdmin();
-        $events = \App\Http\Controllers\HomeController::loadEvents();
-        $events = array_values(array_filter($events, fn($e) => $e['id'] != $id));
-        \App\Http\Controllers\HomeController::saveEvents($events);
+        $id = (int) $id;
 
-        // Delete from database
-        $dbEvent = \App\Models\Event::find($id);
-        if ($dbEvent) {
-            $dbEvent->delete();
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($id) {
+                // 1. Lepas asosiasi admin event jika ada
+                \App\Models\User::where('event_id', $id)->update(['event_id' => null]);
+
+                // 2. Hapus tiket yang berhubungan dengan order atau participant event ini
+                $orderIds = \App\Models\Order::where('event_id', $id)->pluck('id');
+                \App\Models\Ticket::whereIn('order_id', $orderIds)->delete();
+
+                $participantIds = \App\Models\Participant::where('event_id', $id)->pluck('id');
+                \App\Models\Ticket::whereIn('participant_id', $participantIds)->delete();
+
+                // 3. Hapus participant event ini
+                \App\Models\Participant::where('event_id', $id)->delete();
+
+                // 4. Hapus order event ini
+                \App\Models\Order::where('event_id', $id)->delete();
+
+                // 5. Hapus konfigurasi tiket, rekening pembayaran, dan form field
+                \App\Models\EventCategory::where('event_id', $id)->delete();
+                \App\Models\EventPaymentAccount::where('event_id', $id)->delete();
+                \App\Models\EventFormField::where('event_id', $id)->delete();
+
+                // 6. Hapus event dari database
+                $dbEvent = \App\Models\Event::find($id);
+                if ($dbEvent) {
+                    $dbEvent->delete();
+                }
+            });
+
+            // 7. Hapus dari events.json
+            $events = \App\Http\Controllers\HomeController::loadEvents();
+            $thumbnailToDelete = '';
+            foreach ($events as $ev) {
+                if ($ev['id'] == $id && !empty($ev['thumbnail'])) {
+                    $thumbnailToDelete = $ev['thumbnail'];
+                    break;
+                }
+            }
+            $events = array_values(array_filter($events, fn($e) => $e['id'] != $id));
+            \App\Http\Controllers\HomeController::saveEvents($events);
+
+            if ($thumbnailToDelete) {
+                $this->deleteThumbnailFile($thumbnailToDelete);
+            }
+
+            return redirect()->route('admin.events')->with('success', 'Event berhasil dihapus beserta seluruh data terkait!');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Gagal menghapus event ID {$id}: " . $e->getMessage());
+            return redirect()->route('admin.events')->with('error', 'Gagal menghapus event: ' . $e->getMessage());
         }
-
-        return redirect()->route('admin.events')->with('success', 'Event berhasil dihapus!');
     }
 
     public function bulkDestroyEvent(Request $request)
     {
         $this->checkSuperAdmin();
-        $ids = $request->input('ids', []);
-        if (!is_array($ids) || empty($ids)) {
+        $ids = array_map('intval', $request->input('ids', []));
+        if (empty($ids)) {
             return redirect()->back()->with('error', 'Pilih event yang ingin dihapus terlebih dahulu.');
         }
 
-        $events = \App\Http\Controllers\HomeController::loadEvents();
-        $events = array_values(array_filter($events, fn($e) => !in_array($e['id'], $ids)));
-        \App\Http\Controllers\HomeController::saveEvents($events);
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($ids) {
+                \App\Models\User::whereIn('event_id', $ids)->update(['event_id' => null]);
 
-        // Delete from database
-        \App\Models\Event::whereIn('id', $ids)->delete();
+                $orderIds = \App\Models\Order::whereIn('event_id', $ids)->pluck('id');
+                \App\Models\Ticket::whereIn('order_id', $orderIds)->delete();
 
-        return redirect()->route('admin.events')->with('success', 'Event terpilih berhasil dihapus!');
+                $participantIds = \App\Models\Participant::whereIn('event_id', $ids)->pluck('id');
+                \App\Models\Ticket::whereIn('participant_id', $participantIds)->delete();
+
+                \App\Models\Participant::whereIn('event_id', $ids)->delete();
+                \App\Models\Order::whereIn('event_id', $ids)->delete();
+                \App\Models\EventCategory::whereIn('event_id', $ids)->delete();
+                \App\Models\EventPaymentAccount::whereIn('event_id', $ids)->delete();
+                \App\Models\EventFormField::whereIn('event_id', $ids)->delete();
+
+                \App\Models\Event::whereIn('id', $ids)->delete();
+            });
+
+            $events = \App\Http\Controllers\HomeController::loadEvents();
+            $events = array_values(array_filter($events, fn($e) => !in_array((int)$e['id'], $ids)));
+            \App\Http\Controllers\HomeController::saveEvents($events);
+
+            return redirect()->route('admin.events')->with('success', count($ids) . ' event terpilih berhasil dihapus!');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Gagal menghapus massal event: " . $e->getMessage());
+            return redirect()->route('admin.events')->with('error', 'Gagal menghapus event terpilih: ' . $e->getMessage());
+        }
     }
 
     // ===== GAMBAR / THUMBNAIL EVENT =====
@@ -964,7 +1050,7 @@ class AdminController extends Controller
         ]);
 
         $lama = $this->eventThumbnail($event->id);
-        $path = '/storage/' . $request->file('thumbnail')->store('thumbnails', 'public');
+        $path = self::storeThumbnailFile($request->file('thumbnail'));
 
         $this->saveEventThumbnail($event->id, $path);
         $this->deleteThumbnailFile($lama);
@@ -1020,13 +1106,15 @@ class AdminController extends Controller
 
     /**
      * Buang berkas gambar yang sudah tidak dipakai event mana pun.
-     *
-     * Pengecekan referensi penting karena dua event bisa saja menunjuk berkas
-     * yang sama — menghapusnya tanpa cek akan mengosongkan gambar event lain.
      */
     private function deleteThumbnailFile(string $path): void
     {
-        if ($path === '' || ! str_starts_with($path, '/storage/thumbnails/')) {
+        if ($path === '') {
+            return;
+        }
+
+        // Jangan hapus gambar bawaan / branding
+        if (str_contains($path, 'setiketbg') || str_contains($path, 'setiket.webp')) {
             return;
         }
 
@@ -1036,8 +1124,15 @@ class AdminController extends Controller
             }
         }
 
-        \Illuminate\Support\Facades\Storage::disk('public')
-            ->delete(substr($path, strlen('/storage/')));
+        if (str_starts_with($path, '/storage/')) {
+            \Illuminate\Support\Facades\Storage::disk('public')
+                ->delete(substr($path, strlen('/storage/')));
+        }
+
+        $filename = basename($path);
+        @unlink(public_path('images/thumbnails/' . $filename));
+        @unlink(public_path('storage/thumbnails/' . $filename));
+        @unlink(storage_path('app/public/thumbnails/' . $filename));
     }
 
     // ===== ADMIN MANAGEMENT =====
