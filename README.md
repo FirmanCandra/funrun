@@ -7,7 +7,7 @@ Platform penjualan tiket event lari (fun run) dengan pembayaran transfer manual 
 - **Super admin** mengelola event, kategori lomba, dan akun admin.
 
 Dibangun dengan Laravel 13, Blade, Tailwind CSS 4, dan Laravel Breeze untuk autentikasi.
- -
+ 
 
 ## Kebutuhan
 
