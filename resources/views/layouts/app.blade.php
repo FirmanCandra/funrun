@@ -193,36 +193,34 @@
             </div>
         </div>
 
-        {{-- ===== FULL-SCREEN EDITORIAL OVERLAY / DARK GLASS (DICE.fm & Boiler Room Style) ===== --}}
-        <div id="mobileMenu" class="fixed inset-0 z-[100] hidden md:hidden bg-[#060a14]/96 dark:bg-[#060a14]/98 backdrop-blur-3xl text-white flex-col transition-all duration-300" aria-label="Menu Navigasi Mobile">
-            {{-- Ambient Concert Glow Blobs --}}
-            <div class="absolute -top-24 -left-24 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute top-1/2 -right-24 w-80 h-80 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-24 left-1/3 w-80 h-80 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        {{-- ===== FULL-SCREEN MOBILE NAVIGATION (LIGHT & DARK ADAPTIVE, CLEAN HUMAN DESIGN) ===== --}}
+        <div id="mobileMenu" class="fixed inset-0 z-[100] hidden md:hidden bg-white/98 dark:bg-[#0b0f19]/98 backdrop-blur-2xl text-gray-900 dark:text-gray-100 flex-col transition-colors duration-200" aria-label="Menu Navigasi Mobile">
 
             {{-- Top Bar inside Overlay --}}
-            <div class="relative z-10 flex items-center justify-between px-5 sm:px-6 h-[72px] border-b border-white/10 shrink-0">
+            <div class="relative z-10 flex items-center justify-between px-5 sm:px-6 h-[72px] border-b border-gray-100 dark:border-slate-800/80 shrink-0">
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" onclick="toggleMobileMenu()" class="flex items-center gap-2 group">
                     <img src="{{ asset('images/setiketbg.webp') }}" alt="SeTiket Logo" class="h-9 w-auto object-contain transition-transform group-hover:scale-105" onerror="this.src='{{ asset('images/setiket.webp') }}'">
                 </a>
 
-                <div class="flex items-center gap-2.5">
+                <div class="flex items-center gap-2">
                     {{-- Quick Theme Toggle --}}
                     <button type="button" onclick="toggleTheme()" aria-label="Ganti Mode Tema"
-                        class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all active:scale-95">
-                        <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        class="p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-amber-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors focus:outline-none">
+                        {{-- Sun icon (visible in dark mode) --}}
+                        <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="4"/>
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m14.14-14.14l-1.41 1.41"/>
                         </svg>
-                        <svg class="w-4 h-4 block dark:hidden text-slate-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        {{-- Moon icon (visible in light mode) --}}
+                        <svg class="w-4 h-4 block dark:hidden text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"/>
                         </svg>
                     </button>
 
                     {{-- Close Button (X) --}}
                     <button type="button" onclick="toggleMobileMenu()" aria-label="Tutup Menu"
-                        class="p-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all active:scale-95 group">
+                        class="p-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors focus:outline-none group">
                         <svg class="w-5 h-5 transition-transform group-hover:rotate-90 duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -231,157 +229,105 @@
             </div>
 
             {{-- Scrollable Content Body --}}
-            <div class="relative z-10 flex-1 overflow-y-auto px-5 sm:px-6 py-6 space-y-7">
+            <div class="relative z-10 flex-1 overflow-y-auto px-5 sm:px-6 py-6 space-y-6">
                 @auth
-                    {{-- User VIP Backstage Pass Card --}}
-                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/[0.09] via-white/[0.04] to-white/[0.02] border border-white/15 p-4 sm:p-5 backdrop-blur-xl shadow-2xl">
-                        <div class="flex items-center justify-between gap-3 mb-3.5">
+                    {{-- User Profile Card --}}
+                    <div class="bg-gray-50/80 dark:bg-slate-800/60 border border-gray-200/70 dark:border-slate-700/70 rounded-2xl p-4 transition-colors">
+                        <div class="flex items-center justify-between gap-3 mb-3">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#0050ff] via-blue-500 to-cyan-400 text-white flex items-center justify-center font-black text-base shadow-[0_0_15px_rgba(0,80,255,0.4)] shrink-0">
+                                <div class="w-10 h-10 rounded-full bg-[#0050ff] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
                                     {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <div class="min-w-0">
-                                    <div class="flex items-center gap-2">
-                                        <p class="text-sm font-bold text-white truncate">{{ auth()->user()->name }}</p>
-                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                                            {{ auth()->user()->isUser() ? 'VIP PASS' : 'ADMIN' }}
-                                        </span>
-                                    </div>
-                                    <p class="text-[11px] text-white/50 truncate">{{ auth()->user()->email }}</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ auth()->user()->name }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ auth()->user()->email }}</p>
                                 </div>
                             </div>
+                            <span class="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 text-[10px] font-bold text-[#0050ff] dark:text-blue-400 uppercase tracking-wider shrink-0">
+                                {{ auth()->user()->isUser() ? 'Member' : 'Admin' }}
+                            </span>
                         </div>
 
-                        {{-- Quick Actions for Authenticated User --}}
-                        <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-white/10">
+                        {{-- Quick Shortcuts --}}
+                        <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-gray-200/60 dark:border-slate-700/60">
                             @if(auth()->user()->isUser())
-                                <a href="{{ route('dashboard') }}" onclick="toggleMobileMenu()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-white/90 transition-colors">
-                                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12"/></svg>
+                                <a href="{{ route('dashboard') }}" onclick="toggleMobileMenu()" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white dark:bg-slate-700/80 border border-gray-200 dark:border-slate-600 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-[#0050ff] dark:hover:text-white transition-colors">
                                     <span>Pesanan Saya</span>
                                 </a>
-                                <a href="{{ route('tickets') }}" onclick="toggleMobileMenu()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-white/90 transition-colors">
-                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5Z"/></svg>
+                                <a href="{{ route('tickets') }}" onclick="toggleMobileMenu()" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white dark:bg-slate-700/80 border border-gray-200 dark:border-slate-600 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-[#0050ff] dark:hover:text-white transition-colors">
                                     <span>Tiket Saya</span>
                                 </a>
                             @else
-                                <a href="{{ route('admin.dashboard') }}" onclick="toggleMobileMenu()" class="col-span-2 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-xs font-semibold text-purple-200 transition-colors">
-                                    <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg>
-                                    <span>Panel Admin</span>
+                                <a href="{{ route('admin.dashboard') }}" onclick="toggleMobileMenu()" class="col-span-2 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#0050ff] text-white text-xs font-semibold hover:bg-[#0043d4] transition-colors">
+                                    <span>Panel Pengelola</span>
                                 </a>
                             @endif
                         </div>
                     </div>
                 @else
-                    {{-- Guest VIP Ticket Pass Card --}}
-                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/[0.09] via-white/[0.04] to-white/[0.02] border border-white/15 p-4.5 sm:p-5 backdrop-blur-xl shadow-2xl">
-                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
-
-                        <div class="relative z-10">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-                                    <span class="text-[10px] font-mono tracking-widest uppercase text-blue-300 font-bold">VIP GUEST ACCESS</span>
-                                </div>
-                                <span class="text-[10px] font-mono tracking-widest text-white/40">EDISI 2026</span>
-                            </div>
-                            <h4 class="text-sm font-bold text-white mb-1">Akses Akun SeTiket</h4>
-                            <p class="text-[11px] text-white/60 mb-3.5 leading-relaxed">
-                                Masuk untuk mengecek pesanan instan, e-ticket QR Code resmi, atau daftar akun baru dalam hitungan detik.
-                            </p>
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <a href="{{ route('login') }}" onclick="toggleMobileMenu()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 backdrop-blur-md transition-all active:scale-95">
-                                    <svg class="w-3.5 h-3.5 text-white/80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/></svg>
-                                    <span>Masuk</span>
-                                </a>
-                                <a href="{{ route('register') }}" onclick="toggleMobileMenu()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#0050ff] to-blue-500 hover:from-blue-600 hover:to-blue-400 text-white font-bold text-xs shadow-[0_0_20px_rgba(0,80,255,0.4)] transition-all active:scale-95">
-                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.375 21c-2.331 0-4.512-.652-6.375-1.765Z"/></svg>
-                                    <span>Daftar</span>
-                                </a>
-                            </div>
+                    {{-- Guest Access Box --}}
+                    <div class="bg-gray-50/80 dark:bg-slate-800/50 border border-gray-200/70 dark:border-slate-700/70 rounded-2xl p-4.5 transition-colors">
+                        <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-1">Masuk ke SeTiket</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                            Cek status pesanan, simpan e-ticket QR Code, atau buat akun baru dengan mudah.
+                        </p>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <a href="{{ route('login') }}" onclick="toggleMobileMenu()" class="flex items-center justify-center py-2.5 px-4 rounded-xl bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-800 dark:text-white font-semibold text-xs hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors">
+                                <span>Masuk</span>
+                            </a>
+                            <a href="{{ route('register') }}" onclick="toggleMobileMenu()" class="flex items-center justify-center py-2.5 px-4 rounded-xl bg-[#0050ff] hover:bg-[#0043d4] text-white font-semibold text-xs shadow-xs transition-colors">
+                                <span>Daftar Akun</span>
+                            </a>
                         </div>
                     </div>
                 @endauth
 
-                {{-- Editorial Lineup Navigation (DICE.fm / Boiler Room Style) --}}
-                <div>
-                    <p class="text-[10px] font-mono uppercase tracking-[0.2em] text-white/40 px-1 mb-2 font-bold">Direktori Event & Panggung</p>
+                {{-- Editorial Clean Navigation List --}}
+                <nav class="divide-y divide-gray-100 dark:divide-slate-800/80">
+                    <a href="{{ route('home') }}#events" onclick="toggleMobileMenu()" class="group flex items-center justify-between py-4 text-gray-900 dark:text-white hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
+                        <span class="text-xl sm:text-2xl font-bold tracking-tight">Event Trending</span>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+                        </svg>
+                    </a>
 
-                    <nav class="space-y-1">
-                        {{-- 01. Event Trending --}}
-                        <a href="{{ route('home') }}#events" onclick="toggleMobileMenu()" class="group flex items-center justify-between py-3.5 px-3 rounded-2xl hover:bg-white/[0.06] border-b border-white/5 transition-all">
-                            <div class="flex items-baseline gap-3.5">
-                                <span class="font-mono text-xs font-bold text-blue-400">01</span>
-                                <span class="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-blue-300 group-hover:translate-x-1.5 transition-all">
-                                    Event Trending
-                                </span>
-                            </div>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1.5 shadow-sm">
-                                <span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
-                                HOT
-                            </span>
+                    <a href="{{ route('home') }}#upcoming-events" onclick="toggleMobileMenu()" class="group flex items-center justify-between py-4 text-gray-900 dark:text-white hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
+                        <span class="text-xl sm:text-2xl font-bold tracking-tight">Jadwal Mendatang</span>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+                        </svg>
+                    </a>
+
+                    <a href="{{ route('home') }}#ended-events" onclick="toggleMobileMenu()" class="group flex items-center justify-between py-4 text-gray-900 dark:text-white hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
+                        <span class="text-xl sm:text-2xl font-bold tracking-tight">Arsip Event Selesai</span>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+                        </svg>
+                    </a>
+
+                    <a href="https://wa.me/6289681201941" target="_blank" rel="noopener" class="group flex items-center justify-between py-4 text-gray-900 dark:text-white hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
+                        <span class="text-xl sm:text-2xl font-bold tracking-tight">Bantuan CS WhatsApp</span>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/>
+                        </svg>
+                    </a>
+
+                    @auth
+                        <a href="{{ route('profile.edit') }}" onclick="toggleMobileMenu()" class="group flex items-center justify-between py-4 text-gray-700 dark:text-gray-300 hover:text-[#0050ff] dark:hover:text-blue-400 transition-colors">
+                            <span class="text-base font-semibold">Pengaturan Akun</span>
+                            <svg class="w-4 h-4 text-gray-400 group-hover:text-[#0050ff] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+                            </svg>
                         </a>
-
-                        {{-- 02. Jadwal Mendatang --}}
-                        <a href="{{ route('home') }}#upcoming-events" onclick="toggleMobileMenu()" class="group flex items-center justify-between py-3.5 px-3 rounded-2xl hover:bg-white/[0.06] border-b border-white/5 transition-all">
-                            <div class="flex items-baseline gap-3.5">
-                                <span class="font-mono text-xs font-bold text-indigo-400">02</span>
-                                <span class="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-indigo-300 group-hover:translate-x-1.5 transition-all">
-                                    Jadwal Mendatang
-                                </span>
-                            </div>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                LINEUP
-                            </span>
-                        </a>
-
-                        {{-- 03. Arsip Event Selesai --}}
-                        <a href="{{ route('home') }}#ended-events" onclick="toggleMobileMenu()" class="group flex items-center justify-between py-3.5 px-3 rounded-2xl hover:bg-white/[0.06] border-b border-white/5 transition-all">
-                            <div class="flex items-baseline gap-3.5">
-                                <span class="font-mono text-xs font-bold text-amber-400">03</span>
-                                <span class="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-amber-300 group-hover:translate-x-1.5 transition-all">
-                                    Arsip Event Selesai
-                                </span>
-                            </div>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                ARCHIVE
-                            </span>
-                        </a>
-
-                        {{-- 04. Pusat Bantuan WhatsApp --}}
-                        <a href="https://wa.me/6289681201941" target="_blank" rel="noopener" class="group flex items-center justify-between py-3.5 px-3 rounded-2xl hover:bg-white/[0.06] border-b border-white/5 transition-all">
-                            <div class="flex items-baseline gap-3.5">
-                                <span class="font-mono text-xs font-bold text-emerald-400">04</span>
-                                <span class="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-emerald-300 group-hover:translate-x-1.5 transition-all">
-                                    Pusat Bantuan CS
-                                </span>
-                            </div>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                ONLINE
-                            </span>
-                        </a>
-
-                        @auth
-                            {{-- 05. Pengaturan Akun --}}
-                            <a href="{{ route('profile.edit') }}" onclick="toggleMobileMenu()" class="group flex items-center justify-between py-3 px-3 rounded-2xl hover:bg-white/[0.06] transition-all">
-                                <div class="flex items-baseline gap-3.5">
-                                    <span class="font-mono text-xs font-bold text-slate-400">05</span>
-                                    <span class="text-base font-bold tracking-tight text-white/80 group-hover:text-white group-hover:translate-x-1.5 transition-all">
-                                        Pengaturan Akun
-                                    </span>
-                                </div>
-                                <svg class="w-4 h-4 text-white/40 group-hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                            </a>
-                        @endauth
-                    </nav>
-                </div>
+                    @endauth
+                </nav>
 
                 {{-- Logout action for authenticated user --}}
                 @auth
                     <div class="pt-2">
                         <form action="{{ route('logout') }}" method="POST" class="m-0">
                             @csrf
-                            <button type="submit" class="w-full py-2.5 px-4 rounded-xl text-center text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 transition-all flex items-center justify-center gap-2">
+                            <button type="submit" class="w-full py-2.5 px-4 rounded-xl text-center text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 border border-red-200 dark:border-red-900/50 transition-colors flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                                 <span>Keluar dari Akun</span>
                             </button>
@@ -391,13 +337,13 @@
             </div>
 
             {{-- Overlay Footer --}}
-            <div class="relative z-10 px-5 sm:px-6 py-4 border-t border-white/10 shrink-0 bg-black/30">
-                <div class="flex items-center justify-between text-[11px] text-white/50 font-mono">
-                    <span>SETIKET • LIVE EXPERIENCES 2026</span>
+            <div class="relative z-10 px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-slate-800/80 shrink-0 bg-gray-50/50 dark:bg-slate-900/40">
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span>Platform Tiket Resmi</span>
                     <div class="flex items-center gap-4">
-                        <a href="https://instagram.com" target="_blank" rel="noopener" class="hover:text-white transition-colors">INSTAGRAM</a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener" class="hover:text-gray-900 dark:hover:text-white transition-colors">Instagram</a>
                         <span>•</span>
-                        <a href="https://wa.me/6289681201941" target="_blank" rel="noopener" class="hover:text-white transition-colors">WHATSAPP</a>
+                        <a href="https://wa.me/6289681201941" target="_blank" rel="noopener" class="hover:text-gray-900 dark:hover:text-white transition-colors">WhatsApp</a>
                     </div>
                 </div>
             </div>
