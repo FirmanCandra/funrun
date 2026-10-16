@@ -143,7 +143,7 @@
                 <div class="px-3 pt-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     Sistem & Tampilan
                 </div>
-                <a href="{{ route('admin.banners') }}"
+                <a href="{{ \Illuminate\Support\Facades\Route::has('admin.banners') ? route('admin.banners') : url('/admin/banners') }}"
                     class="sidebar-item px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-sm font-medium transition-all {{ request()->routeIs('admin.banners*') ? 'bg-blue-600 text-white shadow-xs font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -158,6 +158,13 @@
                         </path>
                     </svg>
                     Manajemen Admin
+                </a>
+                <a href="{{ route('admin.clear-cache') }}" onclick="return confirm('Bersihkan cache route, view, dan konfigurasi sistem?')"
+                    class="sidebar-item px-3.5 py-2 rounded-xl flex items-center gap-3 text-xs font-medium transition-all text-slate-500 hover:bg-slate-50 hover:text-slate-800" title="Bersihkan cache sistem">
+                    <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Bersihkan Cache
                 </a>
             @endif
         </nav>
@@ -224,14 +231,14 @@
             </div>
             <div class="flex items-center gap-3 shrink-0">
                 <div class="hidden sm:flex flex-col items-end">
-                    <span class="font-bold text-slate-800 text-sm leading-tight">{{ auth()->user()->name }}</span>
+                    <span class="font-bold text-slate-800 text-sm leading-tight">{{ auth()->user()->name ?? 'Admin' }}</span>
                     <span class="text-[11px] font-semibold text-blue-600 capitalize bg-blue-50 px-2 py-0.5 rounded-full mt-0.5 border border-blue-100/50">
                         {{ auth()->user()->isSuperAdmin() ? 'Super Admin' : 'Admin Event' }}
                     </span>
                 </div>
                 <div
                     class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xs flex items-center justify-center font-bold text-sm tracking-wide">
-                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
                 </div>
             </div>
         </header>

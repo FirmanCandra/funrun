@@ -98,12 +98,17 @@ class BannerAndEndedEventTest extends TestCase
         $this->assertStringNotContainsString('JAKARTA NIGHT MARATHON 2026', $marqueeContent);
 
         // Pastikan jaminan dan badge layanan resmi ada di ribbon
-        $this->assertStringContainsString('TIKET RESMI & TERVERIFIKASI', $marqueeContent);
+        $this->assertStringContainsString('TIKET RESMI &amp; TERVERIFIKASI', $marqueeContent);
         $this->assertStringContainsString('E-TICKET DENGAN QR CODE INSTAN', $marqueeContent);
-        $this->assertStringContainsString('CHECK-IN MUDAH & CEPAT', $marqueeContent);
+        $this->assertStringContainsString('CHECK-IN MUDAH &amp; CEPAT', $marqueeContent);
         $this->assertStringContainsString('VERIFIKASI PANITIA RESMI', $marqueeContent);
         $this->assertStringContainsString('PEMBAYARAN AMAN TERENKRIPSI', $marqueeContent);
         $this->assertStringContainsString('CUSTOMER SUPPORT RESPONSIF', $marqueeContent);
+
+        // Pastikan tidak ada icon SVG (anti-judol) dan teks menggunakan warna putih
+        $this->assertStringNotContainsString('<svg', $marqueeContent);
+        $this->assertStringNotContainsString('text-amber-400', $marqueeContent);
+        $this->assertStringContainsString('text-white', $marqueeContent);
 
         // Pastikan search input placeholder tidak lagi mencantumkan nama event dummy
         $response->assertDontSee('Cari event SOUNDCHECK, YE JAKARTA, MARATHON...');

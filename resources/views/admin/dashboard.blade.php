@@ -88,14 +88,15 @@
                 </div>
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-slate-900 truncate">{{ $selectedEvent['nama'] }}</span>
-                        <span class="text-[10px] font-semibold text-slate-500">• {{ $selectedEvent['tanggal'] }}</span>
+                        <span class="text-xs font-bold text-slate-900 truncate">{{ $selectedEvent['nama'] ?? 'Event' }}</span>
+                        <span class="text-[10px] font-semibold text-slate-500">• {{ $selectedEvent['tanggal'] ?? '-' }}</span>
                     </div>
-                    <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ $selectedEvent['lokasi'] }}</p>
+                    <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ $selectedEvent['lokasi'] ?? '-' }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-                <a href="{{ route('event.show', $selectedEvent['slug'] ?? \Illuminate\Support\Str::slug($selectedEvent['nama'])) }}" target="_blank"
+                @php($eventIdentifier = !empty($selectedEvent['slug']) ? $selectedEvent['slug'] : (!empty($selectedEvent['nama']) ? \Illuminate\Support\Str::slug($selectedEvent['nama']) : ($selectedEvent['id'] ?? 1)))
+                <a href="{{ route('event.show', $eventIdentifier) }}" target="_blank"
                    class="text-xs font-bold text-slate-700 hover:text-blue-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
                    title="Lihat halaman publik event ini">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +104,7 @@
                     </svg>
                     Lihat Publik
                 </a>
-                <a href="{{ route('admin.event-image', ['event_id' => $selectedEvent['id']]) }}"
+                <a href="{{ route('admin.event-image', ['event_id' => $selectedEvent['id'] ?? 1]) }}"
                    class="text-xs font-bold text-blue-700 hover:text-blue-800 bg-white border border-blue-200 px-3 py-1.5 rounded-lg transition-colors">
                     Kelola Pengaturan Event Ini →
                 </a>
@@ -303,7 +304,7 @@
         @if(!empty($selectedEvent))
             {{-- Quick Setting Tiles for the Selected Event --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <a href="{{ route('admin.event-image', ['event_id' => $selectedEvent['id']]) }}"
+                <a href="{{ route('admin.event-image', ['event_id' => $selectedEvent['id'] ?? 1]) }}"
                    class="p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 bg-slate-50/50 hover:bg-white transition-all flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,7 +317,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('admin.events.categories', $selectedEvent['id']) }}"
+                <a href="{{ route('admin.events.categories', $selectedEvent['id'] ?? 1) }}"
                    class="p-3.5 rounded-xl border border-slate-200 hover:border-purple-500 bg-slate-50/50 hover:bg-white transition-all flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -329,7 +330,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('admin.payment-accounts', ['event_id' => $selectedEvent['id']]) }}"
+                <a href="{{ route('admin.payment-accounts', ['event_id' => $selectedEvent['id'] ?? 1]) }}"
                    class="p-3.5 rounded-xl border border-slate-200 hover:border-emerald-500 bg-slate-50/50 hover:bg-white transition-all flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,7 +343,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('admin.form-fields', ['event_id' => $selectedEvent['id']]) }}"
+                <a href="{{ route('admin.form-fields', ['event_id' => $selectedEvent['id'] ?? 1]) }}"
                    class="p-3.5 rounded-xl border border-slate-200 hover:border-amber-500 bg-slate-50/50 hover:bg-white transition-all flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,25 +363,25 @@
                     <div class="p-3 rounded-xl border border-slate-200/80 bg-slate-50/40 hover:bg-white transition-colors flex items-center gap-3.5">
                         <div class="w-16 h-11 rounded-lg overflow-hidden bg-slate-200 shrink-0 border border-slate-300">
                             @if(!empty($ev['thumbnail']))
-                                <img src="{{ $ev['thumbnail'] }}" alt="{{ $ev['nama'] }}" class="w-full h-full object-cover">
+                                <img src="{{ $ev['thumbnail'] }}" alt="{{ $ev['nama'] ?? 'Event' }}" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full bg-slate-700 text-white flex items-center justify-center font-bold text-xs">
-                                    {{ strtoupper(substr($ev['nama'], 0, 2)) }}
+                                    {{ strtoupper(substr($ev['nama'] ?? 'EV', 0, 2)) }}
                                 </div>
                             @endif
                         </div>
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2 mb-0.5">
-                                <span class="text-xs font-bold text-slate-900 truncate">{{ $ev['nama'] }}</span>
+                                <span class="text-xs font-bold text-slate-900 truncate">{{ $ev['nama'] ?? 'Event' }}</span>
                                 @if(($ev['kategori'] ?? '') === 'upcoming')
                                     <span class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">Upcoming</span>
                                 @else
                                     <span class="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">Highlight</span>
                                 @endif
                             </div>
-                            <p class="text-[11px] text-slate-500 truncate">{{ $ev['tanggal'] }} • {{ $ev['lokasi'] }}</p>
+                            <p class="text-[11px] text-slate-500 truncate">{{ $ev['tanggal'] ?? '-' }} • {{ $ev['lokasi'] ?? '-' }}</p>
                         </div>
-                        <a href="{{ route('admin.dashboard', ['event_id' => $ev['id']]) }}"
+                        <a href="{{ route('admin.dashboard', ['event_id' => $ev['id'] ?? 1]) }}"
                            class="shrink-0 text-xs font-semibold text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1.5 rounded-lg transition-colors">
                             Filter Event
                         </a>
@@ -431,7 +432,7 @@
 
                     <div class="text-right shrink-0">
                         <div class="font-bold text-slate-900">
-                            Rp {{ number_format($ord->total_amount, 0, ',', '.') }}
+                            Rp {{ number_format((float) ($ord->total_amount ?? 0), 0, ',', '.') }}
                         </div>
                         <a href="{{ route('admin.orders') }}" class="text-[11px] text-blue-600 hover:underline">
                             Periksa

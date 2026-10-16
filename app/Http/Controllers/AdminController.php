@@ -78,14 +78,21 @@ class AdminController extends Controller
      */
     public static function pendingOrdersCount($user): int
     {
-        $query = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_WAITING);
+        try {
+            if (! $user) {
+                return 0;
+            }
+            $query = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_WAITING);
 
-        // Pesanan menyimpan event_id sendiri, jadi penyaringannya langsung.
-        if ($user->role === 'admin') {
-            $query->where('event_id', $user->event_id);
+            // Pesanan menyimpan event_id sendiri, jadi penyaringannya langsung.
+            if (($user->role ?? '') === 'admin' && !empty($user->event_id)) {
+                $query->where('event_id', $user->event_id);
+            }
+
+            return $query->count();
+        } catch (\Throwable $e) {
+            return 0;
         }
-
-        return $query->count();
     }
 
     public function dashboard(Request $request)
@@ -94,8 +101,8 @@ class AdminController extends Controller
         $eventsList = \App\Http\Controllers\HomeController::loadEvents();
         $totalEvents = count($eventsList);
 
-        if ($user->role === 'admin') {
-            $selectedEventId = (int) $user->event_id;
+        if ($user && $user->role === 'admin') {
+            $selectedEventId = !empty($user->event_id) ? (int) $user->event_id : null;
         } else {
             $rawEventId = $request->query('event_id');
             $selectedEventId = ($rawEventId && $rawEventId !== 'all') ? (int) $rawEventId : null;
@@ -105,46 +112,67 @@ class AdminController extends Controller
         if ($selectedEventId) {
             $selectedEvent = collect($eventsList)->firstWhere('id', $selectedEventId);
             if (!$selectedEvent) {
-                $dbEv = \App\Models\Event::find($selectedEventId);
-                if ($dbEv) {
-                    $selectedEvent = [
-                        'id' => $dbEv->id,
-                        'nama' => $dbEv->title,
-                        'lokasi' => $dbEv->location,
-                        'tanggal' => $dbEv->date,
-                        'thumbnail' => '',
-                        'harga' => 0
-                    ];
+                try {
+                    $dbEv = \App\Models\Event::find($selectedEventId);
+                    if ($dbEv) {
+                        $selectedEvent = [
+                            'id' => $dbEv->id,
+                            'nama' => $dbEv->title ?: ('Event #' . $dbEv->id),
+                            'lokasi' => $dbEv->location ?: '-',
+                            'tanggal' => $dbEv->date ?: '-',
+                            'thumbnail' => '',
+                            'harga' => 0,
+                            'slug' => !empty($dbEv->title) ? \Illuminate\Support\Str::slug($dbEv->title) : ('event-' . $dbEv->id),
+                        ];
+                    }
+                } catch (\Throwable $e) {
+                    // Ignore DB lookup error
+                }
+            } else {
+                if (empty($selectedEvent['slug']) && !empty($selectedEvent['nama'])) {
+                    $selectedEvent['slug'] = \Illuminate\Support\Str::slug($selectedEvent['nama']);
                 }
             }
         }
 
-        if ($selectedEventId) {
-            $totalParticipants = \App\Models\Participant::where('event_id', $selectedEventId)->count();
-            $totalRevenue = \App\Models\Order::where('event_id', $selectedEventId)
-                ->where('payment_status', \App\Models\Order::STATUS_PAID)->sum('total_amount');
-            $ticketsSold = \App\Models\Ticket::whereHas('participant', function($q) use ($selectedEventId) {
-                $q->where('event_id', $selectedEventId);
-            })->whereIn('status', ['valid', 'checked-in'])->count();
-            $checkedIn = \App\Models\Ticket::whereHas('participant', function($q) use ($selectedEventId) {
-                $q->where('event_id', $selectedEventId);
-            })->where('status', 'checked-in')->count();
-            $pendingOrders = \App\Models\Order::where('event_id', $selectedEventId)
-                ->where('payment_status', \App\Models\Order::STATUS_WAITING)->count();
+        $totalParticipants = 0;
+        $totalRevenue = 0.0;
+        $ticketsSold = 0;
+        $checkedIn = 0;
+        $pendingOrders = 0;
+        $recentEvents = array_slice($eventsList, 0, 4);
+        $recentOrders = collect();
 
-            $recentEvents = $selectedEvent ? [$selectedEvent] : [];
-            $recentOrders = \App\Models\Order::with(['user', 'event'])
-                ->where('event_id', $selectedEventId)
-                ->latest()->take(5)->get();
-        } else {
-            $totalParticipants = \App\Models\Participant::count();
-            $totalRevenue = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_PAID)->sum('total_amount');
-            $ticketsSold = \App\Models\Ticket::whereIn('status', ['valid', 'checked-in'])->count();
-            $checkedIn = \App\Models\Ticket::where('status', 'checked-in')->count();
-            $pendingOrders = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_WAITING)->count();
+        try {
+            if ($selectedEventId) {
+                $totalParticipants = \App\Models\Participant::where('event_id', $selectedEventId)->count();
+                $totalRevenue = (float) (\App\Models\Order::where('event_id', $selectedEventId)
+                    ->where('payment_status', \App\Models\Order::STATUS_PAID)->sum('total_amount') ?? 0);
+                $ticketsSold = \App\Models\Ticket::whereHas('participant', function($q) use ($selectedEventId) {
+                    $q->where('event_id', $selectedEventId);
+                })->whereIn('status', ['valid', 'checked-in'])->count();
+                $checkedIn = \App\Models\Ticket::whereHas('participant', function($q) use ($selectedEventId) {
+                    $q->where('event_id', $selectedEventId);
+                })->where('status', 'checked-in')->count();
+                $pendingOrders = \App\Models\Order::where('event_id', $selectedEventId)
+                    ->where('payment_status', \App\Models\Order::STATUS_WAITING)->count();
 
-            $recentEvents = array_slice($eventsList, 0, 4);
-            $recentOrders = \App\Models\Order::with(['user', 'event'])->latest()->take(5)->get();
+                $recentEvents = $selectedEvent ? [$selectedEvent] : [];
+                $recentOrders = \App\Models\Order::with(['user', 'event'])
+                    ->where('event_id', $selectedEventId)
+                    ->latest()->take(5)->get();
+            } else {
+                $totalParticipants = \App\Models\Participant::count();
+                $totalRevenue = (float) (\App\Models\Order::where('payment_status', \App\Models\Order::STATUS_PAID)->sum('total_amount') ?? 0);
+                $ticketsSold = \App\Models\Ticket::whereIn('status', ['valid', 'checked-in'])->count();
+                $checkedIn = \App\Models\Ticket::where('status', 'checked-in')->count();
+                $pendingOrders = \App\Models\Order::where('payment_status', \App\Models\Order::STATUS_WAITING)->count();
+
+                $recentEvents = array_slice($eventsList, 0, 4);
+                $recentOrders = \App\Models\Order::with(['user', 'event'])->latest()->take(5)->get();
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Admin dashboard metrics error: ' . $e->getMessage());
         }
 
         return view('admin.dashboard', compact(
@@ -1764,5 +1792,15 @@ class AdminController extends Controller
 
         return redirect()->route('admin.banners')
             ->with('success', 'Banner slider berhasil dihapus.');
+    }
+
+    public function clearSystemCache()
+    {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+            return redirect()->route('admin.dashboard')->with('success', 'Cache sistem (route, view, config) berhasil dibersihkan.');
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.dashboard')->with('error', 'Gagal membersihkan cache: ' . $e->getMessage());
+        }
     }
 }

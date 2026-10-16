@@ -112,7 +112,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Restore Database Dump
         Route::post('/restore-dump', [AdminController::class, 'restoreDump'])->name('restore-dump');
+
+        // Clear Application Cache (route, view, config)
+        Route::get('/clear-cache', [AdminController::class, 'clearSystemCache'])->name('clear-cache');
     });
+});
+
+// Emergency route for production environments where artisan is unavailable
+Route::get('/flush-cache', function (\Illuminate\Http\Request $request) {
+    if ($request->query('key') === 'setiket-clear') {
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        return response('Cache aplikasi (route, config, view) berhasil dibersihkan! Silakan kembali ke <a href="/admin/dashboard">Admin Dashboard</a>.');
+    }
+    abort(404);
 });
 
 // Route handler for storage files (ensures uploaded proofs and thumbnails always load reliably even without symlink)

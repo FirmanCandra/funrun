@@ -349,71 +349,35 @@
             </div>
         </div>
 
-        {{-- ===== LOKET RUNNING TICKER RIBBON (DENGAN SVG ICONS) ===== --}}
-        <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white overflow-hidden py-2 select-none border-b border-indigo-950/40">
-            <div class="loket-marquee-track text-[11px] sm:text-xs font-semibold tracking-wide">
+        {{-- ===== RUNNING TICKER RIBBON (CLEAN EDITORIAL WHITE TEXT, NO ICONS) ===== --}}
+        <div class="bg-slate-950 text-white overflow-hidden py-2.5 select-none border-b border-white/10">
+            <div class="loket-marquee-track text-[11px] sm:text-xs font-semibold tracking-wider text-white">
                 <span class="inline-flex items-center gap-6 px-4">
-                    <span class="inline-flex items-center gap-1.5 text-amber-400">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"/></svg>
-                        TIKET RESMI & TERVERIFIKASI
-                    </span>
+                    <span class="text-white">TIKET RESMI &amp; TERVERIFIKASI</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-blue-200">
-                        <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h3v3h-3v-3ZM13.5 19.5h3v.75h-3v-.75ZM19.5 13.5h.75v3h-.75v-3ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h3v3h-3v-3Z"/></svg>
-                        E-TICKET DENGAN QR CODE INSTAN
-                    </span>
+                    <span class="text-white">E-TICKET DENGAN QR CODE INSTAN</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-emerald-300">
-                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                        CHECK-IN MUDAH & CEPAT
-                    </span>
+                    <span class="text-white">CHECK-IN MUDAH &amp; CEPAT</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-purple-200">
-                        <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/></svg>
-                        VERIFIKASI PANITIA RESMI
-                    </span>
+                    <span class="text-white">VERIFIKASI PANITIA RESMI</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-cyan-200">
-                        <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
-                        PEMBAYARAN AMAN TERENKRIPSI
-                    </span>
+                    <span class="text-white">PEMBAYARAN AMAN TERENKRIPSI</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-emerald-200">
-                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.75.75 0 0 1-.84-.84c.15-.815.342-1.616.574-2.398A7.95 7.95 0 0 1 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
-                        CUSTOMER SUPPORT RESPONSIF
-                    </span>
+                    <span class="text-white">CUSTOMER SUPPORT RESPONSIF</span>
                     <span class="text-white/40">•</span>
                 </span>
                 <span class="inline-flex items-center gap-6 px-4" aria-hidden="true">
-                    <span class="inline-flex items-center gap-1.5 text-amber-400">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"/></svg>
-                        TIKET RESMI & TERVERIFIKASI
-                    </span>
+                    <span class="text-white">TIKET RESMI &amp; TERVERIFIKASI</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-blue-200">
-                        <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h3v3h-3v-3ZM13.5 19.5h3v.75h-3v-.75ZM19.5 13.5h.75v3h-.75v-3ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h3v3h-3v-3Z"/></svg>
-                        E-TICKET DENGAN QR CODE INSTAN
-                    </span>
+                    <span class="text-white">E-TICKET DENGAN QR CODE INSTAN</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-emerald-300">
-                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                        CHECK-IN MUDAH & CEPAT
-                    </span>
+                    <span class="text-white">CHECK-IN MUDAH &amp; CEPAT</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-purple-200">
-                        <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/></svg>
-                        VERIFIKASI PANITIA RESMI
-                    </span>
+                    <span class="text-white">VERIFIKASI PANITIA RESMI</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-cyan-200">
-                        <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
-                        PEMBAYARAN AMAN TERENKRIPSI
-                    </span>
+                    <span class="text-white">PEMBAYARAN AMAN TERENKRIPSI</span>
                     <span class="text-white/40">•</span>
-                    <span class="inline-flex items-center gap-1.5 text-emerald-200">
-                        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a.75.75 0 0 1-.84-.84c.15-.815.342-1.616.574-2.398A7.95 7.95 0 0 1 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/></svg>
-                        CUSTOMER SUPPORT RESPONSIF
-                    </span>
+                    <span class="text-white">CUSTOMER SUPPORT RESPONSIF</span>
                     <span class="text-white/40">•</span>
                 </span>
             </div>
