@@ -103,6 +103,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/admins/{id}', [AdminController::class, 'updateAdmin'])->name('admins.update');
         Route::delete('/admins/{id}', [AdminController::class, 'destroyAdmin'])->name('admins.destroy');
 
+        // Banner Slider Management
+        Route::get('/banners', [AdminController::class, 'banners'])->name('banners');
+        Route::post('/banners', [AdminController::class, 'storeBanner'])->name('banners.store');
+        Route::put('/banners/{id}', [AdminController::class, 'updateBanner'])->name('banners.update');
+        Route::post('/banners/{id}/toggle', [AdminController::class, 'toggleBanner'])->name('banners.toggle');
+        Route::delete('/banners/{id}', [AdminController::class, 'destroyBanner'])->name('banners.destroy');
+
         // Restore Database Dump
         Route::post('/restore-dump', [AdminController::class, 'restoreDump'])->name('restore-dump');
     });

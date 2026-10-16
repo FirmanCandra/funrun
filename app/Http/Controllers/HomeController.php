@@ -174,8 +174,10 @@ class HomeController extends Controller
             $endedEvents     = array_values(array_filter($events, fn ($e) => ($e['kategori'] ?? '') === 'ended'));
         }
 
+        $heroBanners = \App\Services\BannerService::getActiveBanners();
+
         return view('welcome', array_merge(
-            compact('upcomingEvents', 'highlightEvents', 'endedEvents', 'q'),
+            compact('upcomingEvents', 'highlightEvents', 'endedEvents', 'q', 'heroBanners'),
             self::participantContext()
         ));
     }

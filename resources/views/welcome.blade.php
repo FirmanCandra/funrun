@@ -10,8 +10,38 @@
 
     $q = request('q', '');
 
-    // Event untuk Carousel Hero Banner (utamakan event trending)
-    $bannerEvents = $trendingEvents->isNotEmpty() ? $trendingEvents : $allEvents->take(5);
+    // Setup Slides untuk Carousel Hero Banner (utamakan Banner Aktif dari Panel Admin)
+    $carouselSlides = [];
+    if (!empty($heroBanners) && count($heroBanners) > 0) {
+        foreach ($heroBanners as $b) {
+            $carouselSlides[] = [
+                'title' => $b['title'] ?? 'SeTiket Event',
+                'subtitle' => $b['subtitle'] ?? '',
+                'badge' => !empty($b['badge_text']) ? $b['badge_text'] : 'Featured Event',
+                'button_text' => !empty($b['button_text']) ? $b['button_text'] : 'Beli Tiketnya di Sini',
+                'url' => !empty($b['target_url']) ? $b['target_url'] : route('home'),
+                'image' => $b['image_url'] ?? '',
+                'is_custom' => true,
+            ];
+        }
+    } else {
+        // Fallback: HANYA gunakan event aktif yang belum berakhir (kategori !== 'ended')
+        $activeFallbackEvents = $trendingEvents->concat($upcoming)->filter(fn($e) => ($e['kategori'] ?? '') !== 'ended');
+        if ($activeFallbackEvents->isEmpty()) {
+            $activeFallbackEvents = collect(\App\Http\Controllers\HomeController::loadEvents())->filter(fn($e) => ($e['kategori'] ?? '') !== 'ended');
+        }
+        foreach ($activeFallbackEvents->take(5) as $ev) {
+            $carouselSlides[] = [
+                'title' => $ev['nama'] ?? 'SeTiket',
+                'subtitle' => trim(($ev['lokasi'] ?? '') . (!empty($ev['tanggal']) ? ' • ' . $ev['tanggal'] : '')),
+                'badge' => ($ev['kategori'] ?? '') === 'highlight' ? 'Featured Event' : 'Event Rekomendasi',
+                'button_text' => 'Beli Tiketnya di Sini',
+                'url' => route('event.show', $ev['slug'] ?? \Illuminate\Support\Str::slug($ev['nama'] ?? 'event')),
+                'image' => $ev['thumbnail'] ?? '',
+                'is_custom' => false,
+            ];
+        }
+    }
 
     // Helper untuk mengurai tanggal badge Loket Event2Go (contoh: "OKT \n 6 \n SEL")
     $parseDateBadge = function($tanggalStr) {
@@ -70,16 +100,16 @@
         
         {{-- Carousel Slides Container --}}
         <div class="relative h-[200px] sm:h-[380px] md:h-[440px] lg:h-[480px] overflow-hidden" id="carouselTrack">
-            @foreach($bannerEvents as $index => $bEvent)
+            @foreach($carouselSlides as $index => $slide)
                 <div class="carousel-slide absolute inset-0 transition-opacity duration-700 ease-in-out {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' }}"
                     data-slide-index="{{ $index }}">
                     
                     {{-- Banner Image --}}
-                    @if(!empty($bEvent['thumbnail']))
-                        <img src="{{ $bEvent['thumbnail'] }}" alt="{{ $bEvent['nama'] }}" class="w-full h-full object-cover">
+                    @if(!empty($slide['image']))
+                        <img src="{{ $slide['image'] }}" alt="{{ $slide['title'] }}" class="w-full h-full object-cover">
                     @else
                         @include('partials.event-image', [
-                            'nama' => $bEvent['nama'],
+                            'nama' => $slide['title'],
                             'thumbnail' => null,
                             'class' => 'w-full h-full object-cover'
                         ])
@@ -89,34 +119,31 @@
                     <div class="hidden sm:block absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
                     {{-- Mobile clickable link: seluruh banner poster di mobile langsung bisa diklik --}}
-                    <a href="{{ route('event.show', $bEvent['slug'] ?? \Illuminate\Support\Str::slug($bEvent['nama'])) }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $bEvent['nama'] }}"></a>
+                    <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $slide['title'] }}"></a>
 
                     {{-- Banner Content & Floating CTA Pill (Desktop Only - di mobile di-hidden agar poster bersih) --}}
                     <div class="hidden sm:flex absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex-col sm:flex-row items-start sm:items-end justify-between gap-3 z-10 pointer-events-none">
                         <div class="max-w-2xl text-white pointer-events-auto">
                             <span class="inline-block px-3 py-1 bg-[#0050ff] text-white text-[11px] sm:text-xs font-bold rounded-full mb-2 tracking-wide uppercase">
-                                {{ ($bEvent['kategori'] ?? '') === 'highlight' ? 'Featured Event' : 'Akan Datang' }}
+                                {{ $slide['badge'] }}
                             </span>
                             <h2 class="text-xl sm:text-3xl md:text-4xl font-black leading-tight drop-shadow-md">
-                                {{ $bEvent['nama'] }}
+                                {{ $slide['title'] }}
                             </h2>
-                            <p class="text-xs sm:text-sm text-gray-200 mt-1.5 flex items-center gap-3 drop-shadow">
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                                    {{ $bEvent['lokasi'] }}
-                                </span>
-                                <span>•</span>
-                                <span class="inline-flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                                    {{ $bEvent['tanggal'] }}
-                                </span>
-                            </p>
+                            @if(!empty($slide['subtitle']))
+                                <p class="text-xs sm:text-sm text-gray-200 mt-1.5 flex items-center gap-3 drop-shadow">
+                                    <span class="inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                                        {{ $slide['subtitle'] }}
+                                    </span>
+                                </p>
+                            @endif
                         </div>
 
                         {{-- Loket Floating Action Pill --}}
-                        <a href="{{ route('event.show', $bEvent['slug'] ?? \Illuminate\Support\Str::slug($bEvent['nama'])) }}"
+                        <a href="{{ $slide['url'] }}"
                             class="pointer-events-auto inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
-                            <span>Beli Tiketnya di Sini</span>
+                            <span>{{ $slide['button_text'] }}</span>
                             <svg class="w-4 h-4 text-[#0050ff]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/>
                             </svg>
@@ -142,7 +169,7 @@
 
         {{-- Carousel Dots Indicator --}}
         <div class="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 sm:left-8 sm:translate-x-0 z-20 flex items-center gap-1.5" id="carouselDots">
-            @foreach($bannerEvents as $index => $bEvent)
+            @foreach($carouselSlides as $index => $slide)
                 <button type="button" onclick="goToSlide({{ $index }})" aria-label="Pilih Slide {{ $index + 1 }}"
                     class="carousel-dot h-2 rounded-full transition-all duration-300 {{ $index === 0 ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80' }}"
                     data-dot-index="{{ $index }}"></button>

@@ -40,6 +40,12 @@ class RegistrationController extends Controller
             ];
         }
 
+        // Event yang sudah berakhir tidak boleh dipesan lagi
+        if (($event['kategori'] ?? '') === 'ended') {
+            return redirect()->route('event.show', $event['slug'] ?? $event['id'])
+                ->with('error', 'Penjualan tiket untuk event ini sudah ditutup karena acara telah berakhir.');
+        }
+
         // Apply fallbacks
         if (empty($event['waktu'])) {
             $event['waktu'] = '16.00 - 23.00';
@@ -83,6 +89,14 @@ class RegistrationController extends Controller
         }
 
         $jsonEvent = collect(HomeController::loadEvents())->firstWhere('id', $eventId);
+        $dbEvent = Event::find($eventId);
+        if ($jsonEvent && ($jsonEvent['kategori'] ?? '') === 'ended') {
+            $isExplicitlyEnded = ! $dbEvent || (mb_stripos($dbEvent->title, 'volt') === false && mb_stripos($dbEvent->title, 'step up') === false);
+            if ($isExplicitlyEnded) {
+                return redirect()->route('event.show', $jsonEvent['slug'] ?? $eventId)
+                    ->with('error', 'Penjualan tiket untuk event ini sudah ditutup karena acara telah berakhir.');
+            }
+        }
 
         // Rekening tujuan harus salah satu milik event ini dan masih aktif —
         // tanpa itu pembeli bisa mengarahkan transfernya ke rekening event lain.

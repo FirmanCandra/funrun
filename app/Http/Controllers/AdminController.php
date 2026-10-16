@@ -1571,4 +1571,198 @@ class AdminController extends Controller
         }
         return redirect()->back()->with('error', 'Gagal merestore database. Cek file log sistem.');
     }
+
+    // ===== BANNER SLIDER MANAGEMENT =====
+
+    public function banners(Request $request)
+    {
+        $this->checkSuperAdmin();
+        $banners = \App\Services\BannerService::loadBanners();
+
+        // Urutkan berdasarkan sort_order menaik
+        usort($banners, function ($a, $b) {
+            $orderA = (int) ($a['sort_order'] ?? 0);
+            $orderB = (int) ($b['sort_order'] ?? 0);
+            return $orderA <=> $orderB;
+        });
+
+        // Ambil daftar event aktif untuk opsi cepat pemilih URL target
+        $activeEvents = collect(\App\Http\Controllers\HomeController::loadEvents())
+            ->filter(fn ($e) => ($e['kategori'] ?? '') !== 'ended')
+            ->values();
+
+        return view('admin.banners', compact('banners', 'activeEvents'));
+    }
+
+    public function storeBanner(Request $request)
+    {
+        $this->checkSuperAdmin();
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'badge_text' => 'nullable|string|max:50',
+            'button_text' => 'nullable|string|max:50',
+            'target_url' => 'nullable|string|max:500',
+            'sort_order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,webp,jpg|max:2048',
+            'image_url' => 'nullable|string|max:500',
+        ], [
+            'title.required' => 'Judul banner wajib diisi.',
+            'image.image' => 'Berkas harus berupa gambar.',
+            'image.mimes' => 'Format gambar harus WebP, JPG, atau PNG.',
+            'image.max' => 'Ukuran gambar maksimal 2 MB.',
+        ]);
+
+        if (! $request->hasFile('image') && empty(trim((string) $request->input('image_url')))) {
+            return back()->withInput()->with('error', 'Pilih berkas gambar banner yang ingin diunggah atau masukkan URL gambar.');
+        }
+
+        if ($request->hasFile('image')) {
+            $imageUrl = \App\Services\BannerService::storeBannerFile($request->file('image'));
+        } else {
+            $imageUrl = trim((string) $request->input('image_url'));
+        }
+
+        $banners = \App\Services\BannerService::loadBanners();
+        $newId = (string) (time() . rand(100, 999));
+
+        $maxSort = 0;
+        foreach ($banners as $b) {
+            if ((int) ($b['sort_order'] ?? 0) > $maxSort) {
+                $maxSort = (int) ($b['sort_order'] ?? 0);
+            }
+        }
+
+        $newBanner = [
+            'id' => $newId,
+            'title' => trim($request->input('title')),
+            'subtitle' => trim((string) $request->input('subtitle')),
+            'badge_text' => trim((string) $request->input('badge_text')) ?: 'Featured Event',
+            'button_text' => trim((string) $request->input('button_text')) ?: 'Beli Tiketnya di Sini',
+            'target_url' => trim((string) $request->input('target_url')) ?: route('home'),
+            'image_url' => $imageUrl,
+            'is_active' => true,
+            'sort_order' => $request->filled('sort_order') ? (int) $request->input('sort_order') : ($maxSort + 1),
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+
+        $banners[] = $newBanner;
+        \App\Services\BannerService::saveBanners($banners);
+
+        return redirect()->route('admin.banners')
+            ->with('success', 'Banner slider baru berhasil ditambahkan.');
+    }
+
+    public function updateBanner(Request $request, $id)
+    {
+        $this->checkSuperAdmin();
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'badge_text' => 'nullable|string|max:50',
+            'button_text' => 'nullable|string|max:50',
+            'target_url' => 'nullable|string|max:500',
+            'sort_order' => 'nullable|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,webp,jpg|max:2048',
+            'image_url' => 'nullable|string|max:500',
+        ], [
+            'title.required' => 'Judul banner wajib diisi.',
+            'image.image' => 'Berkas harus berupa gambar.',
+            'image.mimes' => 'Format gambar harus WebP, JPG, atau PNG.',
+            'image.max' => 'Ukuran gambar maksimal 2 MB.',
+        ]);
+
+        $banners = \App\Services\BannerService::loadBanners();
+        $found = false;
+
+        foreach ($banners as &$banner) {
+            if ((string) ($banner['id'] ?? '') === (string) $id) {
+                $found = true;
+                $banner['title'] = trim($request->input('title'));
+                $banner['subtitle'] = trim((string) $request->input('subtitle'));
+                $banner['badge_text'] = trim((string) $request->input('badge_text')) ?: 'Featured Event';
+                $banner['button_text'] = trim((string) $request->input('button_text')) ?: 'Beli Tiketnya di Sini';
+                $banner['target_url'] = trim((string) $request->input('target_url')) ?: route('home');
+                
+                if ($request->filled('sort_order')) {
+                    $banner['sort_order'] = (int) $request->input('sort_order');
+                }
+
+                if ($request->hasFile('image')) {
+                    $oldImage = $banner['image_url'] ?? '';
+                    $banner['image_url'] = \App\Services\BannerService::storeBannerFile($request->file('image'));
+                    \App\Services\BannerService::deleteBannerFile($oldImage);
+                } elseif ($request->filled('image_url')) {
+                    $banner['image_url'] = trim($request->input('image_url'));
+                }
+                break;
+            }
+        }
+        unset($banner);
+
+        if (! $found) {
+            return redirect()->route('admin.banners')->with('error', 'Banner slider tidak ditemukan.');
+        }
+
+        \App\Services\BannerService::saveBanners($banners);
+
+        return redirect()->route('admin.banners')
+            ->with('success', 'Banner slider berhasil diperbarui.');
+    }
+
+    public function toggleBanner(Request $request, $id)
+    {
+        $this->checkSuperAdmin();
+        $banners = \App\Services\BannerService::loadBanners();
+        $found = false;
+        $newState = true;
+
+        foreach ($banners as &$banner) {
+            if ((string) ($banner['id'] ?? '') === (string) $id) {
+                $found = true;
+                $banner['is_active'] = empty($banner['is_active']);
+                $newState = $banner['is_active'];
+                break;
+            }
+        }
+        unset($banner);
+
+        if (! $found) {
+            return redirect()->route('admin.banners')->with('error', 'Banner slider tidak ditemukan.');
+        }
+
+        \App\Services\BannerService::saveBanners($banners);
+
+        $statusText = $newState ? 'diaktifkan dan akan tampil di homepage' : 'dinonaktifkan';
+        return redirect()->route('admin.banners')
+            ->with('success', "Banner slider berhasil {$statusText}.");
+    }
+
+    public function destroyBanner($id)
+    {
+        $this->checkSuperAdmin();
+        $banners = \App\Services\BannerService::loadBanners();
+        $filtered = [];
+        $found = false;
+
+        foreach ($banners as $banner) {
+            if ((string) ($banner['id'] ?? '') === (string) $id) {
+                $found = true;
+                \App\Services\BannerService::deleteBannerFile($banner['image_url'] ?? '');
+            } else {
+                $filtered[] = $banner;
+            }
+        }
+
+        if (! $found) {
+            return redirect()->route('admin.banners')->with('error', 'Banner slider tidak ditemukan.');
+        }
+
+        \App\Services\BannerService::saveBanners($filtered);
+
+        return redirect()->route('admin.banners')
+            ->with('success', 'Banner slider berhasil dihapus.');
+    }
 }

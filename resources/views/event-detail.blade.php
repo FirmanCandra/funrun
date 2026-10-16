@@ -299,15 +299,22 @@
                             <h2 class="text-xl font-bold text-gray-900">Pilihan Kategori Tiket</h2>
                             <p class="text-xs text-gray-500 mt-0.5">Pilih kategori tiket yang sesuai kebutuhan Anda</p>
                         </div>
-                        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 inline-flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                            Kuota Tersedia
-                        </span>
+                        @if(($event['kategori'] ?? '') === 'ended')
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-500 inline-flex items-center gap-1.5 border border-gray-200">
+                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Penjualan Ditutup
+                            </span>
+                        @else
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                                Kuota Tersedia
+                            </span>
+                        @endif
                     </div>
 
                     <div class="space-y-4">
                         @forelse($categories as $cat)
-                            <div class="border border-gray-200 hover:border-[#0050ff] rounded-2xl p-5 transition-all hover:shadow-md bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div class="border border-gray-200 {{ ($event['kategori'] ?? '') === 'ended' ? 'opacity-75 bg-gray-50/60' : 'hover:border-[#0050ff] hover:shadow-md bg-white' }} rounded-2xl p-5 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div class="space-y-1">
                                     <div class="flex items-center gap-2">
                                         <h3 class="font-bold text-gray-900 text-base">{{ $cat->name }}</h3>
@@ -329,10 +336,17 @@
                                             {{ (int)$cat->price === 0 ? 'Gratis' : 'Rp' . number_format($cat->price, 0, ',', '.') }}
                                         </span>
                                     </div>
-                                    <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
-                                        class="px-5 py-2.5 rounded-xl bg-[#0050ff] hover:bg-[#0043d4] text-white text-xs font-bold transition-all shadow-sm">
-                                        Pilih Tiket
-                                    </a>
+                                    @if(($event['kategori'] ?? '') === 'ended')
+                                        <button type="button" disabled
+                                            class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-400 text-xs font-bold border border-gray-200 cursor-not-allowed">
+                                            Penjualan Ditutup
+                                        </button>
+                                    @else
+                                        <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
+                                            class="px-5 py-2.5 rounded-xl bg-[#0050ff] hover:bg-[#0043d4] text-white text-xs font-bold transition-all shadow-sm">
+                                            Pilih Tiket
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         @empty
@@ -343,11 +357,18 @@
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-gray-100 text-center">
-                        <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
-                            class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#0050ff] hover:bg-[#0043d4] text-white font-bold text-sm shadow-md transition-all">
-                            <span>Lanjutkan ke Pengisian Formulir Pemesanan</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                        </a>
+                        @if(($event['kategori'] ?? '') === 'ended')
+                            <div class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm border border-gray-200 cursor-not-allowed">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                <span>Event Telah Berakhir &bull; Penjualan Tiket Ditutup</span>
+                            </div>
+                        @else
+                            <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
+                                class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-[#0050ff] hover:bg-[#0043d4] text-white font-bold text-sm shadow-md transition-all">
+                                <span>Lanjutkan ke Pengisian Formulir Pemesanan</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>
