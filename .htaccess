@@ -12,7 +12,7 @@
 
     # Handle Front Controller for root
     RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^$ public/index.php [L]
+    RewriteRule ^$ public/index.php [L,QSA]
 
     # Handle all other routes & assets
     RewriteCond %{REQUEST_URI} !^/public/
