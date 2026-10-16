@@ -175,19 +175,24 @@ class AdminController extends Controller
             \Illuminate\Support\Facades\Log::error('Admin dashboard metrics error: ' . $e->getMessage());
         }
 
-        return view('admin.dashboard', compact(
-            'totalParticipants',
-            'totalRevenue',
-            'ticketsSold',
-            'checkedIn',
-            'pendingOrders',
-            'totalEvents',
-            'recentEvents',
-            'recentOrders',
-            'eventsList',
-            'selectedEventId',
-            'selectedEvent'
-        ));
+        try {
+            return view('admin.dashboard', compact(
+                'totalParticipants',
+                'totalRevenue',
+                'ticketsSold',
+                'checkedIn',
+                'pendingOrders',
+                'totalEvents',
+                'recentEvents',
+                'recentOrders',
+                'eventsList',
+                'selectedEventId',
+                'selectedEvent'
+            ));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Admin dashboard view render error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            return response()->view('errors.500', ['exception' => $e], 500);
+        }
     }
 
     public function participants(Request $request)
