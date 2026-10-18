@@ -53,11 +53,11 @@ if ($views) {
 echo "Cleared compiled views: $deletedViews files\n\n";
 
 // 2. Read latest Laravel error log
-echo "--- LAST 80 LINES OF LARAVEL.LOG ---\n";
+echo "--- LAST 300 LINES OF LARAVEL.LOG ---\n";
 $log = __DIR__ . '/../storage/logs/laravel.log';
 if (file_exists($log)) {
     $lines = file($log);
-    echo implode('', array_slice($lines, -80));
+    echo implode('', array_slice($lines, -300));
 } else {
     echo "laravel.log does not exist.\n";
 }
