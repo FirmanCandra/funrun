@@ -271,9 +271,19 @@
         border: 1px solid var(--color-line);
         border-radius: var(--radius-card);
         box-shadow: var(--shadow-card);
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+    :where(.dark, .dark *) .card {
+        background: #0f172a;
+        border-color: #1e293b;
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+        color: #f1f5f9;
     }
     .card-hover { transition: transform 0.25s ease, box-shadow 0.25s ease; }
     .card-hover:hover { transform: translateY(-5px); box-shadow: var(--shadow-card-hover); }
+    :where(.dark, .dark *) .card-hover:hover {
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px -5px rgba(37, 99, 235, 0.2);
+    }
     .rounded-card { border-radius: var(--radius-card); }
 
     /* ---------- Buttons (Tailwind helpers) ---------- */
@@ -300,22 +310,38 @@
         background: #fff;
         color: var(--color-ink-900);
         border: 1px solid var(--color-line);
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
     .btn-outline:hover { border-color: #cbd5e1; background: #f8fafc; }
+    :where(.dark, .dark *) .btn-outline {
+        background: #1e293b;
+        color: #f8fafc;
+        border-color: #334155;
+    }
+    :where(.dark, .dark *) .btn-outline:hover {
+        background: #334155;
+        border-color: #475569;
+    }
 
     .btn-ghost { color: var(--color-ink-500); }
     .btn-ghost:hover { color: var(--color-ink-900); }
+    :where(.dark, .dark *) .btn-ghost { color: #94a3b8; }
+    :where(.dark, .dark *) .btn-ghost:hover { color: #f8fafc; }
 
     /* ---------- Search pill ---------- */
     .search-pill {
         border-radius: 999px;
         border: 1px solid var(--color-line);
         background: #fff;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     }
     .search-pill:focus-within {
         border-color: var(--color-brand-500);
         box-shadow: 0 0 0 4px rgb(37 99 235 / 0.10);
+    }
+    :where(.dark, .dark *) .search-pill {
+        background: #0f172a;
+        border-color: #334155;
     }
 
     /* ---------- Form field ---------- */
@@ -327,7 +353,7 @@
         padding: 0.7rem 0.9rem;
         font-size: 0.925rem;
         color: var(--color-ink-900);
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
     }
     .field::placeholder { color: #9ca3af; }
     .field:focus {
@@ -337,7 +363,24 @@
     }
     .field:disabled, .field[readonly] { background: #f9fafb; color: var(--color-ink-500); }
 
-    .label { display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem; }
+    :where(.dark, .dark *) .field {
+        background: #0b0f19;
+        border-color: #334155;
+        color: #f8fafc;
+    }
+    :where(.dark, .dark *) .field::placeholder { color: #64748b; }
+    :where(.dark, .dark *) .field:focus {
+        background: #020617;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+    }
+    :where(.dark, .dark *) .field:disabled, :where(.dark, .dark *) .field[readonly] {
+        background: #1e293b;
+        color: #94a3b8;
+    }
+
+    .label { display: block; font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem; transition: color 0.2s ease; }
+    :where(.dark, .dark *) .label { color: #cbd5e1; }
 
     /* ---------- Badge ---------- */
     .badge {
