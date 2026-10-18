@@ -64,12 +64,18 @@ $bannersPath = __DIR__ . '/../storage/app/banners.json';
 if (file_exists($bannersPath)) {
     $existingBanners = json_decode(@file_get_contents($bannersPath), true) ?: [];
     $hasPromo = false;
-    foreach ($existingBanners as $b) {
+    $updated = false;
+    foreach ($existingBanners as &$b) {
         if (($b['id'] ?? '') === 'setiket-promo') {
             $hasPromo = true;
+            if (($b['image_url'] ?? '') !== '/images/banners/setiket-lowpoly-promo.webp') {
+                $b['image_url'] = '/images/banners/setiket-lowpoly-promo.webp';
+                $updated = true;
+            }
             break;
         }
     }
+    unset($b);
     if (!$hasPromo) {
         array_unshift($existingBanners, [
             'id' => 'setiket-promo',
@@ -78,14 +84,18 @@ if (file_exists($bannersPath)) {
             'badge_text' => 'Platform Resmi',
             'button_text' => 'Jelajahi Event',
             'target_url' => '/#events',
-            'image_url' => '/images/banners/setiket-hero-promo.webp',
+            'image_url' => '/images/banners/setiket-lowpoly-promo.webp',
             'has_overlay' => false,
             'is_active' => true,
             'sort_order' => 1,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
-        @file_put_contents($bannersPath, json_encode(array_values($existingBanners), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $updated = true;
         echo "Sync: Added setiket-promo banner to storage/app/banners.json\n";
+    }
+    if ($updated) {
+        @file_put_contents($bannersPath, json_encode(array_values($existingBanners), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        echo "Sync: Updated storage/app/banners.json with latest low-poly promo banner\n";
     }
 
     echo "--- BANNERS IN STORAGE (" . count($existingBanners) . ") ---\n";

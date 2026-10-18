@@ -122,8 +122,8 @@ def create_banner():
     ]
     for d in dest_dirs:
         os.makedirs(d, exist_ok=True)
-        p = os.path.join(d, 'setiket-hero-promo.webp')
-        final_rgb.save(p, 'WEBP', quality=95, method=6)
+        final_rgb.save(os.path.join(d, 'setiket-hero-promo.webp'), 'WEBP', quality=95, method=6)
+        final_rgb.save(os.path.join(d, 'setiket-lowpoly-promo.webp'), 'WEBP', quality=95, method=6)
         
     artifact_path = r'C:\Users\yogafatwanto\.gemini\antigravity-ide\brain\f7b223ac-8d37-4d7c-94a5-fc5df9e1e333\setiket_lowpoly_banner.webp'
     final_rgb.save(artifact_path, 'WEBP', quality=95, method=6)

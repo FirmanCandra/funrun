@@ -121,7 +121,7 @@ class BannerService
                 'badge_text' => 'Platform Resmi',
                 'button_text' => 'Jelajahi Event',
                 'target_url' => '/#events',
-                'image_url' => '/images/banners/setiket-hero-promo.webp',
+                'image_url' => '/images/banners/setiket-lowpoly-promo.webp',
                 'has_overlay' => false,
                 'is_active' => true,
                 'sort_order' => 1,
