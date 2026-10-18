@@ -33,51 +33,51 @@
         </div>
 
         {{-- QR --}}
-        <div class="p-8 text-center border-b border-dashed border-line relative">
-            <span class="absolute -left-3 -bottom-3 w-6 h-6 rounded-full bg-canvas border border-line"></span>
-            <span class="absolute -right-3 -bottom-3 w-6 h-6 rounded-full bg-canvas border border-line"></span>
+        <div class="p-8 text-center border-b border-dashed border-line dark:border-slate-800 relative">
+            <span class="absolute -left-3 -bottom-3 w-6 h-6 rounded-full bg-canvas dark:bg-[#0b0f19] border border-line dark:border-slate-800"></span>
+            <span class="absolute -right-3 -bottom-3 w-6 h-6 rounded-full bg-canvas dark:bg-[#0b0f19] border border-line dark:border-slate-800"></span>
 
             @if($terbit)
-                <div class="inline-block bg-white p-4 rounded-card border border-line mb-5">
+                <div class="inline-block bg-white p-4 rounded-card border border-line dark:border-slate-700 mb-5 shadow-xs">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={{ urlencode($ticket->qr_code) }}"
                         alt="QR Code" class="w-48 h-48 object-contain">
                 </div>
             @else
-                <div class="inline-flex w-56 h-56 items-center justify-center bg-gray-50 border-2 border-dashed border-line rounded-card mb-5">
-                    <span class="text-ink-500 text-sm px-6 leading-relaxed">
+                <div class="inline-flex w-56 h-56 items-center justify-center bg-gray-50 dark:bg-slate-900/60 border-2 border-dashed border-line dark:border-slate-800 rounded-card mb-5">
+                    <span class="text-ink-500 dark:text-slate-400 text-sm px-6 leading-relaxed">
                         QR code muncul setelah pembayaran diverifikasi panitia
                     </span>
                 </div>
             @endif
 
-            <p class="text-xs uppercase tracking-wider text-ink-500 mb-1">Kode Tiket</p>
-            <p class="font-mono font-bold tracking-wider text-ink-900">{{ $ticket->ticket_code }}</p>
+            <p class="text-xs uppercase tracking-wider text-ink-500 dark:text-slate-400 mb-1">Kode Tiket</p>
+            <p class="font-mono font-bold tracking-wider text-ink-900 dark:text-white">{{ $ticket->ticket_code }}</p>
         </div>
 
         {{-- Detail --}}
         <div class="p-8 grid grid-cols-2 gap-6">
             <div>
-                <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Nama Peserta</p>
-                <p class="font-semibold text-ink-900">{{ $participant->displayName() }}</p>
+                <p class="text-xs uppercase tracking-wider text-ink-500 dark:text-slate-400 mb-1.5">Nama Peserta</p>
+                <p class="font-semibold text-ink-900 dark:text-white">{{ $participant->displayName() }}</p>
             </div>
             <div>
-                <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Kategori</p>
-                <p class="font-semibold text-ink-900">{{ $participant->category }}</p>
+                <p class="text-xs uppercase tracking-wider text-ink-500 dark:text-slate-400 mb-1.5">Kategori</p>
+                <p class="font-semibold text-ink-900 dark:text-white">{{ $participant->category }}</p>
             </div>
             <div>
-                <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Ukuran Jersey</p>
-                <p class="font-semibold text-ink-900">{{ $participant->jersey_size ?? '—' }}</p>
+                <p class="text-xs uppercase tracking-wider text-ink-500 dark:text-slate-400 mb-1.5">Ukuran Jersey</p>
+                <p class="font-semibold text-ink-900 dark:text-white">{{ $participant->jersey_size ?? '—' }}</p>
             </div>
             <div>
-                <p class="text-xs uppercase tracking-wider text-ink-500 mb-1.5">Status</p>
-                <span class="badge" style="{{ $terbit ? 'background-color: #f0fdf4; color: #16a34a;' : 'background-color: #f3f4f6; color: #4b5563;' }}">
-                    <span class="w-1.5 h-1.5 rounded-full {{ $terbit ? 'bg-green-600' : 'bg-gray-400' }}"></span>
+                <p class="text-xs uppercase tracking-wider text-ink-500 dark:text-slate-400 mb-1.5">Status</p>
+                <span class="badge border border-transparent {{ $terbit ? 'bg-green-50 dark:bg-emerald-950/60 text-green-700 dark:text-emerald-300 dark:border-emerald-800/60' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 dark:border-slate-700' }}">
+                    <span class="w-1.5 h-1.5 rounded-full {{ $terbit ? 'bg-green-600 dark:bg-green-400' : 'bg-gray-400' }}"></span>
                     {{ $ticket->statusLabel() }}
                 </span>
             </div>
         </div>
 
-        <div class="px-8 py-5 bg-gray-50 border-t border-line text-sm text-ink-500 leading-relaxed">
+        <div class="px-8 py-5 bg-gray-50 dark:bg-slate-900/60 border-t border-line dark:border-slate-800 text-sm text-ink-500 dark:text-slate-400 leading-relaxed">
             Tunjukkan QR code ini di meja registrasi untuk mengambil Race Pack dan nomor BIB Anda.
         </div>
     </div>

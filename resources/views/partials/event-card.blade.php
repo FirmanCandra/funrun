@@ -57,8 +57,8 @@
 
         <div class="event-footer">
             <div>
-                <small style="font-size:11px;color:#6b7280;display:block;font-weight:500;">Mulai dari</small>
-                <span style="font-size:17px;font-weight:700;color:{{ $gratis ? '#16a34a' : '#111827' }};">
+                <small class="text-[11px] text-gray-500 dark:text-slate-400 block font-medium">Mulai dari</small>
+                <span class="text-[17px] font-bold {{ $gratis ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white' }}">
                     {{ $gratis ? 'Gratis' : 'Rp' . number_format($ev['harga'], 0, ',', '.') }}
                 </span>
             </div>

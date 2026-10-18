@@ -99,14 +99,14 @@
 
                     @auth
                         @if(auth()->user()->isUser())
-                            <a href="{{ route('tickets') }}" class="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0050ff] hover:text-[#0043d4] px-3 py-1.5 rounded-xl hover:bg-blue-50/70 transition-colors">
+                            <a href="{{ route('tickets') }}" class="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0050ff] dark:text-blue-400 hover:text-[#0043d4] dark:hover:text-blue-300 px-3 py-1.5 rounded-xl hover:bg-blue-50/70 dark:hover:bg-blue-950/40 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5Z" />
                                 </svg>
                                 <span>Tiket Saya</span>
                             </a>
                         @else
-                            <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0050ff] hover:text-[#0043d4] px-3 py-1.5 rounded-xl hover:bg-blue-50/70 transition-colors">
+                            <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0050ff] dark:text-blue-400 hover:text-[#0043d4] dark:hover:text-blue-300 px-3 py-1.5 rounded-xl hover:bg-blue-50/70 dark:hover:bg-blue-950/40 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/>
                                 </svg>
@@ -117,14 +117,14 @@
                         {{-- Profile trigger --}}
                         <div class="relative" id="profileMenuContainer">
                             <button type="button" id="profileTrigger" onclick="toggleProfileMenu(event)"
-                                class="flex items-center gap-2 p-1.5 rounded-full hover:bg-gray-100 transition-colors focus:outline-none">
+                                class="flex items-center gap-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors focus:outline-none">
                                 <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0050ff] to-blue-400 text-white flex items-center justify-center font-bold text-sm shadow-sm">
                                     {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
                                 </div>
-                                <span class="hidden md:inline text-xs font-semibold text-gray-800 max-w-[100px] truncate">
+                                <span class="hidden md:inline text-xs font-semibold text-gray-800 dark:text-gray-100 max-w-[100px] truncate">
                                     {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}
                                 </span>
-                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-3.5 h-3.5 text-gray-400 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
                                 </svg>
                             </button>

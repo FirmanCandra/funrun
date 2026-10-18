@@ -114,10 +114,10 @@
 
             {{-- Right: Loket Floating Booking Card (Loket Screenshot 3) --}}
             <div class="lg:col-span-5 xl:col-span-4">
-                <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden text-gray-900 sticky top-[118px]">
+                <div class="bg-white dark:bg-[#131d31] rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden text-gray-900 dark:text-gray-100 sticky top-[118px]">
                     
                     {{-- Poster 16:9 di bagian atas kartu --}}
-                    <div class="aspect-video relative overflow-hidden bg-gray-100">
+                    <div class="aspect-video relative overflow-hidden bg-gray-100 dark:bg-slate-800">
                         @if(!empty($event['thumbnail']))
                             <img src="{{ $event['thumbnail'] }}" alt="{{ $event['nama'] }}" class="w-full h-full object-cover">
                         @else
@@ -135,12 +135,12 @@
                         {{-- Harga Mulai Dari --}}
                         <div class="flex items-baseline justify-between">
                             <div>
-                                <span class="text-xs text-gray-400 block font-medium">Harga mulai dari</span>
-                                <span class="text-2xl sm:text-3xl font-black text-gray-900">
+                                <span class="text-xs text-gray-400 dark:text-slate-400 block font-medium">Harga mulai dari</span>
+                                <span class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
                                     {{ $gratis ? 'Gratis' : 'Rp' . number_format($event['harga'], 0, ',', '.') }}
                                 </span>
                             </div>
-                            <span class="text-xs font-semibold px-2.5 py-1 rounded-lg {{ ($event['kategori'] ?? '') === 'ended' ? 'bg-gray-100 text-gray-500' : 'bg-blue-50 text-[#0050ff]' }}">
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-lg {{ ($event['kategori'] ?? '') === 'ended' ? 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400' : 'bg-blue-50 dark:bg-blue-950/60 text-[#0050ff] dark:text-blue-400' }}">
                                 {{ ($event['kategori'] ?? '') === 'ended' ? 'Event Selesai' : 'Tiket Resmi' }}
                             </span>
                         </div>
@@ -148,7 +148,7 @@
                         {{-- Tombol Utama Beli Tiket (Loket Vibrant Blue) --}}
                         <div>
                             @if(($event['kategori'] ?? '') === 'ended')
-                                <div class="w-full py-3.5 px-6 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm text-center border border-gray-200 cursor-not-allowed">
+                                <div class="w-full py-3.5 px-6 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 font-bold text-sm text-center border border-gray-200 dark:border-slate-700 cursor-not-allowed">
                                     Penjualan Tiket Ditutup
                                 </div>
                             @elseif($sudahTerdaftar)
@@ -159,7 +159,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                                     </a>
                                     <a href="{{ route('event.register', ['event_id' => $event['id']]) }}"
-                                        class="w-full py-2.5 px-4 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold text-xs text-center block transition-colors">
+                                        class="w-full py-2.5 px-4 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-200 font-semibold text-xs text-center block transition-colors">
                                         Pesan Tiket Tambahan
                                     </a>
                                 </div>
@@ -172,25 +172,25 @@
                         </div>
 
                         {{-- Diselenggarakan Oleh (Loket style) --}}
-                        <div class="pt-4 border-t border-gray-100 flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 text-[#0050ff] flex items-center justify-center font-bold text-sm shrink-0">
+                        <div class="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950/60 text-[#0050ff] dark:text-blue-400 flex items-center justify-center font-bold text-sm shrink-0">
                                 {{ strtoupper(mb_substr($event['penyelenggara'] ?? 'LK', 0, 2)) }}
                             </div>
                             <div class="min-w-0">
-                                <span class="text-[11px] text-gray-400 block">Diselenggarakan oleh</span>
-                                <h4 class="text-sm font-bold text-gray-900 truncate">
+                                <span class="text-[11px] text-gray-400 dark:text-slate-400 block">Diselenggarakan oleh</span>
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">
                                     {{ $event['penyelenggara'] ?? 'LOKET Official Organizer' }}
                                 </h4>
                             </div>
                         </div>
 
                         {{-- Bagikan Event (Loket Share Icons) --}}
-                        <div class="pt-3 border-t border-gray-100">
-                            <span class="text-xs font-bold text-gray-700 block mb-2.5">Bagikan Event</span>
+                        <div class="pt-3 border-t border-gray-100 dark:border-slate-800">
+                            <span class="text-xs font-bold text-gray-700 dark:text-slate-300 block mb-2.5">Bagikan Event</span>
                             <div class="flex items-center gap-2.5">
                                 {{-- Salin Link --}}
                                 <button type="button" onclick="copyEventLink()" id="copyBtn" aria-label="Salin Tautan"
-                                    class="w-9 h-9 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 flex items-center justify-center text-gray-600 transition-colors">
+                                    class="w-9 h-9 rounded-full border border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-slate-300 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-3.051a4.5 4.5 0 0 0-1.242-7.244l-4.5-4.5a4.5 4.5 0 0 0-6.364 6.364l1.757 1.757"/></svg>
                                 </button>
 
@@ -226,19 +226,19 @@
 </div>
 
 {{-- ===== LOKET TABS SYSTEM (SCREENSHOT 3) ===== --}}
-<div class="border-b border-gray-200 bg-white sticky top-[106px] z-30 shadow-xs">
+<div class="border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] sticky top-[106px] z-30 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <nav class="flex space-x-8" aria-label="Tabs" id="eventTabNav">
             <button type="button" onclick="switchTab('deskripsi')" id="tabBtn-deskripsi"
-                class="tab-btn py-4 px-1 border-b-2 font-bold text-sm text-[#0050ff] border-[#0050ff] transition-colors">
+                class="tab-btn py-4 px-1 border-b-2 font-bold text-sm text-[#0050ff] dark:text-blue-400 border-[#0050ff] dark:border-blue-400 transition-colors">
                 Deskripsi
             </button>
             <button type="button" onclick="switchTab('tiket')" id="tabBtn-tiket"
-                class="tab-btn py-4 px-1 border-b-2 font-bold text-sm text-gray-500 border-transparent hover:text-gray-900 transition-colors">
+                class="tab-btn py-4 px-1 border-b-2 font-bold text-sm text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-white transition-colors">
                 Tiket
             </button>
             <button type="button" onclick="switchTab('syarat')" id="tabBtn-syarat"
-                class="tab-btn py-4 px-1 border-b-2 font-bold text-sm text-gray-500 border-transparent hover:text-gray-900 transition-colors">
+                class="tab-btn py-4 px-1 border-b-2 font-bold text-sm text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-white transition-colors">
                 Syarat dan Ketentuan
             </button>
         </nav>
@@ -254,18 +254,18 @@
 
             {{-- TAB 1: DESKRIPSI --}}
             <div id="tabContent-deskripsi" class="tab-content space-y-8">
-                <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4 pb-3 border-b border-gray-100">
+                <div class="bg-white dark:bg-[#131d31] rounded-2xl border border-gray-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-100 dark:border-slate-800">
                         Tentang Acara Ini
                     </h2>
-                    <div class="prose max-w-none text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                    <div class="prose max-w-none text-gray-600 dark:text-slate-300 leading-relaxed whitespace-pre-line text-sm sm:text-base">
                         {!! e($event['deskripsi']) !!}
                     </div>
                 </div>
 
                 {{-- Informasi Venue & Peta --}}
-                <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4 pb-3 border-b border-gray-100">
+                <div class="bg-white dark:bg-[#131d31] rounded-2xl border border-gray-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-100 dark:border-slate-800">
                         Lokasi & Venue Acara
                     </h2>
                     <div class="space-y-4">
@@ -274,14 +274,14 @@
                                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
                             </span>
                             <div>
-                                <h4 class="font-bold text-gray-900 text-base">{{ $event['lokasi'] }}</h4>
-                                <p class="text-xs text-gray-500 mt-0.5">Waktu: {{ $event['waktu'] ?? '16.00 - 23.00' }} WIB</p>
+                                <h4 class="font-bold text-gray-900 dark:text-white text-base">{{ $event['lokasi'] }}</h4>
+                                <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Waktu: {{ $event['waktu'] ?? '16.00 - 23.00' }} WIB</p>
                             </div>
                         </div>
 
                         <div class="pt-2">
                             <a href="{{ $petaUrl }}" target="_blank" rel="noopener"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 hover:border-[#0050ff] hover:text-[#0050ff] text-gray-700 text-xs sm:text-sm font-semibold transition-all">
+                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 dark:border-slate-700 hover:border-[#0050ff] hover:text-[#0050ff] dark:hover:border-blue-400 dark:hover:text-blue-400 text-gray-700 dark:text-slate-300 text-xs sm:text-sm font-semibold transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 13V4m0 0L9 7"/></svg>
                                 <span>Buka Lokasi di Google Maps</span>
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
@@ -293,20 +293,20 @@
 
             {{-- TAB 2: TIKET (REAL CATEGORIES LIST) --}}
             <div id="tabContent-tiket" class="tab-content hidden space-y-5">
-                <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
-                    <div class="flex items-center justify-between mb-6 pb-3 border-b border-gray-100">
+                <div class="bg-white dark:bg-[#131d31] rounded-2xl border border-gray-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+                    <div class="flex items-center justify-between mb-6 pb-3 border-b border-gray-100 dark:border-slate-800">
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900">Pilihan Kategori Tiket</h2>
-                            <p class="text-xs text-gray-500 mt-0.5">Pilih kategori tiket yang sesuai kebutuhan Anda</p>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Pilihan Kategori Tiket</h2>
+                            <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Pilih kategori tiket yang sesuai kebutuhan Anda</p>
                         </div>
                         @if(($event['kategori'] ?? '') === 'ended')
-                            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-500 inline-flex items-center gap-1.5 border border-gray-200">
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 inline-flex items-center gap-1.5 border border-gray-200 dark:border-slate-700">
                                 <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                 Penjualan Ditutup
                             </span>
                         @else
-                            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 inline-flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 inline-flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-800/40">
+                                <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                                 Kuota Tersedia
                             </span>
                         @endif
@@ -314,31 +314,31 @@
 
                     <div class="space-y-4">
                         @forelse($categories as $cat)
-                            <div class="border border-gray-200 {{ ($event['kategori'] ?? '') === 'ended' ? 'opacity-75 bg-gray-50/60' : 'hover:border-[#0050ff] hover:shadow-md bg-white' }} rounded-2xl p-5 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div class="border border-gray-200 dark:border-slate-800 {{ ($event['kategori'] ?? '') === 'ended' ? 'opacity-75 bg-gray-50/60 dark:bg-slate-900/40' : 'hover:border-[#0050ff] dark:hover:border-blue-500 hover:shadow-md bg-white dark:bg-slate-900/60' }} rounded-2xl p-5 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div class="space-y-1">
                                     <div class="flex items-center gap-2">
-                                        <h3 class="font-bold text-gray-900 text-base">{{ $cat->name }}</h3>
+                                        <h3 class="font-bold text-gray-900 dark:text-white text-base">{{ $cat->name }}</h3>
                                         @if(!empty($cat->code))
-                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-600 uppercase">
+                                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 uppercase">
                                                 {{ $cat->code }}
                                             </span>
                                         @endif
                                     </div>
-                                    <p class="text-xs text-gray-500">
+                                    <p class="text-xs text-gray-500 dark:text-slate-400">
                                         Termasuk e-ticket resmi, barcode QR check-in, dan akses gate utama acara.
                                     </p>
                                 </div>
 
-                                <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0">
+                                <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-gray-100 dark:border-slate-800 pt-3 sm:pt-0">
                                     <div class="text-left sm:text-right">
-                                        <span class="text-[11px] text-gray-400 block">Harga</span>
-                                        <span class="text-lg font-black text-gray-900">
+                                        <span class="text-[11px] text-gray-400 dark:text-slate-400 block">Harga</span>
+                                        <span class="text-lg font-black text-gray-900 dark:text-white">
                                             {{ (int)$cat->price === 0 ? 'Gratis' : 'Rp' . number_format($cat->price, 0, ',', '.') }}
                                         </span>
                                     </div>
                                     @if(($event['kategori'] ?? '') === 'ended')
                                         <button type="button" disabled
-                                            class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-400 text-xs font-bold border border-gray-200 cursor-not-allowed">
+                                            class="px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 text-xs font-bold border border-gray-200 dark:border-slate-700 cursor-not-allowed">
                                             Penjualan Ditutup
                                         </button>
                                     @else
@@ -350,15 +350,15 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="text-center py-8 text-gray-500 text-sm">
+                            <div class="text-center py-8 text-gray-500 dark:text-slate-400 text-sm">
                                 Pilihan tiket akan segera dirilis oleh panitia.
                             </div>
                         @endforelse
                     </div>
 
-                    <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                    <div class="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800 text-center">
                         @if(($event['kategori'] ?? '') === 'ended')
-                            <div class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm border border-gray-200 cursor-not-allowed">
+                            <div class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-400 font-bold text-sm border border-gray-200 dark:border-slate-700 cursor-not-allowed">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                                 <span>Event Telah Berakhir &bull; Penjualan Tiket Ditutup</span>
                             </div>
@@ -375,11 +375,11 @@
 
             {{-- TAB 3: SYARAT DAN KETENTUAN --}}
             <div id="tabContent-syarat" class="tab-content hidden space-y-6">
-                <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4 pb-3 border-b border-gray-100">
+                <div class="bg-white dark:bg-[#131d31] rounded-2xl border border-gray-100 dark:border-slate-800 p-6 sm:p-8 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-3 border-b border-gray-100 dark:border-slate-800">
                         Syarat & Ketentuan Pembelian
                     </h2>
-                    <div class="prose max-w-none text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                    <div class="prose max-w-none text-gray-600 dark:text-slate-300 leading-relaxed whitespace-pre-line text-sm sm:text-base">
                         {!! e($event['syarat_ketentuan']) !!}
                     </div>
                 </div>
@@ -389,23 +389,23 @@
 
         {{-- Right Side Promotion Column --}}
         <div class="lg:col-span-4 space-y-6">
-            <div class="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 p-6">
-                <h4 class="font-bold text-gray-900 text-base mb-2">Perlindungan Pembelian SeTiket</h4>
-                <ul class="space-y-2.5 text-xs text-gray-600">
+            <div class="rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800/80 dark:to-slate-900/90 border border-blue-100 dark:border-slate-700/60 p-6">
+                <h4 class="font-bold text-gray-900 dark:text-white text-base mb-2">Perlindungan Pembelian SeTiket</h4>
+                <ul class="space-y-2.5 text-xs text-gray-600 dark:text-slate-300">
                     <li class="flex items-center gap-2.5">
-                        <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <span class="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                         </span>
                         E-Ticket terbit langsung dengan QR Code unik anti-duplikat.
                     </li>
                     <li class="flex items-center gap-2.5">
-                        <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <span class="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                         </span>
                         Verifikasi pembayaran resmi oleh panitia acara.
                     </li>
                     <li class="flex items-center gap-2.5">
-                        <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <span class="w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                             <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                         </span>
                         Bantuan cepat via Customer Service WhatsApp jika ada kendala.
@@ -413,11 +413,11 @@
                 </ul>
             </div>
 
-            <div class="rounded-2xl border border-gray-200 p-6 bg-white">
-                <h4 class="font-bold text-gray-900 text-sm mb-1">Punya Pertanyaan Seputar Event?</h4>
-                <p class="text-xs text-gray-500 mb-4">Hubungi tim customer service kami untuk bantuan informasi tiket.</p>
+            <div class="rounded-2xl border border-gray-200 dark:border-slate-800 p-6 bg-white dark:bg-[#131d31]">
+                <h4 class="font-bold text-gray-900 dark:text-white text-sm mb-1">Punya Pertanyaan Seputar Event?</h4>
+                <p class="text-xs text-gray-500 dark:text-slate-400 mb-4">Hubungi tim customer service kami untuk bantuan informasi tiket.</p>
                 <a href="https://wa.me/6289681201941" target="_blank" rel="noopener"
-                    class="w-full py-2.5 px-4 rounded-xl border border-emerald-500 text-emerald-600 hover:bg-emerald-50 font-bold text-xs text-center block transition-colors">
+                    class="w-full py-2.5 px-4 rounded-xl border border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 font-bold text-xs text-center block transition-colors">
                     Chat WhatsApp Customer Support
                 </a>
             </div>
@@ -437,8 +437,8 @@
         
         // Nonaktifkan semua tab button
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('text-[#0050ff]', 'border-[#0050ff]');
-            btn.classList.add('text-gray-500', 'border-transparent');
+            btn.classList.remove('text-[#0050ff]', 'border-[#0050ff]', 'dark:text-blue-400', 'dark:border-blue-400');
+            btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-transparent');
         });
 
         // Tampilkan tab yang dipilih
@@ -448,8 +448,8 @@
         // Aktifkan button yang dipilih
         const activeBtn = document.getElementById('tabBtn-' + tabName);
         if (activeBtn) {
-            activeBtn.classList.remove('text-gray-500', 'border-transparent');
-            activeBtn.classList.add('text-[#0050ff]', 'border-[#0050ff]');
+            activeBtn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-transparent');
+            activeBtn.classList.add('text-[#0050ff]', 'border-[#0050ff]', 'dark:text-blue-400', 'dark:border-blue-400');
         }
     }
 

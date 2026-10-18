@@ -31,17 +31,17 @@
 <div class="{{ $field->isFullWidth() ? 'md:col-span-2' : '' }}">
     @if ($field->type === EventFormField::TYPE_CONSENT)
 
-        <label class="flex items-start gap-3 cursor-pointer bg-gray-50 border border-line rounded-btn p-4">
+        <label class="flex items-start gap-3 cursor-pointer bg-gray-50 dark:bg-slate-800/60 border border-line dark:border-slate-700 rounded-btn p-4">
             {{-- Hidden 0 supaya checkbox yang tidak dicentang tetap terkirim. --}}
             <input type="hidden" name="{{ $name }}" value="0">
             <input type="checkbox" name="{{ $name }}" value="1" {{ $value ? 'checked' : '' }}
                 {{ $field->required ? 'required' : '' }}
-                class="mt-0.5 rounded border-line text-brand-600 focus:ring-brand-500">
-            <span class="text-sm text-ink-900">
+                class="mt-0.5 rounded border-line dark:border-slate-600 text-brand-600 focus:ring-brand-500">
+            <span class="text-sm text-ink-900 dark:text-white">
                 {{ $field->label }}
                 @if ($field->required)<span class="text-red-500">*</span>@endif
                 @if ($field->help_text)
-                    <span class="block text-xs text-ink-500 mt-1">{{ $field->help_text }}</span>
+                    <span class="block text-xs text-ink-500 dark:text-slate-400 mt-1">{{ $field->help_text }}</span>
                 @endif
             </span>
         </label>
@@ -105,7 +105,7 @@
         @endif
 
         @if ($field->help_text)
-            <p class="text-xs text-ink-500 mt-1">{{ $field->help_text }}</p>
+            <p class="text-xs text-ink-500 dark:text-slate-400 mt-1">{{ $field->help_text }}</p>
         @endif
 
     @endif
