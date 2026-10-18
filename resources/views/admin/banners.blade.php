@@ -427,56 +427,80 @@
         </div>
     </div>
 
-@endsection
-
-@push('scripts')
-<script>
-    function openAddModal() {
-        document.getElementById('addModal').classList.remove('hidden');
-    }
-
-    function closeAddModal() {
-        document.getElementById('addModal').classList.add('hidden');
-    }
-
-    function openEditModal(banner) {
-        const form = document.getElementById('editForm');
-        form.action = '/admin/banners/' + banner.id;
-
-        document.getElementById('editTitle').value = banner.title || '';
-        document.getElementById('editSubtitle').value = banner.subtitle || '';
-        document.getElementById('editBadge').value = banner.badge_text || 'Featured Event';
-        document.getElementById('editButton').value = banner.button_text || 'Beli Tiketnya di Sini';
-        document.getElementById('editTargetUrl').value = banner.target_url || '';
-        document.getElementById('editSortOrder').value = banner.sort_order || 1;
-        document.getElementById('editImageUrl').value = banner.image_url || '';
-        document.getElementById('editHasOverlay').checked = (banner.has_overlay === undefined || banner.has_overlay === null) ? true : Boolean(banner.has_overlay);
-
-        const previewContainer = document.getElementById('editCurrentImgPreview');
-        if (banner.image_url) {
-            previewContainer.innerHTML = `
-                <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
-                    <img src="${banner.image_url}" class="w-16 h-10 object-cover rounded" onerror="this.src='/images/setiketbg.webp'">
-                    <span class="text-[11px] text-slate-500 truncate">Gambar saat ini: ${banner.image_url}</span>
-                </div>
-            `;
-        } else {
-            previewContainer.innerHTML = '';
+    {{-- Script Modal Kelola Banner --}}
+    <script>
+        function openAddModal() {
+            var modal = document.getElementById('addModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            } else {
+                console.error('Modal addModal tidak ditemukan di DOM');
+            }
         }
 
-        document.getElementById('editModal').classList.remove('hidden');
-    }
+        function closeAddModal() {
+            var modal = document.getElementById('addModal');
+            if (modal) modal.classList.add('hidden');
+        }
 
-    function closeEditModal() {
-        document.getElementById('editModal').classList.add('hidden');
-    }
+        function openEditModal(banner) {
+            var form = document.getElementById('editForm');
+            if (!form) return;
+            form.action = '/admin/banners/' + banner.id;
 
-    // Tutup modal bila klik di luar
-    window.addEventListener('click', function(e) {
-        const addModal = document.getElementById('addModal');
-        const editModal = document.getElementById('editModal');
-        if (e.target === addModal) closeAddModal();
-        if (e.target === editModal) closeEditModal();
-    });
-</script>
-@endpush
+            var titleEl = document.getElementById('editTitle');
+            if (titleEl) titleEl.value = banner.title || '';
+            var subEl = document.getElementById('editSubtitle');
+            if (subEl) subEl.value = banner.subtitle || '';
+            var badgeEl = document.getElementById('editBadge');
+            if (badgeEl) badgeEl.value = banner.badge_text || 'Featured Event';
+            var btnEl = document.getElementById('editButton');
+            if (btnEl) btnEl.value = banner.button_text || 'Beli Tiketnya di Sini';
+            var targetEl = document.getElementById('editTargetUrl');
+            if (targetEl) targetEl.value = banner.target_url || '';
+            var sortEl = document.getElementById('editSortOrder');
+            if (sortEl) sortEl.value = banner.sort_order || 1;
+            var imgEl = document.getElementById('editImageUrl');
+            if (imgEl) imgEl.value = banner.image_url || '';
+            var overlayEl = document.getElementById('editHasOverlay');
+            if (overlayEl) {
+                overlayEl.checked = (banner.has_overlay === undefined || banner.has_overlay === null) ? true : Boolean(banner.has_overlay);
+            }
+
+            var previewContainer = document.getElementById('editCurrentImgPreview');
+            if (previewContainer) {
+                if (banner.image_url) {
+                    previewContainer.innerHTML = `
+                        <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
+                            <img src="${banner.image_url}" class="w-16 h-10 object-cover rounded" onerror="this.src='/images/setiketbg.webp'">
+                            <span class="text-[11px] text-slate-500 truncate">Gambar saat ini: ${banner.image_url}</span>
+                        </div>
+                    `;
+                } else {
+                    previewContainer.innerHTML = '';
+                }
+            }
+
+            var editModal = document.getElementById('editModal');
+            if (editModal) {
+                editModal.classList.remove('hidden');
+            } else {
+                console.error('Modal editModal tidak ditemukan di DOM');
+            }
+        }
+
+        function closeEditModal() {
+            var editModal = document.getElementById('editModal');
+            if (editModal) editModal.classList.add('hidden');
+        }
+
+        // Tutup modal bila klik di area gelap di luar modal
+        window.addEventListener('click', function(e) {
+            var addModal = document.getElementById('addModal');
+            var editModal = document.getElementById('editModal');
+            if (addModal && e.target === addModal) closeAddModal();
+            if (editModal && e.target === editModal) closeEditModal();
+        });
+    </script>
+@endsection
+
