@@ -120,49 +120,51 @@
                             <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10" aria-label="{{ $slide['title'] }}"></a>
                         </div>
 
-                        {{-- 2. MOBILE VIEW (layar ponsel): Tampilan Khusus Mobile-First, Teks Jelas & Tidak Terkompres --}}
-                        <div class="block sm:hidden w-full h-full relative bg-gradient-to-br from-[#060a14] via-[#0d1629] to-[#070b16] p-4 sm:p-5 flex flex-col justify-between overflow-hidden">
-                            {{-- Ambient Background Glows --}}
-                            <div class="absolute -right-8 -top-8 w-36 h-36 bg-blue-600/20 rounded-full blur-2xl pointer-events-none"></div>
-                            <div class="absolute -left-8 -bottom-8 w-36 h-36 bg-cyan-500/15 rounded-full blur-2xl pointer-events-none"></div>
+                        {{-- 2. MOBILE VIEW (layar ponsel): Tampilan Bersih Ala Gambar 1 (Tanpa Pill Badges AI-Slop) --}}
+                        <div class="block sm:hidden w-full h-full relative p-4 flex flex-col justify-between overflow-hidden bg-[#040c20]">
+                            {{-- Low-poly crystal background subtly visible --}}
+                            <img src="{{ str_starts_with($slide['image'], 'http') ? $slide['image'] : asset(ltrim($slide['image'], '/')) }}"
+                                alt=""
+                                class="absolute inset-0 w-full h-full object-cover object-left opacity-30 pointer-events-none"
+                                aria-hidden="true">
+                            <div class="absolute inset-0 bg-gradient-to-r from-[#040c20] via-[#040c20]/80 to-[#040c20]/50 pointer-events-none"></div>
 
-                            {{-- Brand & Pill Header --}}
-                            <div class="relative z-10 flex items-center justify-between gap-2">
+                            {{-- Brand Header (Clean Logo, No Pills, No Dots) --}}
+                            <div class="relative z-10 flex items-center justify-between">
                                 <img src="{{ asset('images/setiketbg.webp') }}" alt="SeTiket" class="h-6 w-auto object-contain">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/15 text-cyan-300 border border-cyan-400/30 text-[10px] font-bold tracking-wide uppercase">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                                    Platform Resmi
+                                <span class="text-[10px] uppercase tracking-wider text-cyan-300/80 font-bold">
+                                    Official Platform
                                 </span>
                             </div>
 
                             {{-- Headline Khusus Mobile --}}
                             <div class="relative z-10 my-auto py-1">
                                 <h3 class="text-base font-black text-white leading-tight">
-                                    Pesan Tiket Konser & Event<br>
-                                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">
-                                        Resmi & Terpercaya
-                                    </span>
+                                    Pesan Tiket <span class="text-cyan-300 font-serif italic">Konser & Event</span><br>
+                                    <span class="text-white">Resmi & Terpercaya</span>
                                 </h3>
-                                <p class="text-[11px] text-slate-300 mt-1 line-clamp-2 leading-relaxed">
-                                    E-ticket QR Code instan, verifikasi cepat panitia resmi, & garansi pembayaran 100% aman.
-                                </p>
+
+                                {{-- Dashed line style ala Gambar 1 --}}
+                                <div class="border-l-2 border-dashed border-cyan-400/80 pl-2.5 my-2">
+                                    <p class="text-[11px] text-slate-200 line-clamp-2 leading-relaxed font-medium">
+                                        Platform e-ticketing konser, festival & seminar. QR Code instan, verifikasi panitia cepat & aman.
+                                    </p>
+                                </div>
                             </div>
 
-                            {{-- Footer Badges & CTA --}}
-                            <div class="relative z-10 flex items-center justify-between gap-2 pt-2 border-t border-white/10">
-                                <div class="flex items-center gap-2 text-[10px] text-slate-300 font-semibold">
-                                    <span class="text-emerald-400 font-bold">✓ QR Instan</span>
-                                    <span>•</span>
-                                    <span>✓ 100% Asli</span>
-                                </div>
-                                <a href="{{ $slide['url'] }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 shrink-0">
+                            {{-- Footer CTA (Clean, No Pill Badges) --}}
+                            <div class="relative z-10 flex items-center justify-between pt-1 border-t border-white/10">
+                                <span class="text-[10px] text-slate-300 font-semibold tracking-wide">
+                                    setiket.id
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-xs shadow-md shadow-blue-900/40 shrink-0">
                                     <span>Beli Tiket</span>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                                </a>
+                                </span>
                             </div>
 
                             {{-- Area ketuk seluruh card di mobile --}}
-                            <a href="{{ $slide['url'] }}" class="absolute inset-0 z-0" aria-label="{{ $slide['title'] }}"></a>
+                            <a href="{{ $slide['url'] }}" class="absolute inset-0 z-20" aria-label="{{ $slide['title'] }}"></a>
                         </div>
                     @else
                         {{-- Banner Standar (Event Poster seperti BIGBANG) --}}
