@@ -52,11 +52,20 @@ if ($views) {
 }
 echo "Cleared compiled views: $deletedViews files\n\n";
 
-// 2. Read latest Laravel error log
-echo "--- LAST 300 LINES OF LARAVEL.LOG ---\n";
+// 2. Clear log if requested
 $log = __DIR__ . '/../storage/logs/laravel.log';
+if (isset($_GET['clear_log']) && $_GET['clear_log'] === '1') {
+    @file_put_contents($log, '');
+    echo "=== LOG CLEARED AT " . date('Y-m-d H:i:s') . " ===\n\n";
+}
+
+// 3. Read latest Laravel error log
+echo "--- LARAVEL.LOG STATUS ---\n";
 if (file_exists($log)) {
     $lines = file($log);
+    $total = count($lines);
+    echo "Total lines: $total\n";
+    echo "--- LAST 300 LINES OF LARAVEL.LOG ---\n";
     echo implode('', array_slice($lines, -300));
 } else {
     echo "laravel.log does not exist.\n";

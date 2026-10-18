@@ -7,8 +7,12 @@
 
     # Block direct access to sensitive files and directories
     RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml) - [F,L,NC]
-    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests|vendor)/ - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests)/ - [F,L,NC]
     RewriteRule ^storage/(framework|logs|private)/ - [F,L,NC]
+
+    # Block root vendor directory while allowing public vendor assets
+    RewriteCond %{REQUEST_URI} !^/vendor/space-dynamic/
+    RewriteRule ^vendor/ - [F,L,NC]
 
     # Handle Front Controller for root
     RewriteCond %{REQUEST_URI} !^/public/

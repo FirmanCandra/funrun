@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin Panel — hanya role admin & super_admin
+Route::redirect('/admin', '/admin/dashboard');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth', 'role:admin,super_admin'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
