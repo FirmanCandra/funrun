@@ -123,10 +123,10 @@
                             <button type="button" id="profileTrigger" onclick="toggleProfileMenu(event)"
                                 class="flex items-center gap-2 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors focus:outline-none">
                                 <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-[#0050ff] to-blue-400 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                                    {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+                                    {{ strtoupper(mb_substr(auth()->user()->name ?? 'User', 0, 1)) }}
                                 </div>
                                 <span class="hidden md:inline text-xs font-semibold text-gray-800 dark:text-gray-100 max-w-[100px] truncate">
-                                    {{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->first() }}
+                                    {{ \Illuminate\Support\Str::of(auth()->user()->name ?? 'User')->explode(' ')->first() }}
                                 </span>
                                 <svg class="w-3.5 h-3.5 text-gray-400 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
@@ -240,7 +240,7 @@
                         <div class="flex items-center justify-between gap-3 mb-3">
                             <div class="flex items-center gap-3 min-w-0">
                                 <div class="w-10 h-10 rounded-full bg-[#0050ff] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-                                    {{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}
+                                    {{ strtoupper(mb_substr(auth()->user()->name ?? 'User', 0, 1)) }}
                                 </div>
                                 <div class="min-w-0">
                                     <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ auth()->user()->name }}</p>
