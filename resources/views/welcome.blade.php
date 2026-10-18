@@ -14,6 +14,7 @@
     $carouselSlides = [];
     if (!empty($heroBanners) && count($heroBanners) > 0) {
         foreach ($heroBanners as $b) {
+            $hasOverlay = isset($b['has_overlay']) ? (bool)$b['has_overlay'] : true;
             $carouselSlides[] = [
                 'title' => $b['title'] ?? 'SeTiket Event',
                 'subtitle' => $b['subtitle'] ?? '',
@@ -21,6 +22,7 @@
                 'button_text' => !empty($b['button_text']) ? $b['button_text'] : 'Beli Tiketnya di Sini',
                 'url' => !empty($b['target_url']) ? $b['target_url'] : route('home'),
                 'image' => $b['image_url'] ?? '',
+                'has_overlay' => $hasOverlay,
                 'is_custom' => true,
             ];
         }
@@ -115,40 +117,45 @@
                         ])
                     @endif
 
-                    {{-- Dark Overlay for readable text - Desktop only --}}
-                    <div class="hidden sm:block absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
+                    @if($slide['has_overlay'] ?? true)
+                        {{-- Dark Overlay for readable text - Desktop only --}}
+                        <div class="hidden sm:block absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
 
-                    {{-- Mobile clickable link: seluruh banner poster di mobile langsung bisa diklik --}}
-                    <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $slide['title'] }}"></a>
+                        {{-- Mobile clickable link: seluruh banner poster di mobile langsung bisa diklik --}}
+                        <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $slide['title'] }}"></a>
 
-                    {{-- Banner Content & Floating CTA Pill (Desktop Only - di mobile di-hidden agar poster bersih) --}}
-                    <div class="hidden sm:flex absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex-col sm:flex-row items-start sm:items-end justify-between gap-3 z-10 pointer-events-none">
-                        <div class="max-w-2xl text-white pointer-events-auto">
-                            <span class="inline-block px-3 py-1 bg-[#0050ff] text-white text-[11px] sm:text-xs font-bold rounded-full mb-2 tracking-wide uppercase">
-                                {{ $slide['badge'] }}
-                            </span>
-                            <h2 class="text-xl sm:text-3xl md:text-4xl font-black leading-tight drop-shadow-md">
-                                {{ $slide['title'] }}
-                            </h2>
-                            @if(!empty($slide['subtitle']))
-                                <p class="text-xs sm:text-sm text-gray-200 mt-1.5 flex items-center gap-3 drop-shadow">
-                                    <span class="inline-flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                                        {{ $slide['subtitle'] }}
-                                    </span>
-                                </p>
-                            @endif
+                        {{-- Banner Content & Floating CTA Pill (Desktop Only - di mobile di-hidden agar poster bersih) --}}
+                        <div class="hidden sm:flex absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex-col sm:flex-row items-start sm:items-end justify-between gap-3 z-10 pointer-events-none">
+                            <div class="max-w-2xl text-white pointer-events-auto">
+                                <span class="inline-block px-3 py-1 bg-[#0050ff] text-white text-[11px] sm:text-xs font-bold rounded-full mb-2 tracking-wide uppercase">
+                                    {{ $slide['badge'] }}
+                                </span>
+                                <h2 class="text-xl sm:text-3xl md:text-4xl font-black leading-tight drop-shadow-md">
+                                    {{ $slide['title'] }}
+                                </h2>
+                                @if(!empty($slide['subtitle']))
+                                    <p class="text-xs sm:text-sm text-gray-200 mt-1.5 flex items-center gap-3 drop-shadow">
+                                        <span class="inline-flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                                            {{ $slide['subtitle'] }}
+                                        </span>
+                                    </p>
+                                @endif
+                            </div>
+
+                            {{-- Loket Floating Action Pill --}}
+                            <a href="{{ $slide['url'] }}"
+                                class="pointer-events-auto inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
+                                <span>{{ $slide['button_text'] }}</span>
+                                <svg class="w-4 h-4 text-[#0050ff]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/>
+                                </svg>
+                            </a>
                         </div>
-
-                        {{-- Loket Floating Action Pill --}}
-                        <a href="{{ $slide['url'] }}"
-                            class="pointer-events-auto inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
-                            <span>{{ $slide['button_text'] }}</span>
-                            <svg class="w-4 h-4 text-[#0050ff]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/>
-                            </svg>
-                        </a>
-                    </div>
+                    @else
+                        {{-- Desain Penuh / Standalone Promo Banner (Teks & Branding sudah tertera langsung di dalam gambar seperti Sebaris) --}}
+                        <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10" aria-label="{{ $slide['title'] }}"></a>
+                    @endif
                 </div>
             @endforeach
         </div>

@@ -115,6 +115,19 @@ class BannerService
     {
         return [
             [
+                'id' => 'setiket-promo',
+                'title' => 'Platform Resmi Tiket Konser & Event SeTiket',
+                'subtitle' => 'E-Ticket QR Code instan, check-in cepat, dan proteksi pembayaran 100% aman.',
+                'badge_text' => 'Platform Resmi',
+                'button_text' => 'Jelajahi Event',
+                'target_url' => '/#events',
+                'image_url' => '/images/banners/setiket-hero-promo.webp',
+                'has_overlay' => false,
+                'is_active' => true,
+                'sort_order' => 1,
+                'created_at' => '2026-10-19 03:50:00'
+            ],
+            [
                 'id' => '1',
                 'title' => 'SOUNDCHECK Vol.1 Night Party',
                 'subtitle' => 'Kopi Nakal, Kemang, Jakarta Selatan • 9 Oktober 2026',
@@ -122,8 +135,9 @@ class BannerService
                 'button_text' => 'Beli Tiketnya di Sini',
                 'target_url' => '/event/soundcheck-vol1-night-party',
                 'image_url' => '/images/thumbnails/soundcheck-vol1.jpg',
+                'has_overlay' => true,
                 'is_active' => true,
-                'sort_order' => 1,
+                'sort_order' => 2,
                 'created_at' => '2026-10-01 10:00:00'
             ],
             [
@@ -134,8 +148,9 @@ class BannerService
                 'button_text' => 'Beli Tiketnya di Sini',
                 'target_url' => '/event/ye-jakarta-2026-world-tour',
                 'image_url' => '/images/thumbnails/ye-jakarta-2026.jpg',
+                'has_overlay' => true,
                 'is_active' => true,
-                'sort_order' => 2,
+                'sort_order' => 3,
                 'created_at' => '2026-10-02 10:00:00'
             ],
             [
@@ -146,8 +161,9 @@ class BannerService
                 'button_text' => 'Beli Tiketnya di Sini',
                 'target_url' => '/event/bigbang-2026-2027-world-tour-re-boot',
                 'image_url' => '/images/thumbnails/bigbang-worldtour.jpg',
+                'has_overlay' => true,
                 'is_active' => true,
-                'sort_order' => 3,
+                'sort_order' => 4,
                 'created_at' => '2026-10-03 10:00:00'
             ]
         ];

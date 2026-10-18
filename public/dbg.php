@@ -59,6 +59,37 @@ if (isset($_GET['clear_log']) && $_GET['clear_log'] === '1') {
     echo "=== LOG CLEARED AT " . date('Y-m-d H:i:s') . " ===\n\n";
 }
 
+// 2b. Sinkronisasi banner resmi setiket-promo jika belum ada di storage/app/banners.json
+$bannersPath = __DIR__ . '/../storage/app/banners.json';
+if (file_exists($bannersPath)) {
+    $existingBanners = json_decode(@file_get_contents($bannersPath), true) ?: [];
+    $hasPromo = false;
+    foreach ($existingBanners as $b) {
+        if (($b['id'] ?? '') === 'setiket-promo') {
+            $hasPromo = true;
+            break;
+        }
+    }
+    if (!$hasPromo) {
+        array_unshift($existingBanners, [
+            'id' => 'setiket-promo',
+            'title' => 'Platform Resmi Tiket Konser & Event SeTiket',
+            'subtitle' => 'E-Ticket QR Code instan, check-in cepat, dan proteksi pembayaran 100% aman.',
+            'badge_text' => 'Platform Resmi',
+            'button_text' => 'Jelajahi Event',
+            'target_url' => '/#events',
+            'image_url' => '/images/banners/setiket-hero-promo.webp',
+            'has_overlay' => false,
+            'is_active' => true,
+            'sort_order' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        @file_put_contents($bannersPath, json_encode(array_values($existingBanners), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        echo "Sync: Added setiket-promo banner to storage/app/banners.json\n";
+    }
+}
+
+
 // 3. Read latest Laravel error log
 echo "--- LARAVEL.LOG STATUS ---\n";
 if (file_exists($log)) {

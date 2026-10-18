@@ -182,4 +182,33 @@ class BannerAndEndedEventTest extends TestCase
         $remaining = BannerService::loadBanners();
         $this->assertNull(collect($remaining)->firstWhere('id', $newBanner['id']));
     }
+
+    public function test_banner_slider_supports_standalone_artwork_without_overlay(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
+
+        // Create standalone banner with has_overlay false
+        $storeResponse = $this->actingAs($superAdmin)->post(route('admin.banners.store'), [
+            'title' => 'Banner SeTiket Promosi Resmi',
+            'subtitle' => 'E-Ticket QR Code instan & terpercaya',
+            'badge_text' => 'Platform Resmi',
+            'button_text' => 'Jelajahi Event',
+            'target_url' => '/#events',
+            'sort_order' => 1,
+            'image_url' => '/images/banners/setiket-hero-promo.webp',
+            'has_overlay' => '0',
+        ]);
+
+        $storeResponse->assertRedirect(route('admin.banners'));
+        $banners = BannerService::loadBanners();
+        $banner = collect($banners)->firstWhere('title', 'Banner SeTiket Promosi Resmi');
+        $this->assertNotNull($banner);
+        $this->assertFalse($banner['has_overlay']);
+
+        // Check rendering on homepage: when has_overlay is false, the full clickable link is rendered without dark gradient
+        $response = $this->get(route('home'));
+        $response->assertStatus(200);
+        $response->assertSee('/images/banners/setiket-hero-promo.webp');
+    }
 }
+

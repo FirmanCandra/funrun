@@ -1675,6 +1675,7 @@ class AdminController extends Controller
             'button_text' => trim((string) $request->input('button_text')) ?: 'Beli Tiketnya di Sini',
             'target_url' => trim((string) $request->input('target_url')) ?: route('home'),
             'image_url' => $imageUrl,
+            'has_overlay' => $request->has('has_overlay') ? (bool) $request->boolean('has_overlay') : true,
             'is_active' => true,
             'sort_order' => $request->filled('sort_order') ? (int) $request->input('sort_order') : ($maxSort + 1),
             'created_at' => date('Y-m-d H:i:s'),
@@ -1718,6 +1719,7 @@ class AdminController extends Controller
                 $banner['badge_text'] = trim((string) $request->input('badge_text')) ?: 'Featured Event';
                 $banner['button_text'] = trim((string) $request->input('button_text')) ?: 'Beli Tiketnya di Sini';
                 $banner['target_url'] = trim((string) $request->input('target_url')) ?: route('home');
+                $banner['has_overlay'] = $request->has('has_overlay') ? (bool) $request->boolean('has_overlay') : false;
                 
                 if ($request->filled('sort_order')) {
                     $banner['sort_order'] = (int) $request->input('sort_order');

@@ -154,6 +154,11 @@
                                         {{ $banner['badge_text'] ?? 'Featured Event' }}
                                     </span>
                                     <h4 class="font-extrabold text-slate-900 text-base truncate">{{ $banner['title'] }}</h4>
+                                    @if(isset($banner['has_overlay']) && !$banner['has_overlay'])
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                            Desain Penuh (No Overlay)
+                                        </span>
+                                    @endif
                                 </div>
                                 @if(!empty($banner['subtitle']))
                                     <p class="text-xs text-slate-600 line-clamp-1">{{ $banner['subtitle'] }}</p>
@@ -278,6 +283,21 @@
                     </div>
                 </div>
 
+                {{-- Pilihan Mode Tampilan Overlay --}}
+                <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <label class="flex items-start gap-2.5 cursor-pointer">
+                        <input type="hidden" name="has_overlay" value="0">
+                        <input type="checkbox" name="has_overlay" id="addHasOverlay" value="1" checked
+                            class="w-4 h-4 mt-0.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">Tampilkan Overlay Teks & Tombol CTA</span>
+                            <span class="block text-[11px] text-slate-500 mt-0.5">
+                                Aktifkan jika banner adalah background event biasa. <strong>Hilangkan centang</strong> jika banner adalah poster artwork desain penuh di mana logo dan teks sudah ada di gambar (seperti banner promosi SeTiket).
+                            </span>
+                        </div>
+                    </label>
+                </div>
+
                 {{-- Upload Gambar Banner --}}
                 <div class="pt-2 border-t border-slate-100">
                     <label class="block text-xs font-bold text-slate-700 mb-1">
@@ -360,6 +380,21 @@
                     </div>
                 </div>
 
+                {{-- Pilihan Mode Tampilan Overlay Edit --}}
+                <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <label class="flex items-start gap-2.5 cursor-pointer">
+                        <input type="hidden" name="has_overlay" value="0">
+                        <input type="checkbox" name="has_overlay" id="editHasOverlay" value="1"
+                            class="w-4 h-4 mt-0.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">Tampilkan Overlay Teks & Tombol CTA</span>
+                            <span class="block text-[11px] text-slate-500 mt-0.5">
+                                Aktifkan jika banner adalah background event biasa. <strong>Hilangkan centang</strong> jika banner adalah poster artwork desain penuh di mana logo dan teks sudah ada di gambar.
+                            </span>
+                        </div>
+                    </label>
+                </div>
+
                 {{-- Ganti Gambar Banner --}}
                 <div class="pt-2 border-t border-slate-100">
                     <label class="block text-xs font-bold text-slate-700 mb-1">
@@ -415,6 +450,7 @@
         document.getElementById('editTargetUrl').value = banner.target_url || '';
         document.getElementById('editSortOrder').value = banner.sort_order || 1;
         document.getElementById('editImageUrl').value = banner.image_url || '';
+        document.getElementById('editHasOverlay').checked = (banner.has_overlay === undefined || banner.has_overlay === null) ? true : Boolean(banner.has_overlay);
 
         const previewContainer = document.getElementById('editCurrentImgPreview');
         if (banner.image_url) {
