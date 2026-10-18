@@ -18,6 +18,12 @@ $loginView = @file_get_contents(__DIR__ . '/../resources/views/auth/login.blade.
 echo "login.blade.php size: " . strlen($loginView) . " bytes\n";
 echo "login.blade.php has auth.google: " . (str_contains($loginView, 'auth.google') ? "YES" : "NO") . "\n\n";
 
+if (isset($_GET['pull']) && $_GET['pull'] === '1') {
+    echo "--- GIT PULL TRIGGERED ---\n";
+    $output = @shell_exec('cd ' . escapeshellarg(__DIR__ . '/..') . ' && git pull origin main 2>&1');
+    echo ($output ?: "shell_exec returned empty or disabled") . "\n\n";
+}
+
 // 1. Flush any bootstrap caches
 $routeCache = __DIR__ . '/../bootstrap/cache/routes-v7.php';
 $configCache = __DIR__ . '/../bootstrap/cache/config.php';
