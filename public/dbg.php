@@ -5,7 +5,18 @@ echo "=== SETIKET PRODUCTION DIAGNOSTIC ===\n";
 echo "Date: " . date('Y-m-d H:i:s') . "\n";
 echo "PHP Version: " . phpversion() . "\n";
 echo "Current File: " . __FILE__ . "\n";
-echo "DocRoot: " . ($_SERVER['DOCUMENT_ROOT'] ?? '-') . "\n\n";
+echo "DocRoot: " . ($_SERVER['DOCUMENT_ROOT'] ?? '-') . "\n";
+
+$head = @file_get_contents(__DIR__ . '/../.git/HEAD');
+echo "Git HEAD: " . trim($head ?: 'unknown') . "\n";
+if ($head && str_starts_with(trim($head), 'ref: ')) {
+    $refPath = __DIR__ . '/../.git/' . trim(substr(trim($head), 5));
+    echo "Git Ref Hash: " . trim(@file_get_contents($refPath) ?: 'not found') . "\n";
+}
+
+$loginView = @file_get_contents(__DIR__ . '/../resources/views/auth/login.blade.php');
+echo "login.blade.php size: " . strlen($loginView) . " bytes\n";
+echo "login.blade.php has auth.google: " . (str_contains($loginView, 'auth.google') ? "YES" : "NO") . "\n\n";
 
 // 1. Flush any bootstrap caches
 $routeCache = __DIR__ . '/../bootstrap/cache/routes-v7.php';
