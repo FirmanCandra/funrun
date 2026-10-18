@@ -43,13 +43,19 @@
 }
 
 :root {
+    color-scheme: light;
     --color-ink-900: #111827;
     --color-ink-500: #6b7280;
     --color-line:    #e5e7eb;
     --color-canvas:  #f8fafc;
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
 }
 
 :where(.dark, .dark *), .dark {
+    color-scheme: dark;
     --color-ink-900: #f8fafc;
     --color-ink-500: #94a3b8;
     --color-line:    #334155;
@@ -74,11 +80,15 @@
     * { box-sizing: border-box; }
 
     html, body {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Plus Jakarta Sans', 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         font-weight: 400;
         background-color: #fff;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        text-size-adjust: 100%;
         overflow-x: clip;
         width: 100%;
         max-width: 100vw;
@@ -1393,19 +1403,32 @@
 }
 
 /* ============================================================
-   SAFARI & WEBKIT ENGINE OPTIMIZATIONS (iOS & macOS)
+   CROSS-BROWSER ENGINE OPTIMIZATIONS (Safari, iOS, Opera, Chrome, Firefox, Edge)
    ============================================================ */
-/* 1. Fix Safari border-radius overflow clipping bug */
-.poster-wrapper,
-.loket-event-card,
-.carousel-slide {
-    -webkit-mask-image: -webkit-radial-gradient(white, black);
-    -webkit-backface-visibility: hidden;
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
+
+/* 1. Safari WebKit Sticky Positioning Fix */
+.sticky {
+    position: -webkit-sticky !important;
+    position: sticky !important;
 }
 
-/* 2. Fix Safari touch momentum scrolling */
+/* 2. Fix Safari border-radius overflow clipping bug on transform & hover */
+.poster-wrapper,
+.loket-event-card,
+.carousel-slide,
+.event-card,
+.event-card-sd,
+.event-card-h {
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    isolation: isolate;
+}
+
+/* 3. Cross-Browser Touch Momentum & Scrollbars (iOS Safari, Opera, Firefox) */
 .no-scrollbar {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -1417,7 +1440,24 @@
     height: 0;
 }
 
-/* 3. Prevent Safari iOS auto-zoom on input focus */
+.overflow-x-auto,
+#eventTrendingTrack {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* 4. Cross-browser subtle scrollbar for desktop & modern browsers */
+@supports (scrollbar-width: thin) {
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+    }
+    .dark * {
+        scrollbar-color: rgba(51, 65, 85, 0.6) transparent;
+    }
+}
+
+/* 5. Prevent Safari iOS auto-zoom on input focus */
 @media screen and (max-width: 768px) {
     input[type="text"],
     input[type="email"],
@@ -1430,13 +1470,73 @@
     }
 }
 
-/* 4. Fix Safari native button styling & tap highlight */
+/* 6. Fix native button & input appearance across WebKit, Blink & Gecko */
 * {
     -webkit-tap-highlight-color: transparent;
 }
 
-button, input[type="submit"], input[type="button"] {
+button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Search input cross-browser normalization */
+input[type="search"] {
+    -webkit-appearance: textfield;
+    outline-offset: -2px;
+}
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+}
+
+/* 7. Glassmorphism Fallback for older Safari & Firefox */
+@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
+    .backdrop-blur-2xl,
+    .backdrop-blur-xl,
+    .backdrop-blur-lg,
+    .backdrop-blur-md,
+    .backdrop-blur-sm {
+        background-color: rgba(255, 255, 255, 0.96) !important;
+    }
+    .dark .backdrop-blur-2xl,
+    .dark .backdrop-blur-xl,
+    .dark .backdrop-blur-lg,
+    .dark .backdrop-blur-md,
+    .dark .backdrop-blur-sm {
+        background-color: rgba(11, 15, 25, 0.96) !important;
+    }
+}
+
+/* 8. Safe area padding helpers for notch screens (iPhone & modern Android) */
+.safe-p-top {
+    padding-top: max(1rem, env(safe-area-inset-top, 0px));
+}
+.safe-p-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+.safe-p-x {
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+}
+
+/* 9. Respect Reduced Motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    html:focus-within {
+        scroll-behavior: auto !important;
+    }
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 

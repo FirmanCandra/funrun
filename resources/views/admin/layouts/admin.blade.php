@@ -3,10 +3,15 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="color-scheme" content="light">
     <title>Admin Dashboard - SeTiket</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="{{ asset('js/html5-qrcode.min.js') }}" type="text/javascript" onerror="this.onerror=null;this.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'"></script>
     <script>
         if (typeof Html5Qrcode === 'undefined') {
@@ -15,8 +20,11 @@
     </script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: #f8fafc;
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
         .sidebar-item.active {
@@ -33,7 +41,7 @@
     menetap, lebarnya menghabiskan hampir seluruh layar ponsel.
 --}}
 
-<body class="flex flex-row h-dvh w-screen overflow-hidden text-slate-800" style="display: flex !important; flex-direction: row !important; height: 100vh !important; width: 100vw !important;">
+<body class="flex flex-row h-dvh w-screen overflow-hidden text-slate-800" style="display: flex !important; flex-direction: row !important; height: 100vh !important; height: 100dvh !important; width: 100vw !important;">
 
     <!-- Latar gelap saat laci terbuka di layar kecil -->
     <div id="sidebarOverlay" class="hidden fixed inset-0 z-30 bg-slate-900/50 lg:hidden"></div>

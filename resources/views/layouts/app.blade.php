@@ -10,6 +10,7 @@
     <meta name="application-name" content="SeTiket">
     <meta name="msapplication-TileColor" content="#0050ff">
     <meta name="format-detection" content="telephone=no">
+    <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#ffffff" id="metaThemeColor">
     <meta name="description" content="SeTiket — Platform pemesanan tiket event & konser terpercaya di Indonesia. Temukan fun run, festival musik, seminar, dan pameran dengan mudah.">
     <title>@yield('title', 'SeTiket | Platform Beli Tiket Konser & Event Terpercaya di Indonesia')</title>
@@ -23,16 +24,16 @@
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=2">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=2">
 
-    {{-- Fonts: Plus Jakarta Sans & Inter --}}
+    {{-- Fonts: Plus Jakarta Sans, Poppins & Inter (Lengkap untuk Safari, Opera, Firefox, Chrome) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     {{-- App CSS & JS --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script>
-        // Init theme before render to prevent flash
+        // Init theme before render to prevent flash across all browsers
         const isDarkTheme = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
         if (isDarkTheme) {
             document.documentElement.classList.add('dark');
@@ -45,7 +46,10 @@
 
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
     </style>
 
@@ -337,7 +341,7 @@
             </div>
 
             {{-- Overlay Footer --}}
-            <div class="relative z-10 px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-slate-800/80 shrink-0 bg-gray-50/50 dark:bg-slate-900/40">
+            <div class="relative z-10 px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-slate-800/80 shrink-0 bg-gray-50/50 dark:bg-slate-900/40" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
                 <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>Platform Tiket Resmi</span>
                     <div class="flex items-center gap-4">
