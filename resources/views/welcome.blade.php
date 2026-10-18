@@ -108,7 +108,11 @@
                     
                     {{-- Banner Image --}}
                     @if(!empty($slide['image']))
-                        <img src="{{ $slide['image'] }}" alt="{{ $slide['title'] }}" class="w-full h-full object-cover">
+                        <img src="{{ str_starts_with($slide['image'], 'http') ? $slide['image'] : asset(ltrim($slide['image'], '/')) }}"
+                            alt="{{ $slide['title'] }}"
+                            class="w-full h-full object-cover"
+                            loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                            onerror="if(!this.dataset.fallback){this.dataset.fallback=1;this.src='{{ asset('images/setiketbg.webp') }}';}">
                     @else
                         @include('partials.event-image', [
                             'nama' => $slide['title'],

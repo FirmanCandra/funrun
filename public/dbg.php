@@ -87,7 +87,15 @@ if (file_exists($bannersPath)) {
         @file_put_contents($bannersPath, json_encode(array_values($existingBanners), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         echo "Sync: Added setiket-promo banner to storage/app/banners.json\n";
     }
+
+    echo "--- BANNERS IN STORAGE (" . count($existingBanners) . ") ---\n";
+    foreach ($existingBanners as $b) {
+        $act = !empty($b['is_active']) ? 'YES' : 'NO';
+        $ovr = isset($b['has_overlay']) ? ($b['has_overlay'] ? 'YES' : 'NO') : 'default(YES)';
+        echo "- [{$b['id']}] #{$b['sort_order']} {$b['title']} (Active: {$act}, Overlay: {$ovr}, Img: {$b['image_url']})\n";
+    }
 }
+
 
 
 // 3. Read latest Laravel error log
