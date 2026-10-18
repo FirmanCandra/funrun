@@ -15,7 +15,9 @@
     if (!empty($heroBanners) && count($heroBanners) > 0) {
         foreach ($heroBanners as $b) {
             $hasOverlay = isset($b['has_overlay']) ? (bool)$b['has_overlay'] : true;
-            $isOfficialBrand = (($b['id'] ?? '') === 'setiket-promo') || str_contains($b['image_url'] ?? '', 'setiket-hero-promo');
+            $isOfficialBrand = (($b['id'] ?? '') === 'setiket-promo')
+                || str_contains($b['image_url'] ?? '', 'setiket-hero-promo')
+                || str_contains($b['image_url'] ?? '', 'setiket-lowpoly-promo');
             $carouselSlides[] = [
                 'id' => $b['id'] ?? '',
                 'title' => $b['title'] ?? 'SeTiket Event',
@@ -46,6 +48,22 @@
                 'is_custom' => false,
             ];
         }
+    }
+
+    // Safety net: Pastikan banner resmi SeTiket selalu ada jika slides kosong
+    if (empty($carouselSlides)) {
+        $carouselSlides[] = [
+            'id' => 'setiket-promo',
+            'title' => 'Platform Resmi Tiket Konser & Event SeTiket',
+            'subtitle' => 'E-Ticket QR Code instan, check-in cepat, dan proteksi pembayaran 100% aman.',
+            'badge' => 'Platform Resmi',
+            'button_text' => 'Jelajahi Event',
+            'url' => route('home'),
+            'image' => asset('images/banners/setiket-lowpoly-promo.webp'),
+            'has_overlay' => false,
+            'is_official_brand' => true,
+            'is_custom' => true,
+        ];
     }
 
     // Helper untuk mengurai tanggal badge Loket Event2Go (contoh: "OKT \n 6 \n SEL")
@@ -100,18 +118,42 @@
 @section('content')
 
 {{-- ===== HERO BANNER CAROUSEL (LOKET STYLE) ===== --}}
+<style>
+    #carouselTrack {
+        height: 220px !important;
+        min-height: 220px !important;
+    }
+    @media (min-width: 640px) {
+        #carouselTrack {
+            height: 380px !important;
+            min-height: 380px !important;
+        }
+    }
+    @media (min-width: 768px) {
+        #carouselTrack {
+            height: 440px !important;
+            min-height: 440px !important;
+        }
+    }
+    @media (min-width: 1024px) {
+        #carouselTrack {
+            height: 480px !important;
+            min-height: 480px !important;
+        }
+    }
+</style>
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-7 pb-3 sm:pb-4">
-    <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-md sm:shadow-lg border border-gray-100 dark:border-slate-800 bg-gray-900" id="heroCarousel">
+    <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-md sm:shadow-lg border border-gray-150 dark:border-slate-800 bg-white dark:bg-slate-900" id="heroCarousel">
         
         {{-- Carousel Slides Container --}}
-        <div class="relative h-[225px] sm:h-[380px] md:h-[440px] lg:h-[480px] overflow-hidden" id="carouselTrack">
+        <div class="relative w-full overflow-hidden" id="carouselTrack">
             @foreach($carouselSlides as $index => $slide)
                 <div class="carousel-slide absolute inset-0 transition-opacity duration-700 ease-in-out {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' }}"
                     data-slide-index="{{ $index }}">
                     
                     @if(!empty($slide['is_official_brand']))
-                        {{-- 1. DESKTOP VIEW (sm ke atas): Banner Vektor Bersih Tanpa Artefak AI --}}
-                        <div class="hidden sm:block w-full h-full relative">
+                        {{-- 1. DESKTOP VIEW (sm ke atas): Banner Vektor Putih Bersih Tema SeTiket --}}
+                        <div class="hidden sm:block w-full h-full relative bg-white">
                             <img src="{{ str_starts_with($slide['image'], 'http') ? $slide['image'] : asset(ltrim($slide['image'], '/')) }}"
                                 alt="{{ $slide['title'] }}"
                                 class="w-full h-full object-cover"
@@ -120,44 +162,44 @@
                             <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10" aria-label="{{ $slide['title'] }}"></a>
                         </div>
 
-                        {{-- 2. MOBILE VIEW (layar ponsel): Tampilan Bersih Ala Gambar 1 (Tanpa Pill Badges AI-Slop) --}}
-                        <div class="block sm:hidden w-full h-full relative p-4 flex flex-col justify-between overflow-hidden bg-[#040c20]">
+                        {{-- 2. MOBILE VIEW (layar ponsel): Tampilan Putih Bersih Ala Gambar 1 (Tanpa Pill Badges AI-Slop) --}}
+                        <div class="block sm:hidden w-full h-full relative p-4 flex flex-col justify-between overflow-hidden bg-white dark:bg-[#07132e] border-b border-gray-100 dark:border-slate-800">
                             {{-- Low-poly crystal background subtly visible --}}
                             <img src="{{ str_starts_with($slide['image'], 'http') ? $slide['image'] : asset(ltrim($slide['image'], '/')) }}"
                                 alt=""
-                                class="absolute inset-0 w-full h-full object-cover object-left opacity-30 pointer-events-none"
+                                class="absolute inset-0 w-full h-full object-cover object-left opacity-35 pointer-events-none"
                                 aria-hidden="true">
-                            <div class="absolute inset-0 bg-gradient-to-r from-[#040c20] via-[#040c20]/80 to-[#040c20]/50 pointer-events-none"></div>
+                            <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/60 dark:from-[#07132e]/95 dark:via-[#07132e]/85 dark:to-[#07132e]/60 pointer-events-none"></div>
 
                             {{-- Brand Header (Clean Logo, No Pills, No Dots) --}}
                             <div class="relative z-10 flex items-center justify-between">
                                 <img src="{{ asset('images/setiketbg.webp') }}" alt="SeTiket" class="h-6 w-auto object-contain">
-                                <span class="text-[10px] uppercase tracking-wider text-cyan-300/80 font-bold">
+                                <span class="text-[10px] uppercase tracking-wider text-[#0050ff] dark:text-cyan-400 font-bold">
                                     Official Platform
                                 </span>
                             </div>
 
                             {{-- Headline Khusus Mobile --}}
                             <div class="relative z-10 my-auto py-1">
-                                <h3 class="text-base font-black text-white leading-tight">
-                                    Pesan Tiket <span class="text-cyan-300 font-serif italic">Konser & Event</span><br>
-                                    <span class="text-white">Resmi & Terpercaya</span>
+                                <h3 class="text-base font-black text-slate-900 dark:text-white leading-tight">
+                                    Pesan Tiket <span class="text-[#0050ff] dark:text-cyan-400 font-serif italic">Konser & Event</span><br>
+                                    <span class="text-slate-800 dark:text-slate-100">Resmi & Terpercaya</span>
                                 </h3>
 
-                                {{-- Dashed line style ala Gambar 1 --}}
-                                <div class="border-l-2 border-dashed border-cyan-400/80 pl-2.5 my-2">
-                                    <p class="text-[11px] text-slate-200 line-clamp-2 leading-relaxed font-medium">
+                                {{-- Dashed line style ala Gambar 1 (SeTiket Blue) --}}
+                                <div class="border-l-2 border-dashed border-[#0050ff] dark:border-cyan-400 pl-2.5 my-2">
+                                    <p class="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed font-medium">
                                         Platform e-ticketing konser, festival & seminar. QR Code instan, verifikasi panitia cepat & aman.
                                     </p>
                                 </div>
                             </div>
 
                             {{-- Footer CTA (Clean, No Pill Badges) --}}
-                            <div class="relative z-10 flex items-center justify-between pt-1 border-t border-white/10">
-                                <span class="text-[10px] text-slate-300 font-semibold tracking-wide">
+                            <div class="relative z-10 flex items-center justify-between pt-1 border-t border-slate-200/80 dark:border-white/10">
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 font-semibold tracking-wide">
                                     setiket.id
                                 </span>
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-xs shadow-md shadow-blue-900/40 shrink-0">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0050ff] hover:bg-[#0043d4] text-white font-bold text-xs shadow-md shadow-blue-500/25 shrink-0">
                                     <span>Beli Tiket</span>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
                                 </span>
@@ -244,7 +286,7 @@
         <div class="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 sm:left-8 sm:translate-x-0 z-20 flex items-center gap-1.5" id="carouselDots">
             @foreach($carouselSlides as $index => $slide)
                 <button type="button" onclick="goToSlide({{ $index }})" aria-label="Pilih Slide {{ $index + 1 }}"
-                    class="carousel-dot h-2 rounded-full transition-all duration-300 {{ $index === 0 ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80' }}"
+                    class="carousel-dot h-2 rounded-full transition-all duration-300 {{ $index === 0 ? 'w-6 bg-[#0050ff]' : 'w-2 bg-slate-300 hover:bg-[#0050ff]/60' }}"
                     data-dot-index="{{ $index }}"></button>
             @endforeach
         </div>
@@ -654,11 +696,11 @@
 
         dots.forEach((dot, i) => {
             if (i === currentSlide) {
-                dot.classList.remove('w-2', 'bg-white/50');
-                dot.classList.add('w-6', 'bg-white');
+                dot.classList.remove('w-2', 'bg-slate-300', 'bg-white/50');
+                dot.classList.add('w-6', 'bg-[#0050ff]');
             } else {
-                dot.classList.remove('w-6', 'bg-white');
-                dot.classList.add('w-2', 'bg-white/50');
+                dot.classList.remove('w-6', 'bg-[#0050ff]', 'bg-white');
+                dot.classList.add('w-2', 'bg-slate-300');
             }
         });
     }
