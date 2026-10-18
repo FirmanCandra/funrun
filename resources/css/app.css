@@ -1526,18 +1526,6 @@ input[type="search"]::-webkit-search-results-decoration {
     padding-right: max(1rem, env(safe-area-inset-right, 0px));
 }
 
-/* 9. Respect Reduced Motion preferences */
-@media (prefers-reduced-motion: reduce) {
-    html:focus-within {
-        scroll-behavior: auto !important;
-    }
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
 
 
 
