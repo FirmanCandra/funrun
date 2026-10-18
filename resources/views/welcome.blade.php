@@ -15,7 +15,9 @@
     if (!empty($heroBanners) && count($heroBanners) > 0) {
         foreach ($heroBanners as $b) {
             $hasOverlay = isset($b['has_overlay']) ? (bool)$b['has_overlay'] : true;
+            $isOfficialBrand = (($b['id'] ?? '') === 'setiket-promo') || str_contains($b['image_url'] ?? '', 'setiket-hero-promo');
             $carouselSlides[] = [
+                'id' => $b['id'] ?? '',
                 'title' => $b['title'] ?? 'SeTiket Event',
                 'subtitle' => $b['subtitle'] ?? '',
                 'badge' => !empty($b['badge_text']) ? $b['badge_text'] : 'Featured Event',
@@ -23,6 +25,7 @@
                 'url' => !empty($b['target_url']) ? $b['target_url'] : route('home'),
                 'image' => $b['image_url'] ?? '',
                 'has_overlay' => $hasOverlay,
+                'is_official_brand' => $isOfficialBrand,
                 'is_custom' => true,
             ];
         }
@@ -101,78 +104,135 @@
     <div class="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-md sm:shadow-lg border border-gray-100 dark:border-slate-800 bg-gray-900" id="heroCarousel">
         
         {{-- Carousel Slides Container --}}
-        <div class="relative h-[200px] sm:h-[380px] md:h-[440px] lg:h-[480px] overflow-hidden" id="carouselTrack">
+        <div class="relative h-[225px] sm:h-[380px] md:h-[440px] lg:h-[480px] overflow-hidden" id="carouselTrack">
             @foreach($carouselSlides as $index => $slide)
                 <div class="carousel-slide absolute inset-0 transition-opacity duration-700 ease-in-out {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' }}"
                     data-slide-index="{{ $index }}">
                     
-                    {{-- Banner Image --}}
-                    @if(!empty($slide['image']))
-                        <img src="{{ str_starts_with($slide['image'], 'http') ? $slide['image'] : asset(ltrim($slide['image'], '/')) }}"
-                            alt="{{ $slide['title'] }}"
-                            class="w-full h-full object-cover"
-                            loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
-                            onerror="if(!this.dataset.fallback){this.dataset.fallback=1;this.src='{{ asset('images/setiketbg.webp') }}';}">
-                    @else
-                        @include('partials.event-image', [
-                            'nama' => $slide['title'],
-                            'thumbnail' => null,
-                            'class' => 'w-full h-full object-cover'
-                        ])
-                    @endif
+                    @if(!empty($slide['is_official_brand']))
+                        {{-- 1. DESKTOP VIEW (sm ke atas): Banner Vektor Bersih Tanpa Artefak AI --}}
+                        <div class="hidden sm:block w-full h-full relative">
+                            <img src="{{ str_starts_with($slide['image'], 'http') ? $slide['image'] : asset(ltrim($slide['image'], '/')) }}"
+                                alt="{{ $slide['title'] }}"
+                                class="w-full h-full object-cover"
+                                loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                onerror="if(!this.dataset.fallback){this.dataset.fallback=1;this.src='{{ asset('images/setiketbg.webp') }}';}">
+                            <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10" aria-label="{{ $slide['title'] }}"></a>
+                        </div>
 
-                    @if($slide['has_overlay'] ?? true)
-                        {{-- Dark Overlay for readable text - Desktop only --}}
-                        <div class="hidden sm:block absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
+                        {{-- 2. MOBILE VIEW (layar ponsel): Tampilan Khusus Mobile-First, Teks Jelas & Tidak Terkompres --}}
+                        <div class="block sm:hidden w-full h-full relative bg-gradient-to-br from-[#060a14] via-[#0d1629] to-[#070b16] p-4 sm:p-5 flex flex-col justify-between overflow-hidden">
+                            {{-- Ambient Background Glows --}}
+                            <div class="absolute -right-8 -top-8 w-36 h-36 bg-blue-600/20 rounded-full blur-2xl pointer-events-none"></div>
+                            <div class="absolute -left-8 -bottom-8 w-36 h-36 bg-cyan-500/15 rounded-full blur-2xl pointer-events-none"></div>
 
-                        {{-- Mobile clickable link: seluruh banner poster di mobile langsung bisa diklik --}}
-                        <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $slide['title'] }}"></a>
-
-                        {{-- Banner Content & Floating CTA Pill (Desktop Only - di mobile di-hidden agar poster bersih) --}}
-                        <div class="hidden sm:flex absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex-col sm:flex-row items-start sm:items-end justify-between gap-3 z-10 pointer-events-none">
-                            <div class="max-w-2xl text-white pointer-events-auto">
-                                <span class="inline-block px-3 py-1 bg-[#0050ff] text-white text-[11px] sm:text-xs font-bold rounded-full mb-2 tracking-wide uppercase">
-                                    {{ $slide['badge'] }}
+                            {{-- Brand & Pill Header --}}
+                            <div class="relative z-10 flex items-center justify-between gap-2">
+                                <img src="{{ asset('images/setiketbg.webp') }}" alt="SeTiket" class="h-6 w-auto object-contain">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/15 text-cyan-300 border border-cyan-400/30 text-[10px] font-bold tracking-wide uppercase">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                                    Platform Resmi
                                 </span>
-                                <h2 class="text-xl sm:text-3xl md:text-4xl font-black leading-tight drop-shadow-md">
-                                    {{ $slide['title'] }}
-                                </h2>
-                                @if(!empty($slide['subtitle']))
-                                    <p class="text-xs sm:text-sm text-gray-200 mt-1.5 flex items-center gap-3 drop-shadow">
-                                        <span class="inline-flex items-center gap-1">
-                                            <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                                            {{ $slide['subtitle'] }}
-                                        </span>
-                                    </p>
-                                @endif
                             </div>
 
-                            {{-- Loket Floating Action Pill --}}
-                            <a href="{{ $slide['url'] }}"
-                                class="pointer-events-auto inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
-                                <span>{{ $slide['button_text'] }}</span>
-                                <svg class="w-4 h-4 text-[#0050ff]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/>
-                                </svg>
-                            </a>
+                            {{-- Headline Khusus Mobile --}}
+                            <div class="relative z-10 my-auto py-1">
+                                <h3 class="text-base font-black text-white leading-tight">
+                                    Pesan Tiket Konser & Event<br>
+                                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">
+                                        Resmi & Terpercaya
+                                    </span>
+                                </h3>
+                                <p class="text-[11px] text-slate-300 mt-1 line-clamp-2 leading-relaxed">
+                                    E-ticket QR Code instan, verifikasi cepat panitia resmi, & garansi pembayaran 100% aman.
+                                </p>
+                            </div>
+
+                            {{-- Footer Badges & CTA --}}
+                            <div class="relative z-10 flex items-center justify-between gap-2 pt-2 border-t border-white/10">
+                                <div class="flex items-center gap-2 text-[10px] text-slate-300 font-semibold">
+                                    <span class="text-emerald-400 font-bold">✓ QR Instan</span>
+                                    <span>•</span>
+                                    <span>✓ 100% Asli</span>
+                                </div>
+                                <a href="{{ $slide['url'] }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/30 shrink-0">
+                                    <span>Beli Tiket</span>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                                </a>
+                            </div>
+
+                            {{-- Area ketuk seluruh card di mobile --}}
+                            <a href="{{ $slide['url'] }}" class="absolute inset-0 z-0" aria-label="{{ $slide['title'] }}"></a>
                         </div>
                     @else
-                        {{-- Desain Penuh / Standalone Promo Banner (Teks & Branding sudah tertera langsung di dalam gambar seperti Sebaris) --}}
-                        <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10" aria-label="{{ $slide['title'] }}"></a>
+                        {{-- Banner Standar (Event Poster seperti BIGBANG) --}}
+                        @if(!empty($slide['image']))
+                            <img src="{{ str_starts_with($slide['image'], 'http') ? $slide['image'] : asset(ltrim($slide['image'], '/')) }}"
+                                alt="{{ $slide['title'] }}"
+                                class="w-full h-full object-cover"
+                                loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                onerror="if(!this.dataset.fallback){this.dataset.fallback=1;this.src='{{ asset('images/setiketbg.webp') }}';}">
+                        @else
+                            @include('partials.event-image', [
+                                'nama' => $slide['title'],
+                                'thumbnail' => null,
+                                'class' => 'w-full h-full object-cover'
+                            ])
+                        @endif
+
+                        @if($slide['has_overlay'] ?? true)
+                            {{-- Dark Overlay for readable text - Desktop only --}}
+                            <div class="hidden sm:block absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent"></div>
+
+                            {{-- Mobile clickable link: seluruh banner poster di mobile langsung bisa diklik --}}
+                            <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10 sm:hidden" aria-label="{{ $slide['title'] }}"></a>
+
+                            {{-- Banner Content & Floating CTA Pill (Desktop Only) --}}
+                            <div class="hidden sm:flex absolute bottom-5 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex-col sm:flex-row items-start sm:items-end justify-between gap-3 z-10 pointer-events-none">
+                                <div class="max-w-2xl text-white pointer-events-auto">
+                                    <span class="inline-block px-3 py-1 bg-[#0050ff] text-white text-[11px] sm:text-xs font-bold rounded-full mb-2 tracking-wide uppercase">
+                                        {{ $slide['badge'] }}
+                                    </span>
+                                    <h2 class="text-xl sm:text-3xl md:text-4xl font-black leading-tight drop-shadow-md">
+                                        {{ $slide['title'] }}
+                                    </h2>
+                                    @if(!empty($slide['subtitle']))
+                                        <p class="text-xs sm:text-sm text-gray-200 mt-1.5 flex items-center gap-3 drop-shadow">
+                                            <span class="inline-flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21c4.5-5 7-8.5 7-12a7 7 0 1 0-14 0c0 3.5 2.5 7 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                                                {{ $slide['subtitle'] }}
+                                            </span>
+                                        </p>
+                                    @endif
+                                </div>
+
+                                {{-- Loket Floating Action Pill --}}
+                                <a href="{{ $slide['url'] }}"
+                                    class="pointer-events-auto inline-flex items-center gap-2.5 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-white/95 hover:bg-white text-gray-900 hover:text-[#0050ff] font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md transition-all transform hover:scale-105 shrink-0">
+                                    <span>{{ $slide['button_text'] }}</span>
+                                    <svg class="w-4 h-4 text-[#0050ff]" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        @else
+                            {{-- Desain Penuh Standar --}}
+                            <a href="{{ $slide['url'] }}" class="absolute inset-0 z-10" aria-label="{{ $slide['title'] }}"></a>
+                        @endif
                     @endif
                 </div>
             @endforeach
         </div>
 
-        {{-- Carousel Arrows --}}
+        {{-- Carousel Arrows (Desktop Only - di mobile navigasi menggunakan swipe & dots agar tidak menutupi isi banner) --}}
         <button type="button" onclick="prevSlide()" aria-label="Slide sebelumnya"
-            class="absolute left-2.5 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-11 h-8 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm flex items-center justify-center transition-all">
+            class="hidden sm:flex absolute left-2.5 sm:left-5 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-11 h-8 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm items-center justify-center transition-all">
             <svg class="w-4 sm:w-6 h-4 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
             </svg>
         </button>
         <button type="button" onclick="nextSlide()" aria-label="Slide berikutnya"
-            class="absolute right-2.5 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-11 h-8 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm flex items-center justify-center transition-all">
+            class="hidden sm:flex absolute right-2.5 sm:right-5 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-11 h-8 sm:h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-sm items-center justify-center transition-all">
             <svg class="w-4 sm:w-6 h-4 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
             </svg>
@@ -623,6 +683,27 @@
 
     if (slides.length > 1) {
         autoSlideInterval = setInterval(nextSlide, 5000);
+    }
+
+    // ===== DUKUNGAN GESTUR SWIPE DI PONSEL =====
+    let carouselTouchStartX = 0;
+    let carouselTouchEndX = 0;
+    const heroTrackEl = document.getElementById('heroCarousel');
+    if (heroTrackEl) {
+        heroTrackEl.addEventListener('touchstart', function(e) {
+            carouselTouchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        heroTrackEl.addEventListener('touchend', function(e) {
+            carouselTouchEndX = e.changedTouches[0].screenX;
+            const diffX = carouselTouchStartX - carouselTouchEndX;
+            if (Math.abs(diffX) > 40) {
+                if (diffX > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }, { passive: true });
     }
 
     // ===== HORIZONTAL SCROLLER =====
