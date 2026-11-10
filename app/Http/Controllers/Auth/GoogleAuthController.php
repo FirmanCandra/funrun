@@ -185,6 +185,14 @@ class GoogleAuthController extends Controller
                 }
 
                 $user = User::create($userData);
+
+                // Kirim welcome email ke pengguna baru Google
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)
+                        ->send(new \App\Mail\WelcomeUserMail($user));
+                } catch (\Throwable $e) {
+                    Log::error('Mail Error (WelcomeUserMail for Google user): ' . $e->getMessage());
+                }
             }
 
             Auth::login($user, remember: true);

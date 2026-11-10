@@ -240,6 +240,18 @@ class RegistrationController extends Controller
             return $order;
         });
 
+        // Kirim konfirmasi pesanan ke email pemesan
+        try {
+            $buyerEmail = $request->user()?->email;
+            if ($buyerEmail) {
+                $order->load(['event', 'tickets.participant', 'user']);
+                \Illuminate\Support\Facades\Mail::to($buyerEmail)
+                    ->send(new \App\Mail\OrderPlacedMail($order));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Mail Error (OrderPlacedMail): ' . $e->getMessage());
+        }
+
         return redirect()->route('registration.success', ['order' => $order->order_code])
             ->with('success', 'Pesanan berhasil dibuat! Silakan tunggu verifikasi admin.');
     }

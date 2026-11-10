@@ -645,6 +645,17 @@ class AdminController extends Controller
         // Tiket dikembalikan ke status menunggu.
         $order->tickets()->update(['status' => 'pending', 'qr_code' => null]);
 
+        // Kirim notifikasi email alasan penolakan ke pembeli
+        $buyerEmail = $order->user?->email;
+        if ($buyerEmail) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($buyerEmail)
+                    ->send(new \App\Mail\OrderRejectedMail($order, $request->rejection_reason));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Mail Error (OrderRejectedMail to ' . $buyerEmail . '): ' . $e->getMessage());
+            }
+        }
+
         return redirect()->back()->with('success', "Pesanan {$order->order_code} ditolak. Pembeli dapat mengunggah ulang bukti pembayaran.");
     }
 
@@ -696,6 +707,17 @@ class AdminController extends Controller
         } else {
             // Log the message if API is not configured
             \Illuminate\Support\Facades\Log::info("WA Message to {$participant->phone}: \n" . $waMessage);
+        }
+
+        // Kirim E-Ticket via Email resmi SeTiket
+        $recipientEmail = $participant->email ?? $participant->user?->email;
+        if ($recipientEmail) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($recipientEmail)
+                    ->send(new \App\Mail\TicketApproved($ticket));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Mail Error (TicketApproved to ' . $recipientEmail . '): ' . $e->getMessage());
+            }
         }
     }
 
@@ -1215,7 +1237,7 @@ class AdminController extends Controller
             'event_id' => 'required|exists:events,id',
         ]);
 
-        \App\Models\User::create([
+        $user = \App\Models\User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
@@ -1223,7 +1245,18 @@ class AdminController extends Controller
             'event_id' => $request->event_id,
         ]);
 
-        return redirect()->route('admin.admins')->with('success', 'Admin berhasil ditambahkan!');
+        $event = \App\Models\Event::find($request->event_id);
+        $eventTitle = $event?->title ?? 'Event';
+
+        // Kirim kredensial akun admin baru ke email yang didaftarkan
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)
+                ->send(new \App\Mail\AdminAccountCreatedMail($user, $request->password, $eventTitle));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Mail Error (AdminAccountCreatedMail to ' . $user->email . '): ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.admins')->with('success', 'Admin berhasil ditambahkan dan detail login telah dikirim ke email!');
     }
 
     public function updateAdmin(Request $request, $id)

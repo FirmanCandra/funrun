@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use App\Models\Ticket;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -14,12 +14,12 @@ class TicketApproved extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $ticket;
+    public Ticket $ticket;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(\App\Models\Ticket $ticket)
+    public function __construct(Ticket $ticket)
     {
         $this->ticket = $ticket;
     }
@@ -29,8 +29,9 @@ class TicketApproved extends Mailable
      */
     public function envelope(): Envelope
     {
+        $eventTitle = $this->ticket->participant?->event?->title ?? 'SeTiket';
         return new Envelope(
-            subject: 'E-Ticket FunRun 2026 - Approved',
+            subject: "E-Ticket Resmi: {$eventTitle} - {$this->ticket->ticket_code}",
         );
     }
 

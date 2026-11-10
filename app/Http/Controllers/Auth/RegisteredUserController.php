@@ -47,6 +47,14 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Kirim welcome email ke pengguna baru
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)
+                ->send(new \App\Mail\WelcomeUserMail($user));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Mail Error (WelcomeUserMail): ' . $e->getMessage());
+        }
+
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false));
