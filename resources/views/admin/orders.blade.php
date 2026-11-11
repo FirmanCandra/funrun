@@ -45,6 +45,18 @@
                 @endif
             </form>
 
+            @if(auth()->user()->isSuperAdmin() && $orders->total() > 0)
+            <form action="{{ route('admin.orders.wipe-all') }}" method="POST" onsubmit="return confirm('PERINGATAN: Apakah Anda yakin ingin MENGHAPUS SEMUA DATA PESANAN, TIKET, DAN PESERTA secara permanen? Tindakan ini tidak dapat dibatalkan!');" class="inline">
+                @csrf
+                <button type="submit" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                    <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Kosongkan Semua Pesanan & Partisipan
+                </button>
+            </form>
+            @endif
+
             <button type="button" id="bulk-delete-btn" onclick="confirmBulkDelete()"
                 class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
                 style="display: none;">

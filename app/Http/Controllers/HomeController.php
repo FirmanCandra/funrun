@@ -22,14 +22,26 @@ class HomeController extends Controller
     public static function loadEvents(): array
     {
         $path = self::getEventsPath();
-        $data = file_exists($path) ? json_decode(@file_get_contents($path), true) : null;
 
-        if (! is_array($data) || empty($data)) {
-            // Seed with default events on first run or when empty
+        if (! file_exists($path)) {
             $defaults = self::defaultEvents();
             @file_put_contents($path, json_encode($defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-
             return $defaults;
+        }
+
+        $content = @file_get_contents($path);
+        $data = json_decode($content, true);
+
+        // Hanya seed ulang jika file bukan JSON array yang valid (rusak)
+        if (! is_array($data)) {
+            $defaults = self::defaultEvents();
+            @file_put_contents($path, json_encode($defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            return $defaults;
+        }
+
+        // Jika array kosong [] (karena admin sengaja menghapus semua event), biarkan kosong []
+        if (empty($data)) {
+            return [];
         }
 
         $changed = false;
@@ -139,15 +151,6 @@ class HomeController extends Controller
 
     public function index()
     {
-        // Auto-seed database & restore data Masta Unimus & Explore The Moment jika belum lengkap
-        if (!app()->runningUnitTests()) {
-            try {
-                \App\Services\RestoreService::ensureRestored();
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
-
         $events = self::loadEvents();
         $q = trim(request('q', ''));
 

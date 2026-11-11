@@ -20,12 +20,24 @@ class BannerService
     public static function loadBanners(): array
     {
         $path = self::getBannersPath();
-        $data = file_exists($path) ? json_decode(@file_get_contents($path), true) : null;
 
-        if (! is_array($data) || empty($data)) {
+        if (! file_exists($path)) {
             $defaults = self::defaultBanners();
             @file_put_contents($path, json_encode($defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             return $defaults;
+        }
+
+        $content = @file_get_contents($path);
+        $data = json_decode($content, true);
+
+        if (! is_array($data)) {
+            $defaults = self::defaultBanners();
+            @file_put_contents($path, json_encode($defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            return $defaults;
+        }
+
+        if (empty($data)) {
+            return [];
         }
 
         return $data;

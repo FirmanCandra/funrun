@@ -20,7 +20,7 @@ echo "login.blade.php has auth.google: " . (str_contains($loginView, 'auth.googl
 
 if (isset($_GET['pull']) && $_GET['pull'] === '1') {
     echo "--- GIT PULL TRIGGERED ---\n";
-    $output = @shell_exec('cd ' . escapeshellarg(__DIR__ . '/..') . ' && git pull origin main 2>&1');
+    $output = @shell_exec('cd ' . escapeshellarg(__DIR__ . '/..') . ' && git pull origin production-baseline 2>&1');
     echo ($output ?: "shell_exec returned empty or disabled") . "\n\n";
 }
 
@@ -57,6 +57,55 @@ if ($views) {
     }
 }
 echo "Cleared compiled views: $deletedViews files\n\n";
+
+// 2a. Database Stats & Transaction Wiping
+try {
+    require_once __DIR__ . '/../vendor/autoload.php';
+    $app = require_once __DIR__ . '/../bootstrap/app.php';
+    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+    $kernel->bootstrap();
+
+    echo "--- DATABASE STATS ---\n";
+    echo "Events: " . \App\Models\Event::count() . "\n";
+    echo "Orders: " . \App\Models\Order::count() . "\n";
+    echo "Participants: " . \App\Models\Participant::count() . "\n";
+    echo "Tickets: " . \App\Models\Ticket::count() . "\n\n";
+
+    if (isset($_GET['wipe_transactions']) && $_GET['wipe_transactions'] === '1' && ($_GET['key'] ?? '') === 'setiket_secure_clear') {
+        echo "--- WIPING TRANSACTIONS, TICKETS, PARTICIPANTS ---\n";
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \App\Models\Ticket::truncate();
+        \App\Models\Participant::truncate();
+        \App\Models\Order::truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        $files = \Illuminate\Support\Facades\Storage::disk('public')->files('proofs');
+        if (!empty($files)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($files);
+        }
+        echo "SUCCESS: All orders, participants, and tickets wiped!\n";
+        echo "Remaining Orders: " . \App\Models\Order::count() . "\n";
+        echo "Remaining Participants: " . \App\Models\Participant::count() . "\n\n";
+    }
+
+    if (isset($_GET['wipe_all_events']) && $_GET['wipe_all_events'] === '1' && ($_GET['key'] ?? '') === 'setiket_secure_clear') {
+        echo "--- WIPING ALL EVENTS ---\n";
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \App\Models\Ticket::truncate();
+        \App\Models\Participant::truncate();
+        \App\Models\Order::truncate();
+        \App\Models\EventCategory::truncate();
+        \App\Models\EventPaymentAccount::truncate();
+        \App\Models\EventFormField::truncate();
+        \App\Models\Event::truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        \App\Http\Controllers\HomeController::saveEvents([]);
+        echo "SUCCESS: All events and related data wiped completely! events.json is now []\n\n";
+    }
+} catch (\Throwable $e) {
+    echo "DB Stats / Operation Error: " . $e->getMessage() . "\n\n";
+}
 
 // 2. Clear log if requested
 $log = __DIR__ . '/../storage/logs/laravel.log';

@@ -59,6 +59,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Antrian verifikasi pesanan (satu baris per pesanan, bukan per tiket)
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
         Route::post('/orders/bulk-delete', [AdminController::class, 'bulkDestroyOrder'])->name('orders.bulk-delete');
+        Route::post('/orders/wipe-all', [AdminController::class, 'wipeAllOrders'])->name('orders.wipe-all');
         Route::post('/orders/{id}/approve', [AdminController::class, 'approveOrder'])->name('orders.approve');
         Route::post('/orders/{id}/reject', [AdminController::class, 'rejectOrder'])->name('orders.reject');
         // Rekening tujuan transfer per event.

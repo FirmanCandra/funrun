@@ -9,14 +9,7 @@ class AdminController extends Controller
 {
     public function __construct()
     {
-        // Only run sync if database table events exists, to avoid issues during migration
-        try {
-            if (! app()->runningUnitTests() && \Illuminate\Support\Facades\Schema::hasTable('events')) {
-                self::syncEventsToDatabase();
-            }
-        } catch (\Throwable $e) {
-            // ignore
-        }
+        // Constructor bersih tanpa auto-sync agar penghapusan event permanen
     }
 
     private function checkSuperAdmin()
@@ -581,6 +574,37 @@ class AdminController extends Controller
         }
 
         return redirect()->back()->with('success', 'Pesanan terpilih berhasil dihapus!');
+    }
+
+    /**
+     * Hapus permanen seluruh data pesanan, tiket, dan peserta (Super Admin only).
+     */
+    public function wipeAllOrders(Request $request)
+    {
+        $this->checkSuperAdmin();
+
+        try {
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            \App\Models\Ticket::truncate();
+            \App\Models\Participant::truncate();
+            \App\Models\Order::truncate();
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            // Bersihkan file bukti pembayaran dari storage public/proofs
+            try {
+                $files = \Illuminate\Support\Facades\Storage::disk('public')->files('proofs');
+                if (!empty($files)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($files);
+                }
+            } catch (\Throwable $e) {
+                // ignore
+            }
+
+            return redirect()->route('admin.orders')->with('success', 'Seluruh data pesanan, tiket, dan peserta berhasil dibersihkan.');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Wipe orders error: ' . $e->getMessage());
+            return redirect()->route('admin.orders')->with('error', 'Gagal membersihkan data: ' . $e->getMessage());
+        }
     }
 
     /**
