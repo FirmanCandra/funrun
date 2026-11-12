@@ -54,6 +54,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/participants/bulk-delete', [AdminController::class, 'bulkDestroyParticipant'])->name('participants.bulk-delete');
         Route::get('/participants/{id}/edit', [AdminController::class, 'editParticipant'])->name('participants.edit');
         Route::put('/participants/{id}', [AdminController::class, 'updateParticipant'])->name('participants.update');
+        Route::post('/participants/{id}/account', [AdminController::class, 'updateParticipantAccount'])->name('participants.account.update');
         Route::delete('/participants/{id}', [AdminController::class, 'deleteParticipant'])->name('participants.delete');
         Route::get('/export-csv', [AdminController::class, 'exportCSV'])->name('export');
         // Antrian verifikasi pesanan (satu baris per pesanan, bukan per tiket)

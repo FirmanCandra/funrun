@@ -15,3 +15,4 @@ return [
     'user' => 'Alamat email tersebut tidak terdaftar di sistem kami.',
 
 ];
+

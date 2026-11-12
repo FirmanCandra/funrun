@@ -69,7 +69,15 @@ try {
     echo "Events: " . \App\Models\Event::count() . "\n";
     echo "Orders: " . \App\Models\Order::count() . "\n";
     echo "Participants: " . \App\Models\Participant::count() . "\n";
-    echo "Tickets: " . \App\Models\Ticket::count() . "\n\n";
+    echo "Tickets: " . \App\Models\Ticket::count() . "\n";
+    echo "Column users.plain_password exists: " . (\Illuminate\Support\Facades\Schema::hasColumn('users', 'plain_password') ? "YES" : "NO") . "\n\n";
+
+    if (isset($_GET['migrate']) && $_GET['migrate'] === '1') {
+        echo "--- RUNNING ARTISAN MIGRATE ---\n";
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        echo \Illuminate\Support\Facades\Artisan::output() . "\n";
+        echo "Post-migrate column check: " . (\Illuminate\Support\Facades\Schema::hasColumn('users', 'plain_password') ? "YES" : "NO") . "\n\n";
+    }
 
     if (isset($_GET['wipe_transactions']) && $_GET['wipe_transactions'] === '1' && ($_GET['key'] ?? '') === 'setiket_secure_clear') {
         echo "--- WIPING TRANSACTIONS, TICKETS, PARTICIPANTS ---\n";

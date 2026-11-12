@@ -45,6 +45,44 @@
                 </div>
             </div>
 
+            @if($participant->user)
+            <div class="border-t border-slate-100 pt-5 mt-3">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">Akun Login Peserta</h4>
+                        <p class="text-xs text-slate-500">Kredensial akun untuk login ke SeTiket.</p>
+                    </div>
+                    @if(!empty($participant->user->plain_password))
+                        <span class="text-xs bg-slate-100 px-2.5 py-1 rounded-md text-slate-600">
+                            Password: <strong class="font-mono text-slate-800">{{ $participant->user->plain_password }}</strong>
+                        </span>
+                    @else
+                        <span class="text-xs bg-slate-100 px-2.5 py-1 rounded-md text-slate-400 italic">
+                            Password: [Terenkripsi Bcrypt]
+                        </span>
+                    @endif
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Email Akun</label>
+                        <input type="email" name="email" value="{{ old('email', $participant->user->email) }}" class="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-[11px] text-slate-500 mt-1">Ubah jika peserta salah ketik email saat registrasi.</p>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-sm font-medium text-slate-700">Password Baru</label>
+                            <button type="button" onclick="const num = Math.floor(1000 + Math.random() * 9000); document.getElementById('edit-password-input').value = 'Setiket' + num;" class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                Generate Acak
+                            </button>
+                        </div>
+                        <input type="text" id="edit-password-input" name="password" placeholder="Kosongkan jika tidak ingin mengubah password" class="w-full border border-slate-200 rounded-lg px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="pt-4 flex flex-col sm:flex-row gap-2">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
                     Save Changes

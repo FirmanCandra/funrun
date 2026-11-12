@@ -257,7 +257,7 @@ class AdminController extends Controller
  
     public function updateParticipant(Request $request, $id)
     {
-        $participant = \App\Models\Participant::findOrFail($id);
+        $participant = \App\Models\Participant::with('user')->findOrFail($id);
         $user = auth()->user();
         if ($user->role === 'admin' && $participant->event_id !== $user->event_id) {
             abort(403, 'Unauthorized action.');
@@ -268,18 +268,81 @@ class AdminController extends Controller
             $validCategories = ['3K', '5K', '10K'];
         }
 
-        $request->validate([
+        $rules = [
             // Semua opsional — admin event boleh mematikan field mana pun di
             // formulir, jadi peserta bisa memang tidak punya data ini.
             'fullname' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
             'category' => 'nullable|in:' . implode(',', $validCategories),
             'jersey_size' => 'nullable|in:S,M,L,XL,XXL',
-        ]);
+        ];
+
+        if ($participant->user) {
+            $rules['email'] = 'nullable|email|max:255|unique:users,email,' . $participant->user->id;
+            $rules['password'] = 'nullable|string|min:6';
+        }
+
+        $request->validate($rules);
  
         $participant->update($request->only('fullname', 'phone', 'category', 'jersey_size'));
+
+        if ($participant->user) {
+            if ($request->filled('email')) {
+                $participant->user->email = strtolower(trim($request->email));
+            }
+            if ($request->filled('password')) {
+                $participant->user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+                $participant->user->plain_password = $request->password;
+            }
+            $participant->user->save();
+        }
  
         return redirect()->route('admin.participants')->with('success', 'Participant data updated successfully!');
+    }
+
+    public function updateParticipantAccount(Request $request, $id)
+    {
+        $participant = \App\Models\Participant::with('user')->findOrFail($id);
+        $user = auth()->user();
+        if ($user->role === 'admin' && $participant->event_id !== $user->event_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $accountUser = $participant->user;
+        if (!$accountUser) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Peserta ini belum terhubung dengan akun user.'
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Peserta ini belum terhubung dengan akun user.');
+        }
+
+        $request->validate([
+            'email' => 'required|email|max:255|unique:users,email,' . $accountUser->id,
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $accountUser->email = strtolower(trim($request->email));
+
+        if ($request->filled('password')) {
+            $accountUser->password = \Illuminate\Support\Facades\Hash::make($request->password);
+            $accountUser->plain_password = $request->password;
+        }
+
+        $accountUser->save();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Akun dan password peserta berhasil disimpan!',
+                'email' => $accountUser->email,
+                'plain_password' => $accountUser->plain_password,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Akun dan password peserta berhasil diperbarui!');
     }
 
     public function deleteParticipant($id)
@@ -1265,6 +1328,7 @@ class AdminController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'plain_password' => $request->password,
             'role'     => 'admin',
             'event_id' => $request->event_id,
         ]);
@@ -1303,6 +1367,7 @@ class AdminController extends Controller
 
         if ($request->filled('password')) {
             $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
+            $data['plain_password'] = $request->password;
         }
 
         $admin->update($data);

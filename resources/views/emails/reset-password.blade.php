@@ -39,3 +39,4 @@
     <a href="{{ $resetUrl }}" style="color: #2563eb; word-break: break-all;">{{ $resetUrl }}</a>
 </p>
 @endsection
+
