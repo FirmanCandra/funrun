@@ -106,4 +106,12 @@ class User extends Authenticatable
     {
         return $this->isAdmin() ? route('admin.dashboard') : route('dashboard');
     }
+
+    /**
+     * Kirim notifikasi reset password dengan template resmi SeTiket.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+    }
 }
